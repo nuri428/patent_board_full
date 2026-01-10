@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase
 from neo4j import GraphDatabase
 from typing import AsyncGenerator
 
-from app.core.config import settings
+from back_end.app.core.config import settings
 
 
 class Base(DeclarativeBase):

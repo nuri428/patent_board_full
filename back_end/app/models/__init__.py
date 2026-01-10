@@ -1,0 +1,189 @@
+from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey, Index
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from shared.database import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    username = Column(String(100), unique=True, index=True, nullable=False)
+    full_name = Column(String(255))
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    reports = relationship("Report", back_populates="owner")
+    chat_sessions = relationship("ChatSession", back_populates="user")
+    notifications = relationship("Notification", back_populates="user")
+
+
+class Patent(Base):
+    __tablename__ = "patents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patent_number = Column(String(50), unique=True, index=True, nullable=False)
+    title = Column(Text, nullable=False)
+    abstract = Column(Text)
+    description = Column(Text)
+    inventors = Column(Text)  # JSON string of inventor names
+    assignee = Column(String(500))
+    filing_date = Column(DateTime)
+    publication_date = Column(DateTime)
+    grant_date = Column(DateTime)
+    status = Column(String(50), default="pending")  # pending, granted, expired
+    patent_type = Column(String(50))  # utility, design, plant
+    classification = Column(String(100))  # CPC or IPC classification
+    claims = Column(Text)  # JSON string of claims
+    citations = Column(Text)  # JSON string of citations
+    keywords = Column(Text)  # JSON string of keywords
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    report_patents = relationship("ReportPatent", back_populates="patent")
+
+    # Indexes for common search fields
+    __table_args__ = (
+        Index('idx_patent_title', 'title'),
+        Index('idx_patent_assignee', 'assignee'),
+        Index('idx_patent_status', 'status'),
+        Index('idx_patent_filing_date', 'filing_date'),
+    )
+
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(500), nullable=False)
+    description = Column(Text)
+    report_type = Column(String(50), nullable=False)  # comprehensive, technical, market, strategic
+    topic = Column(String(500), nullable=False)
+    content = Column(Text)  # Generated report content (JSON or markdown)
+    status = Column(String(50), default="pending")  # pending, generating, completed, failed
+    generated_at = Column(DateTime(timezone=True))
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    owner = relationship("User", back_populates="reports")
+    patents = relationship("ReportPatent", back_populates="report")
+    analytics = relationship("ReportAnalytics", back_populates="report", uselist=False)
+
+
+class ReportPatent(Base):
+    __tablename__ = "report_patents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, ForeignKey("reports.id"), nullable=False)
+    patent_id = Column(Integer, ForeignKey("patents.id"), nullable=False)
+    relevance_score = Column(Integer)  # 1-10 relevance rating
+    analysis_notes = Column(Text)
+    added_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    report = relationship("Report", back_populates="patents")
+    patent = relationship("Patent", back_populates="report_patents")
+
+    # Ensure unique patent per report
+    __table_args__ = (
+        Index('idx_report_patent_unique', 'report_id', 'patent_id', unique=True),
+    )
+
+
+class ChatSession(Base):
+    __tablename__ = "chat_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(255), unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(500))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    is_active = Column(Boolean, default=True)
+
+    # Relationships
+    user = relationship("User", back_populates="chat_sessions")
+    messages = relationship("ChatMessage", back_populates="session")
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(Integer, ForeignKey("chat_sessions.id"), nullable=False)
+    message_type = Column(String(20), nullable=False)  # user, assistant, system
+    content = Column(Text, nullable=False)
+    patent_references = Column(Text)  # JSON string of referenced patent IDs
+    sources = Column(Text)  # JSON string of source citations
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    session = relationship("ChatSession", back_populates="messages")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(500), nullable=False)
+    message = Column(Text, nullable=False)
+    notification_type = Column(String(50), nullable=False)  # report_ready, system_alert, etc.
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    read_at = Column(DateTime(timezone=True))
+
+    # Relationships
+    user = relationship("User", back_populates="notifications")
+
+
+class ReportAnalytics(Base):
+    __tablename__ = "report_analytics"
+
+    id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, ForeignKey("reports.id"), unique=True, nullable=False)
+    patent_count = Column(Integer, default=0)
+    processing_time_seconds = Column(Integer)
+    generation_tokens_used = Column(Integer)
+    query_complexity_score = Column(Integer)  # 1-10 scale
+    user_satisfaction_rating = Column(Integer)  # 1-5 scale
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    report = relationship("Report", back_populates="analytics")
+
+
+class SearchQuery(Base):
+    __tablename__ = "search_queries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    query_text = Column(Text, nullable=False)
+    query_type = Column(String(50), nullable=False)  # keyword, semantic, graph
+    filters = Column(Text)  # JSON string of search filters
+    results_count = Column(Integer)
+    execution_time_ms = Column(Integer)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    user = relationship("User")
+
+
+class SystemConfig(Base):
+    __tablename__ = "system_config"
+
+    id = Column(Integer, primary_key=True, index=True)
+    config_key = Column(String(255), unique=True, nullable=False)
+    config_value = Column(Text)
+    description = Column(Text)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
