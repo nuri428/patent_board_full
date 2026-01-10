@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Patent Board</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-lightbulb"></i> Patent Board
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/patents">Patents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">AI Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reports">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/analytics">Analytics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1><i class="fas fa-chart-line"></i> Analytics Dashboard</h1>
+                <p class="lead">Comprehensive insights and trends from patent data and system usage.</p>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-file-alt fa-2x mb-2"></i>
+                        <h5 class="card-title" id="total-patents">-</h5>
+                        <p class="card-text">Total Patents</p>
+                        <small class="text-light">
+                            <span id="patents-growth">+0%</span> this year
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body">
+                        <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                        <h5 class="card-title" id="patents-30-days">-</h5>
+                        <p class="card-text">Last 30 Days</p>
+                        <small class="text-light">New patents added</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-file-invoice fa-2x mb-2"></i>
+                        <h5 class="card-title" id="total-reports">-</h5>
+                        <p class="card-text">Total Reports</p>
+                        <small class="text-light">
+                            <span id="reports-30-days">+0</span> this month
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-warning text-white">
+                    <div class="card-body">
+                        <i class="fas fa-building fa-2x mb-2"></i>
+                        <h5 class="card-title" id="active-companies">-</h5>
+                        <p class="card-text">Active Companies</p>
+                        <small class="text-dark">Top assignees</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line"></i> Patent Activity Timeline</h5>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary active" data-period="7">7 Days</button>
+                            <button class="btn btn-outline-primary" data-period="30">30 Days</button>
+                            <button class="btn btn-outline-primary" data-period="90">90 Days</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="timeline-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-area"></i> Monthly Patent Trends</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="monthly-trends-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-pie"></i> Status Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="status-chart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-trophy"></i> Top Assignees</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="top-assignees-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-calendar-alt"></i> Filing Year Trends</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="filing-trends-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-file-alt"></i> Report Types</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="report-types-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-sync"></i> Live Updates</h5>
+                        <button class="btn btn-primary btn-sm" id="refresh-data">
+                            <i class="fas fa-sync-alt"></i> Refresh Data
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6>Recent Activity</h6>
+                                <div id="recent-activity" class="small">
+                                    <p class="text-muted">Loading activity data...</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>System Health</h6>
+                                <div id="system-health" class="small">
+                                    <p class="text-muted">Loading health status...</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Quick Stats</h6>
+                                <div id="quick-stats" class="small">
+                                    <p class="text-muted">Loading statistics...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container text-center">
+            <p>&copy; 2026 Patent Board. Powered by FastAPI, Neo4j, and LangGraph.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/analytics.js"></script>
+</body>
+</html>

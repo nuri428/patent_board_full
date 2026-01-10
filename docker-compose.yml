@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  patent-board:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - MARIADB_URL=mysql+aiomysql://user:password@localhost:3306/pa_system
+      - NEO4J_URI=bolt://localhost:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=neo4j_password
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - db
+      - neo4j
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - patent-board
+    restart: unless-stopped
+
+
+networks:
+  default:
+    driver: bridge

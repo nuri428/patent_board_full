@@ -1,0 +1,66 @@
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.orm import DeclarativeBase
+from neo4j import GraphDatabase
+from typing import AsyncGenerator
+
+from app.core.config import settings
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+mariadb_engine = create_async_engine(
+    settings.MARIADB_URL,
+    echo=True,
+    future=True,
+)
+
+mariadb_session_factory = async_sessionmaker(
+    mariadb_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
+
+
+async def get_mariadb_db() -> AsyncGenerator[AsyncSession, None]:
+    async with mariadb_session_factory() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
+
+
+class Neo4jConnection:
+    def __init__(self):
+        self.driver = None
+        self._initialize_driver()
+    
+    def _initialize_driver(self):
+        try:
+            self.driver = GraphDatabase.driver(
+                settings.NEO4J_URI,
+                auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
+            )
+        except Exception as e:
+            print(f"Failed to connect to Neo4j: {e}")
+    
+    def close(self):
+        if self.driver:
+            self.driver.close()
+    
+    def get_session(self):
+        if self.driver:
+            return self.driver.session()
+        raise RuntimeError("Neo4j driver not initialized")
+
+
+neo4j_connection = Neo4jConnection()
+
+
+def get_neo4j_db():
+    return neo4j_connection.get_session()
+
+
+def get_db() -> AsyncGenerator[AsyncSession, None]:
+    return get_mariadb_db()
