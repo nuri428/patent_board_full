@@ -80,16 +80,10 @@ class PatentSearch {
             this.showLoading();
             const query = this.buildSearchQuery();
             
-            const response = await fetch('/api/v1/patents/search', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(query)
-            });
+            const response = await apiClient.post(ApiEndpoints.patents.search, query);
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response) {
+                return;
             }
 
             const data = await response.json();
@@ -123,50 +117,64 @@ class PatentSearch {
     createPatentCard(patent) {
         const filingDate = patent.filing_date ? 
             new Date(patent.filing_date).toLocaleDateString() : 'Not specified';
-        const statusBadge = this.getStatusBadge(patent.status);
+        const statusClass = `status-${patent.status || 'pending'}`;
         const inventorsList = patent.inventors && patent.inventors.length > 0 ? 
             patent.inventors.slice(0, 3).join(', ') + 
             (patent.inventors.length > 3 ? '...' : '') : 'Not specified';
 
         return `
-            <div class="card mb-3 patent-card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <h6 class="card-title">
-                                <a href="#" class="text-decoration-none patent-link" data-patent-id="${patent.patent_id}">
+            <div class="patent-card slide-up">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <h6 class="mb-0 me-3">
+                                <a href="#" class="patent-card-link" data-patent-id="${patent.patent_id}">
                                     ${this.highlightText(patent.title)}
                                 </a>
                             </h6>
-                            <p class="card-text text-muted small mb-2">
-                                ${this.truncateText(patent.abstract, 200)}
-                            </p>
-                            <div class="row small text-muted">
-                                <div class="col-md-4">
-                                    <strong>Patent ID:</strong> ${patent.patent_id}
-                                </div>
-                                <div class="col-md-4">
-                                    <strong>Filing Date:</strong> ${filingDate}
-                                </div>
-                                <div class="col-md-4">
-                                    <strong>Status:</strong> ${statusBadge}
-                                </div>
+                            <span class="status-badge ${statusClass}">${patent.status || 'Pending'}</span>
+                        </div>
+                        <p class="text-muted mb-3">
+                            ${this.truncateText(patent.abstract, 250)}
+                        </p>
+                        <div class="row patent-card-meta">
+                            <div class="col-md-3 mb-2">
+                                <i class="fas fa-hashtag me-2 text-muted"></i>
+                                <strong>${patent.patent_id}</strong>
                             </div>
-                            <div class="row small text-muted mt-2">
-                                <div class="col-md-6">
-                                    <strong>Assignee:</strong> ${patent.assignee || 'Not specified'}
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>Inventors:</strong> ${inventorsList}
-                                </div>
+                            <div class="col-md-3 mb-2">
+                                <i class="fas fa-calendar-alt me-2 text-muted"></i>
+                                ${filingDate}
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <i class="fas fa-building me-2 text-muted"></i>
+                                ${patent.assignee || 'Not specified'}
+                            </div>
+                            <div class="col-md-2 mb-2 text-end">
+                                <span class="badge bg-light text-dark">
+                                    ${patent.patent_type || 'Utility'}
+                                </span>
                             </div>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <button class="btn btn-sm btn-outline-primary me-2" onclick="patentSearch.viewPatentDetails('${patent.patent_id}')">
-                                <i class="fas fa-eye"></i> View
+                        ${patent.inventors && patent.inventors.length > 0 ? `
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-users me-2"></i>
+                                ${inventorsList}
+                            </small>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="ms-3">
+                        <div class="btn-group-vertical">
+                            <button class="btn btn-primary btn-sm mb-2" onclick="patentSearch.viewPatentDetails('${patent.patent_id}')" title="View Details">
+                                <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-info" onclick="patentSearch.analyzePatent('${patent.patent_id}')">
-                                <i class="fas fa-brain"></i> Analyze
+                            <button class="btn btn-success btn-sm mb-2" onclick="patentSearch.analyzePatent('${patent.patent_id}')" title="AI Analysis">
+                                <i class="fas fa-brain"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="patentSearch.exportPatent('${patent.patent_id}')" title="Export">
+                                <i class="fas fa-download"></i>
                             </button>
                         </div>
                     </div>
@@ -357,18 +365,25 @@ class PatentSearch {
     }
 
     showError(message) {
-        document.getElementById('search-results').innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle"></i> ${message}
-            </div>
-        `;
+        if (typeof authManager !== 'undefined') {
+            authManager.showAlert(message, 'danger');
+        } else {
+            document.getElementById('search-results').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> ${message}
+                </div>
+            `;
+        }
     }
 
     async viewPatentDetails(patentId) {
         try {
-            const response = await fetch(`/api/v1/patents/${patentId}`);
-            if (!response.ok) throw new Error('Patent not found');
-            
+            const response = await apiClient.get(ApiEndpoints.patents.get(patentId));
+
+            if (!response) {
+                return;
+            }
+
             const patent = await response.json();
             this.showPatentModal(patent);
         } catch (error) {
@@ -376,8 +391,20 @@ class PatentSearch {
         }
     }
 
-    async analyzePatent(patentId) {
+    async     analyzePatent(patentId) {
         window.location.href = `/chat?patent=${patentId}`;
+    }
+
+    async exportPatent(patentId) {
+        try {
+            const response = await apiClient.download(ApiEndpoints.export.patents, { id: patentId }, `patent_${patentId}.pdf`);
+            if (!response) {
+                authManager.showAlert('Failed to export patent', 'warning');
+            }
+        } catch (error) {
+            console.error('Export error:', error);
+            authManager.showAlert('Export failed. Please try again.', 'danger');
+        }
     }
 
     showPatentModal(patent) {

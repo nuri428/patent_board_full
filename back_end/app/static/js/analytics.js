@@ -26,9 +26,12 @@ class AnalyticsDashboard {
 
     async loadDashboardData() {
         try {
-            const response = await fetch('/api/v1/analytics/dashboard');
-            if (!response.ok) throw new Error('Failed to load dashboard data');
-            
+            const response = await apiClient.get(ApiEndpoints.analytics.overview);
+
+            if (!response) {
+                return;
+            }
+
             const data = await response.json();
             this.dashboardData = data;
             this.updateOverviewCards(data.overview);

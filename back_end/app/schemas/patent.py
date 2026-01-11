@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class PatentBase(BaseModel):
-    patent_number: str
+    patent_id: str
     title: str
     abstract: Optional[str] = None
     description: Optional[str] = None
@@ -43,7 +43,7 @@ class PatentUpdate(BaseModel):
 
 class Patent(PatentBase):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     inventors: Optional[List[str]] = []
     claims: Optional[List[Dict[str, Any]]] = []
@@ -72,6 +72,18 @@ class PatentSearchResponse(BaseModel):
 
 class PatentDetail(Patent):
     """Extended patent details with additional relationships"""
+
     similar_patents: Optional[List[Patent]] = []
     cited_patents: Optional[List[Patent]] = []
     citing_patents: Optional[List[Patent]] = []
+
+
+class PatentSearch(BaseModel):
+    limit: int = 100
+    offset: int = 0
+    title: Optional[str] = None
+    abstract: Optional[str] = None
+    assignee: Optional[str] = None
+    status: Optional[str] = None
+    filing_date_from: Optional[datetime] = None
+    filing_date_to: Optional[datetime] = None

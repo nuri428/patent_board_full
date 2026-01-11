@@ -1,28 +1,72 @@
 from .user import User, UserCreate, UserUpdate, UserInDB
-from .patent import Patent, PatentCreate, PatentUpdate, PatentSearchRequest, PatentSearchResponse, PatentDetail
-from .report import Report, ReportCreate, ReportUpdate, ReportDetail, ReportPatent, ReportAnalytics, ReportGenerationRequest, ReportGenerationStatus
-from .chat import ChatSession, ChatMessage, ChatRequest, ChatResponse
+from .patent import (
+    Patent,
+    PatentCreate,
+    PatentUpdate,
+    PatentSearchRequest,
+    PatentSearchResponse,
+    PatentDetail,
+    PatentSearch,
+)
+from .report import (
+    Report,
+    ReportCreate,
+    ReportUpdate,
+    ReportDetail,
+    ReportPatent,
+    ReportAnalytics,
+    ReportGenerationRequest,
+    ReportGenerationStatus,
+)
+from .chat import (
+    ChatSession,
+    ChatMessage,
+    ChatRequest,
+    ChatResponse,
+    ChatSessionCreate,
+    ChatMessageCreate,
+    ChatSessionDetail,
+)
 from .notification import Notification, NotificationCreate
-from .analytics import AnalyticsData, SystemMetrics
+from .analytics import AnalyticsData, SystemMetrics, UserAnalytics, PatentAnalytics
 
 __all__ = [
     # User schemas
-    "User", "UserCreate", "UserUpdate", "UserInDB",
-    
+    "User",
+    "UserCreate",
+    "UserUpdate",
+    "UserInDB",
     # Patent schemas
-    "Patent", "PatentCreate", "PatentUpdate", 
-    "PatentSearchRequest", "PatentSearchResponse", "PatentDetail",
-    
+    "Patent",
+    "PatentCreate",
+    "PatentUpdate",
+    "PatentSearchRequest",
+    "PatentSearchResponse",
+    "PatentDetail",
+    "PatentSearch",
     # Report schemas
-    "Report", "ReportCreate", "ReportUpdate", "ReportDetail",
-    "ReportPatent", "ReportAnalytics", "ReportGenerationRequest", "ReportGenerationStatus",
-    
+    "Report",
+    "ReportCreate",
+    "ReportUpdate",
+    "ReportDetail",
+    "ReportPatent",
+    "ReportAnalytics",
+    "ReportGenerationRequest",
+    "ReportGenerationStatus",
     # Chat schemas
-    "ChatSession", "ChatMessage", "ChatRequest", "ChatResponse",
-    
+    "ChatSession",
+    "ChatMessage",
+    "ChatRequest",
+    "ChatResponse",
+    "ChatSessionCreate",
+    "ChatMessageCreate",
+    "ChatSessionDetail",
     # Notification schemas
-    "Notification", "NotificationCreate",
-    
+    "Notification",
+    "NotificationCreate",
     # Analytics schemas
-    "AnalyticsData", "SystemMetrics"
+    "AnalyticsData",
+    "SystemMetrics",
+    "UserAnalytics",
+    "PatentAnalytics",
 ]

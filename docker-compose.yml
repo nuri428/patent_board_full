@@ -1,40 +1,158 @@
 version: '3.8'
 
 services:
-  patent-board:
-    build: 
+  # ============================================
+  # Patent Board Backend (FastAPI)
+  # ============================================
+  backend:
+    build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/backend/Dockerfile
+    container_name: patent-board-backend
+    restart: unless-stopped
     ports:
       - "8001:8001"
     environment:
-      - MARIADB_URL=mysql+aiomysql://user:password@localhost:3306/pa_system
-      - NEO4J_URI=bolt://localhost:7687
-      - NEO4J_USER=neo4j
-      - NEO4J_PASSWORD=neo4j_password
+      # Database Configuration
+      - MARIADB_URL=${MARIADB_URL}
+      - MARIADB_HOST=${MARIADB_HOST}
+      - MARIADB_PORT=${MARIADB_PORT}
+      - MARIADB_DATABASE=${MARIADB_DATABASE}
+      - MARIADB_USER=${MARIADB_USER}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+
+      # Neo4j Configuration
+      - NEO4J_URI=${NEO4J_URI}
+      - NEO4J_HOST=${NEO4J_HOST}
+      - NEO4J_PORT=${NEO4J_PORT}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - NEO4J_DATABASE=${NEO4J_DATABASE}
+
+      # API Configuration
+      - API_V1_STR=/api/v1
+      - HOST=0.0.0.0
+      - PORT=8001
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+
+      # AI Services Configuration
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-    depends_on:
-      - db
-      - neo4j
-    restart: unless-stopped
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4-turbo-preview}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-patent-board}
+
+      # MCP Server Configuration
+      - MCP_SERVER_URL=${MCP_SERVER_URL:-http://patent-board-mcp:8081}
+
+      # Application Configuration
+      - PROJECT_NAME=Patent Board
+      - DEBUG=${DEBUG:-true}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+      # CORS Configuration
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-http://localhost:3300,http://localhost:8001}
+
+    volumes:
+      - ./back_end:/app/back_end
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+      - ./ssl:/app/ssl:ro
+
+    networks:
+      - patent-board-network
+
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health", "||", "exit", "1" ]
       interval: 30s
       timeout: 10s
       retries: 3
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - patent-board
+
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  # ============================================
+  # Frontend Service (Node/React)
+  # ============================================
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: patent-board-frontend
     restart: unless-stopped
+    ports:
+      - "3300:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8001/api/v1
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./front_end:/app
+      - /app/node_modules
+    networks:
+      - patent-board-network
+    depends_on:
+      - backend
 
+  # ============================================
+  # MCP Server Service
+  # ============================================
+  mcp:
+    build:
+      context: .
+      dockerfile: docker/mcp/Dockerfile
+    container_name: patent-board-mcp
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      - MARIADB_URL=${MARIADB_URL}
+      - NEO4J_URI=${NEO4J_URI}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEBUG=${DEBUG:-true}
+    volumes:
+      - ./mcp:/app/mcp
+      - ./back_end:/app/back_end
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+    networks:
+      - patent-board-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health", "||", "exit", "1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+# ============================================
+# Network Configuration
+# ============================================
 networks:
-  default:
+  patent-board-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.200.0/24
+
+# ============================================
+# Volume Configuration
+# ============================================
+volumes:
+  # Application volumes
+  logs:
+    driver: local
+    name: patent_board_logs
+  uploads:
+    driver: local
+    name: patent_board_uploads

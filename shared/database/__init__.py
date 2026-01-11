@@ -35,20 +35,19 @@ class Neo4jConnection:
     def __init__(self):
         self.driver = None
         self._initialize_driver()
-    
+
     def _initialize_driver(self):
         try:
             self.driver = GraphDatabase.driver(
-                settings.NEO4J_URI,
-                auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
+                settings.NEO4J_URI, auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
             )
         except Exception as e:
             print(f"Failed to connect to Neo4j: {e}")
-    
+
     def close(self):
         if self.driver:
             self.driver.close()
-    
+
     def get_session(self):
         if self.driver:
             return self.driver.session()
@@ -62,5 +61,4 @@ def get_neo4j_db():
     return neo4j_connection.get_session()
 
 
-def get_db() -> AsyncGenerator[AsyncSession, None]:
-    return get_mariadb_db()
+get_db = get_mariadb_db

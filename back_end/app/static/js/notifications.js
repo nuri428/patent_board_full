@@ -108,9 +108,12 @@ class NotificationCenter {
 
     async loadNotifications() {
         try {
-            const response = await fetch('/api/v1/notifications/');
-            if (!response.ok) throw new Error('Failed to load notifications');
-            
+            const response = await apiClient.get(ApiEndpoints.notifications.list);
+
+            if (!response) {
+                return;
+            }
+
             const data = await response.json();
             this.notifications = data.notifications || [];
             this.updateNotificationDisplay();
@@ -265,18 +268,19 @@ class NotificationCenter {
 
     async markNotificationAsRead(notificationId) {
         try {
-            const response = await fetch(`/api/v1/notifications/mark-read/${notificationId}`, {
-                method: 'POST'
-            });
-            
-            if (response.ok) {
-                const notification = this.notifications.find(n => n.id === notificationId);
-                if (notification) {
-                    notification.read = true;
-                }
-                this.updateNotificationDisplay();
-                this.updateUnreadCount();
+            const response = await apiClient.post(ApiEndpoints.notifications.markRead(notificationId));
+
+            if (!response) {
+                return;
             }
+
+            const notification = this.notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.read = true;
+            }
+            this.updateNotificationDisplay();
+            this.updateUnreadCount();
+
         } catch (error) {
             console.error('Error marking notification as read:', error);
         }

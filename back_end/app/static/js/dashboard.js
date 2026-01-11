@@ -37,9 +37,12 @@ class UserDashboard {
 
     async loadDashboardData() {
         try {
-            const response = await fetch('/api/v1/user/dashboard');
-            if (!response.ok) throw new Error('Failed to load dashboard data');
-            
+            const response = await apiClient.get(ApiEndpoints.user.dashboard);
+
+            if (!response) {
+                return;
+            }
+
             const data = await response.json();
             this.dashboardData = data;
             this.updateOverviewCards(data.overview);
@@ -160,9 +163,12 @@ class UserDashboard {
 
     async loadRecommendations() {
         try {
-            const response = await fetch('/api/v1/user/recommendations');
-            if (!response.ok) throw new Error('Failed to load recommendations');
-            
+            const response = await apiClient.get(ApiEndpoints.user.recommendations);
+
+            if (!response) {
+                return;
+            }
+
             const recommendations = await response.json();
             this.updateRecommendations(recommendations);
 
@@ -207,9 +213,12 @@ class UserDashboard {
 
     async loadUserPreferences() {
         try {
-            const response = await fetch('/api/v1/user/preferences');
-            if (!response.ok) throw new Error('Failed to load preferences');
-            
+            const response = await apiClient.get(ApiEndpoints.user.preferences);
+
+            if (!response) {
+                return;
+            }
+
             this.preferences = await response.json();
             this.applyPreferences();
 
@@ -245,16 +254,12 @@ class UserDashboard {
         };
 
         try {
-            const response = await fetch('/api/v1/user/preferences', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(preferences)
-            });
+            const response = await apiClient.post(ApiEndpoints.user.preferences, preferences);
 
-            if (!response.ok) throw new Error('Failed to save preferences');
-            
+            if (!response) {
+                return;
+            }
+
             this.preferences = preferences;
             this.showSuccess('Preferences saved successfully!');
 
@@ -296,9 +301,12 @@ class UserDashboard {
         document.querySelector(`[data-period="${days}"]`).classList.add('active');
 
         try {
-            const response = await fetch(`/api/v1/user/activity?days=${days}`);
-            if (!response.ok) throw new Error('Failed to load activity data');
-            
+            const response = await apiClient.get(ApiEndpoints.user.activity, { days });
+
+            if (!response) {
+                return;
+            }
+
             const data = await response.json();
             this.createActivityChart(data);
 

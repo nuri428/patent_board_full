@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
-from app.db import get_db
-from app.models import ReportModel, PatentModel
+from shared.database import get_db
+from app.models import Report, Patent
 from typing import List, Dict, Any
 from datetime import datetime
 import json
@@ -19,7 +19,7 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket, user_id: str = None):
         await websocket.accept()
         self.active_connections.append(websocket)
-        
+
         if user_id:
             if user_id not in self.user_connections:
                 self.user_connections[user_id] = []
@@ -28,7 +28,7 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket, user_id: str = None):
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
-        
+
         if user_id and user_id in self.user_connections:
             if websocket in self.user_connections[user_id]:
                 self.user_connections[user_id].remove(websocket)
@@ -50,9 +50,7 @@ manager = ConnectionManager()
 
 @router.get("/")
 async def get_notifications(
-    db: AsyncSession = Depends(get_db),
-    limit: int = 20,
-    unread_only: bool = False
+    db: AsyncSession = Depends(get_db), limit: int = 20, unread_only: bool = False
 ):
     return {
         "notifications": [
@@ -63,13 +61,10 @@ async def get_notifications(
                 "message": "Your patent analysis report is ready.",
                 "timestamp": datetime.now().isoformat(),
                 "read": False,
-                "data": {
-                    "report_id": "report_123",
-                    "patent_count": 5
-                }
+                "data": {"report_id": "report_123", "patent_count": 5},
             },
             {
-                "id": "notif_2", 
+                "id": "notif_2",
                 "type": "patent_update",
                 "title": "Patent Status Updated",
                 "message": "Patent US12345678 status changed to Granted.",
@@ -78,17 +73,15 @@ async def get_notifications(
                 "data": {
                     "patent_id": "US12345678",
                     "old_status": "Pending",
-                    "new_status": "Granted"
-                }
-            }
+                    "new_status": "Granted",
+                },
+            },
         ]
     }
 
 
 @router.post("/mark-read/{notification_id}")
-async def mark_notification_read(
-    notification_id: str
-):
+async def mark_notification_read(notification_id: str):
     return {"message": "Notification marked as read"}
 
 
@@ -103,40 +96,34 @@ async def get_unread_count():
 
 
 @router.delete("/{notification_id}")
-async def delete_notification(
-    notification_id: str
-):
+async def delete_notification(notification_id: str):
     return {"message": "Notification deleted"}
 
 
 @router.websocket("/ws/{user_id}")
-async def websocket_endpoint(
-    websocket: WebSocket,
-    user_id: str
-):
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
     await manager.connect(websocket, user_id)
     try:
         while True:
             data = await websocket.receive_text()
-            
+
     except WebSocketDisconnect:
         manager.disconnect(websocket, user_id)
 
 
-async def notify_report_completion(report_id: str, patent_ids: List[str], user_id: str = None):
+async def notify_report_completion(
+    report_id: str, patent_ids: List[str], user_id: str = None
+):
     message = {
         "type": "report_completion",
         "title": "Report Completed",
         "message": f"Analysis of {len(patent_ids)} patents is complete.",
-        "data": {
-            "report_id": report_id,
-            "patent_count": len(patent_ids)
-        },
-        "timestamp": datetime.now().isoformat()
+        "data": {"report_id": report_id, "patent_count": len(patent_ids)},
+        "timestamp": datetime.now().isoformat(),
     }
-    
+
     message_json = json.dumps(message)
-    
+
     if user_id:
         await manager.send_personal_message(message_json, user_id)
     else:
@@ -151,11 +138,11 @@ async def notify_patent_status_change(patent_id: str, old_status: str, new_statu
         "data": {
             "patent_id": patent_id,
             "old_status": old_status,
-            "new_status": new_status
+            "new_status": new_status,
         },
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
-    
+
     message_json = json.dumps(message)
     await manager.broadcast(message_json)
 
@@ -165,13 +152,10 @@ async def notify_new_patent(patent_id: str, title: str):
         "type": "new_patent",
         "title": "New Patent Added",
         "message": f"Patent {patent_id}: {title[:50]}... has been added to the database.",
-        "data": {
-            "patent_id": patent_id,
-            "title": title
-        },
-        "timestamp": datetime.now().isoformat()
+        "data": {"patent_id": patent_id, "title": title},
+        "timestamp": datetime.now().isoformat(),
     }
-    
+
     message_json = json.dumps(message)
     await manager.broadcast(message_json)
 
@@ -184,14 +168,12 @@ async def get_notification_preferences():
         "report_completion": True,
         "patent_updates": True,
         "system_alerts": True,
-        "digest_frequency": "daily"
+        "digest_frequency": "daily",
     }
 
 
 @router.post("/preferences")
-async def update_notification_preferences(
-    preferences: Dict[str, Any]
-):
+async def update_notification_preferences(preferences: Dict[str, Any]):
     return {"message": "Notification preferences updated", "preferences": preferences}
 
 
@@ -204,27 +186,27 @@ async def get_notification_settings():
                 "enabled": True,
                 "email": True,
                 "push": False,
-                "sound": True
+                "sound": True,
             },
             "patent_updates": {
                 "enabled": True,
                 "email": True,
                 "push": False,
-                "sound": False
+                "sound": False,
             },
             "system_alerts": {
                 "enabled": True,
                 "email": True,
                 "push": True,
-                "sound": True
-            }
+                "sound": True,
+            },
         },
         "ui": {
             "desktop_notifications": True,
             "notification_position": "top-right",
             "auto_hide_after": 5000,
-            "show_preview": True
-        }
+            "show_preview": True,
+        },
     }
 
 
@@ -234,10 +216,10 @@ async def test_notification():
         "type": "test",
         "title": "Test Notification",
         "message": "This is a test notification to verify the system is working.",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
-    
+
     message_json = json.dumps(test_message)
     await manager.broadcast(message_json)
-    
+
     return {"message": "Test notification sent"}

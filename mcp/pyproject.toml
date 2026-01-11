@@ -1,0 +1,33 @@
+[project]
+name = "patent-board-mcp"
+version = "0.1.0"
+description = "Patent Board MCP Server"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.104.1",
+    "uvicorn[standard]>=0.24.0",
+    "mcp>=1.0.0",
+    "fastapi-mcp>=0.4.0",
+    "pydantic>=2.5.0",
+    "sqlalchemy>=2.0.23",
+    "aiomysql>=0.2.0",
+    "neo4j>=5.14.1",
+    "python-dotenv>=1.0.0",
+    # Dependencies required by back_end imports
+    "jinja2>=3.1.2",
+    "python-multipart>=0.0.6",
+    "pydantic-settings>=2.1.0",
+    "langgraph>=0.0.26",
+    "langchain>=0.1.0",
+    "langchain-openai>=0.0.5",
+    "langchain-community>=0.0.10",
+    "pandas>=2.3.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
