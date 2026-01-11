@@ -33,4 +33,16 @@ api.interceptors.response.use(
     }
 );
 
+// Search API
+export const patentAPI = {
+    search: async (params) => {
+        const response = await api.post('/patents/search', params);
+        return response.data;
+    },
+    get: async (id) => {
+        const response = await api.get(`/patents/${id}`);
+        return response.data;
+    }
+};
+
 export default api;

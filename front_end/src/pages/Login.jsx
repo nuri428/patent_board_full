@@ -32,7 +32,7 @@ const Login = () => {
 
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                        Patent Board
+                        Open Patent
                     </h1>
                     <p className="text-gray-500 mt-2">Sign in to your account</p>
                 </div>
