@@ -25,4 +25,7 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
-CMD ["uv", "run", "uvicorn", "mcp.mcp_server:mcp_app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+# Set working directory to mcp folder for correct module resolution
+WORKDIR /app/mcp
+
+CMD ["uv", "run", "uvicorn", "mcp_server:mcp_app", "--host", "0.0.0.0", "--port", "8080", "--reload"]

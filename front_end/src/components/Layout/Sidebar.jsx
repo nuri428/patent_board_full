@@ -7,7 +7,8 @@ import {
     Settings,
     LogOut,
     MessageSquare,
-    Zap
+    Zap,
+    Share2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -19,6 +20,7 @@ const Sidebar = () => {
         { icon: FileText, label: 'Reports', path: '/reports' },
         { icon: MessageSquare, label: 'Chat', path: '/chat' },
         { icon: Search, label: 'Patent Search', path: '/search' },
+        { icon: Share2, label: 'Graph Analysis', path: '/graph' },
         { icon: Zap, label: 'Prompts', path: '/prompts' },
         { icon: Settings, label: 'Settings', path: '/settings' },
     ];
