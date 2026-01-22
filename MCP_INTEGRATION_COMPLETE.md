@@ -4,8 +4,8 @@
 
 ### ✅ FastAPI-MCP 패키지 통합
 - `fastapi-mcp==0.4.0` 설치 완료
-- 별도 MCP 서버 파일(`app/mcp_server.py`) 생성
-- 메인 앱에 `/mcp` 경로로 MCP 서버 마운트
+- MCP 서버 파일 위치: `mcp/mcp_server.py`
+- 백엔드 통합: `back_end/app/api/v1/endpoints/mcp.py`를 통한 API Key 관리 및 MCP 툴 제어 레이어 구축
 
 ### 🔧 MCP 툴 목록
 
@@ -30,12 +30,12 @@ curl -X POST http://localhost:8001/mcp/tools/search_patents \
 ## 📋 구조
 
 ```
-app/
-├── __init__.py              # MCP 서버 마운트
-├── mcp_server.py            # 별도 MCP 서버
+patent_board_full/
 ├── mcp/
-│   └── __init__.py         # 레거시 클라이언트 (보존)
-└── api/v1/                 # 기존 API 라우트
+│   └── mcp_server.py        # 실제 MCP 서버 로직
+└── back_end/app/
+    └── api/v1/endpoints/
+        └── mcp.py           # API Key 관리 및 MCP 연동 라우터
 ```
 
 ## 🚀 사용법
@@ -55,10 +55,10 @@ app/
    {
      "mcpServers": {
        "patent-board": {
-         "command": "uvicorn",
-         "args": ["app:app", "--host", "0.0.0.0", "--port", "8001"],
+         "command": "uv",
+         "args": ["run", "python", "mcp/mcp_server.py"],
          "env": {
-           "AUTH_TOKEN": "patent-mcp-token"
+           "DATABASE_URL": "..."
          }
        }
      }
@@ -74,7 +74,7 @@ app/
 
 ## 🔍 구현 세부사항
 
-### MCP 서버 (`app/mcp_server.py`)
+### MCP 서버 (`mcp/mcp_server.py`)
 ```python
 from fastapi import FastAPI
 from pydantic import BaseModel

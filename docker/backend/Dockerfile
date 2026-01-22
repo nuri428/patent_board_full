@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY back_end/pyproject.toml .
+COPY back_end/uv.lock .
 COPY README.md .
 
 RUN pip install --no-cache-dir uv && \

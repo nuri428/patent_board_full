@@ -6,13 +6,16 @@ from app.models import User, Report, ChatSession, Notification
 from app.schemas import UserCreate, UserUpdate
 import bcrypt
 
-# Monkeypatch bcrypt for passlib compatibility
-if not hasattr(bcrypt, "__about__"):
+# Monkeypatch bcrypt for passlib compatibility (if needed)
+try:
+    if not hasattr(bcrypt, "__about__"):
 
-    class About:
-        __version__ = bcrypt.__version__
+        class About:
+            __version__ = getattr(bcrypt, "__version__", "unknown")
 
-    bcrypt.__about__ = About()
+        bcrypt.__about__ = About()
+except Exception:
+    pass
 
 from passlib.context import CryptContext
 

@@ -26,17 +26,15 @@
    - Patent database API 툴 노출
    - 인증 기반 보안 통합
 
-5. **Implement LangGraph integration for patent analysis reports** ✅
-   - Multi-agent 워크플로우 설계
-   - Patent Collection → Analysis → Summary → Sections → Report
-   - OpenAI LLM 연동
-   - 구조화된 리포트 생성
+5. **Core Backend Skeleton Setup** ✅
+   - FastAPI 프로젝트 구조 및 라우터 설정 완료
+   - 데이터베이스 커넥션 풀링 기초 구현
+   - 인증 및 유저 관리 기초 레이어 구축
 
-6. **Create frontend structure for chat and report display** ✅
-   - Bootstrap 5 기반 반응형 웹 인터페이스
-   - Chat, Reports, Patents 페이지 구현
-   - JavaScript 모듈화 및 API 연동
-   - 실시간 검색 및 상호작용 기능
+6. **Frontend Base Structure Setup** ✅
+   - Bootstrap 5 기반 프레임워크 및 레이아웃 구성
+   - 대시보드 및 특허 검색 페이지 기본 UI 구현
+   - JavaScript 모듈화 기초 작업 완료
 
 7. **Set up database connections (MariaDB, Neo4j)** ✅
    - 비동기 SQLAlchemy 엔진 및 세션 관리
@@ -53,7 +51,9 @@
 ## 🚀 진행 중인 작업 (In Progress)
 
 ### 현재 진행 상태
-- **FastAPI-MCP Integration**: 대체로 개선 중 (진행률 80%)
+- **AI Chat API Implementation**: `crud/chat.py` 로직의 API 엔드포인트 연결 중 (진행률 30%)
+- **Reports Page & LangGraph Integration**: 리포트 생성 워크플로우 및 프론트엔드 연동 중 (진행률 20%)
+- **FastAPI-MCP Integration**: `/mcp` 엔드포인트 내 실제 데이터 연동 및 툴 노출 로직 개선 중 (진행률 60%)
 - **데이터베이스 최적화**: 인덱스 및 쿼리 튜닝 필요
 
 ## 📅 향후 작업 계획 (Future Tasks)

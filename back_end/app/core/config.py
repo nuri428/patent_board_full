@@ -5,6 +5,7 @@ from typing import Optional
 class Settings(BaseSettings):
     # Database
     MARIADB_URL: str = "mysql+aiomysql://patent_user:password@localhost/patent_db"
+    PATENTDB_URL: str = "mysql+aiomysql://patent_user:password@localhost/patent_db"
     NEO4J_URI: str = "bolt://localhost:7687"
     NEO4J_USER: str = "neo4j"
     NEO4J_PASSWORD: str = "password"

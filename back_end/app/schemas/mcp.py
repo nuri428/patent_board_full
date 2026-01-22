@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, Literal
+from typing import Optional, Literal, Any
 from datetime import datetime
 
 
@@ -25,3 +25,16 @@ class MCPKeyRead(MCPKeyBase):
 
 class MCPKeyResult(MCPKeyRead):
     pass
+
+
+class ProxyToolCall(BaseModel):
+    tool_name: str
+    arguments: dict
+
+
+class ProxyResult(BaseModel):
+    status: str
+    data: Any
+    confidence: Optional[Literal["High", "Medium", "Low"]] = None
+    interpretation_note: Optional[str] = None
+    source: str = "KIPRIS"
