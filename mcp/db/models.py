@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Date, DateTime, Integer, Text, BigInteger
+from sqlalchemy import Column, String, Date, DateTime, Integer, Text, BigInteger, JSON
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.dialects.mysql import LONGTEXT
 from datetime import datetime
@@ -21,8 +21,8 @@ class KRPatent(Base):
     registration_date = Column(Date, nullable=True)
     patent_status = Column(String(20), nullable=False)
     raw_data = Column(LONGTEXT, nullable=True)
-    created_at = Column(DateTime(6), nullable=False)
-    updated_at = Column(DateTime(6), nullable=False)
+    created_at = Column(DateTime(6), nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime(6), nullable=False, default=datetime.utcnow)
 
 
 class ForeignPatent(Base):
@@ -40,8 +40,8 @@ class ForeignPatent(Base):
     abstract = Column(LONGTEXT, nullable=True)
     patent_status = Column(String(20), nullable=False)
     raw_data = Column(LONGTEXT, nullable=True)
-    created_at = Column(DateTime(6), nullable=False)
-    updated_at = Column(DateTime(6), nullable=False)
+    created_at = Column(DateTime(6), nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime(6), nullable=False, default=datetime.utcnow)
 
 
 # Link Tables - for future use in search queries
@@ -67,3 +67,26 @@ class ForeignPatentInventor(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(String(300), nullable=False)
     patent_id = Column(String(100), nullable=False)
+
+
+class AnalysisRun(Base):
+    __tablename__ = "analysis_runs"
+    
+    id = Column(String(50), primary_key=True)
+    analysis_type = Column(String(100), nullable=False)
+    parameters = Column(JSON, nullable=True)
+    status = Column(String(20), default="running")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+    results_count = Column(Integer, default=0)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'analysis_type': self.analysis_type,
+            'parameters': self.parameters,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at is not None else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at is not None else None,
+            'results_count': self.results_count
+        }

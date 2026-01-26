@@ -24,6 +24,17 @@ class Settings(BaseSettings):
     NEO4J_PASSWORD: str = Field(..., description="Password for Neo4j")
     NEO4J_DATABASE: str = Field("neo4j", description="Neo4j database name")
 
+    OPENSEARCH_HOST: str = Field("localhost", description="OpenSearch host")
+    OPENSEARCH_PORT: int = Field(9200, description="OpenSearch port")
+    OPENSEARCH_USER: str = Field("admin", description="OpenSearch username")
+    OPENSEARCH_PASSWORD: str = Field("admin", description="OpenSearch password")
+    OPENSEARCH_USE_SSL: bool = Field(False, description="Use SSL for OpenSearch")
+    OPENSEARCH_INDEX_PREFIX: str = Field("patents", description="OpenSearch index prefix")
+
+    BGE_M3_MODEL_NAME: str = Field("BAAI/bge-m3", description="BGE-M3 model name")
+    BGE_M3_DEVICE: str = Field("cpu", description="BGE-M3 device (cpu/cuda)")
+    BGE_M3_USE_FP16: bool = Field(True, description="Use FP16 for BGE-M3")
+
     # MCP Server Security
     MCP_API_KEY: str | None = Field(None, description="Master API key for MCP server")
 

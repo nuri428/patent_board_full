@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from neo4j import GraphDatabase, AsyncGraphDatabase
+from opensearchpy import AsyncOpenSearch
 from typing import AsyncGenerator, Generator
 import contextlib
 
@@ -75,6 +76,21 @@ async def get_neo4j_session():
         yield session
 
 
+opensearch_client = AsyncOpenSearch(
+    hosts=[{
+        'host': settings.OPENSEARCH_HOST, 
+        'port': settings.OPENSEARCH_PORT
+    }],
+    http_auth=(settings.OPENSEARCH_USER, settings.OPENSEARCH_PASSWORD),
+    use_ssl=settings.OPENSEARCH_USE_SSL,
+    verify_certs=settings.OPENSEARCH_USE_SSL,
+)
+
+
+async def get_opensearch_client():
+    return opensearch_client
+
+
 async def close_connections():
     """
     Cleanup function to close DB connections on app shutdown
@@ -82,3 +98,4 @@ async def close_connections():
     await patent_engine.dispose()
     await auth_engine.dispose()
     await neo4j_driver.close()
+    await opensearch_client.close()
