@@ -105,9 +105,9 @@ patent_board_full/
 
 ## 🌐 Access Points
 
-- **Web Interface**: http://localhost:8001
-- **API Documentation**: http://localhost:8001/docs
-- **Health Check**: http://localhost:8001/health
+- **Web Interface**: http://localhost:3301
+- **API Documentation**: http://localhost:8005/docs
+- **Health Check**: http://localhost:8005/health
 
 ## 🔧 Configuration
 
@@ -139,6 +139,7 @@ Key `.env` settings:
 
 ### MCP (Model Context Protocol)
 - Provides unified interface to patent databases
+- Server running on: http://localhost:8082
 - Supports multiple query types: search, get, graph_search, semantic_search
 - Abstracts complex Neo4j Cypher queries
 - Handles both MariaDB and Neo4j data sources

@@ -4,6 +4,7 @@ import logging
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.api import api_router
 from app.routes import web_router
+from app.core.config import settings
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -24,12 +25,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # CORS Configuration
-origins = [
-    "http://localhost:3000",
-    "http://localhost:3300",
-    "http://localhost:8001",
-    "http://localhost:8080",
-]
+origins = settings.BACKEND_CORS_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,

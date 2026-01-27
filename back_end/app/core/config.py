@@ -24,7 +24,11 @@ class Settings(BaseSettings):
     MCP_SERVER_URL: str = "http://localhost:8081"
 
     # CORS
-    BACKEND_CORS_ORIGINS: list = ["http://localhost:8001", "http://localhost:3300"]
+    BACKEND_CORS_ORIGINS: list = [
+        "http://localhost:8002",
+        "http://localhost:3300",
+        "http://localhost:3301",
+    ]
 
     # App
     PROJECT_NAME: str = "Patent Board"
