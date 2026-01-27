@@ -12,7 +12,7 @@ class GraphDatabase:
         query = """
         MATCH (c1:Corporation)-[r:COMPETES_WITH]->(c2:Corporation)
         WHERE toLower(c1.name) CONTAINS toLower($company_name)
-        RETURN c1.name as company, c2.name as competitor, r.strength as strength
+        RETURN c1.name as company, c2.name as competitor, coalesce(r.strength, 0) as strength
         LIMIT 20
         """
         async for session in get_neo4j_session():
@@ -102,7 +102,7 @@ class GraphDatabase:
     @staticmethod
     async def run_advanced_network_analysis() -> Dict[str, Any]:
         results = {}
-        
+
         degree_centrality_query = """
         MATCH (n)
         WHERE n:Corporation OR n:Patent OR n:Technology
@@ -117,7 +117,7 @@ class GraphDatabase:
         ORDER BY degree DESC
         LIMIT 20
         """
-        
+
         betweenness_centrality_query = """
         MATCH (n)
         WHERE n:Corporation OR n:Technology
@@ -133,7 +133,7 @@ class GraphDatabase:
         ORDER BY path_count DESC
         LIMIT 10
         """
-        
+
         collaboration_potential_query = """
         MATCH (c1:Corporation)
         MATCH (c2:Corporation)
@@ -158,7 +158,7 @@ class GraphDatabase:
         ORDER BY collaboration_score DESC
         LIMIT 15
         """
-        
+
         network_structure_query = """
         MATCH (n1)-[r]-(n2)
         WHERE (n1:Corporation OR n1:Technology) AND (n2:Corporation OR n2:Technology)
@@ -173,22 +173,22 @@ class GraphDatabase:
             coalesce(n2.name, n2.technology_name) as node2_name
         LIMIT 50
         """
-        
+
         async for session in get_neo4j_session():
             degree_result = await session.run(degree_centrality_query)
-            results['degree_centrality'] = await degree_result.data()
-            
+            results["degree_centrality"] = await degree_result.data()
+
             betweenness_result = await session.run(betweenness_centrality_query)
-            results['betweenness_centrality'] = await betweenness_result.data()
-            
+            results["betweenness_centrality"] = await betweenness_result.data()
+
             network_result = await session.run(network_structure_query)
-            results['community_edges'] = await network_result.data()
-            
+            results["community_edges"] = await network_result.data()
+
             collaboration_result = await session.run(collaboration_potential_query)
-            results['link_prediction'] = await collaboration_result.data()
-            
+            results["link_prediction"] = await collaboration_result.data()
+
             return results
-        
+
         return {}
 
     @staticmethod
@@ -202,11 +202,13 @@ class GraphDatabase:
         applied_config_version: str = "2.1.0",
         synergy_bonus_applied: bool = False,
         negative_keywords_matched: Optional[List[str]] = None,
-        confidence_before_cap: Optional[float] = None
+        confidence_before_cap: Optional[float] = None,
     ) -> Dict[str, Any]:
         negative_keywords_matched = negative_keywords_matched or []
-        confidence_before_cap = confidence_before_cap if confidence_before_cap is not None else confidence
-        
+        confidence_before_cap = (
+            confidence_before_cap if confidence_before_cap is not None else confidence
+        )
+
         query = """
         MATCH (p:Patent {application_number: $patent_id})
         MATCH (t:Technology {technology_id: $technology_id})
@@ -224,32 +226,35 @@ class GraphDatabase:
         
         RETURN p, r, t
         """
-        
+
         async for session in get_neo4j_session():
-            result = await session.run(query, {
-                'patent_id': patent_id,
-                'technology_id': technology_id,
-                'confidence': confidence,
-                'method': method,
-                'is_partial': is_partial,
-                'applied_config_version': applied_config_version,
-                'synergy_bonus_applied': synergy_bonus_applied,
-                'negative_keywords_matched': negative_keywords_matched,
-                'confidence_before_cap': confidence_before_cap,
-                'analysis_run_id': analysis_run_id
-            })
+            result = await session.run(
+                query,
+                {
+                    "patent_id": patent_id,
+                    "technology_id": technology_id,
+                    "confidence": confidence,
+                    "method": method,
+                    "is_partial": is_partial,
+                    "applied_config_version": applied_config_version,
+                    "synergy_bonus_applied": synergy_bonus_applied,
+                    "negative_keywords_matched": negative_keywords_matched,
+                    "confidence_before_cap": confidence_before_cap,
+                    "analysis_run_id": analysis_run_id,
+                },
+            )
             record = await result.single()
-            
+
             if record:
                 return {
-                    'patent_id': record['p']['application_number'],
-                    'technology_id': record['t']['technology_id'],
-                    'technology_name': record['t'].get('technology_name'),
-                    'confidence': confidence,
-                    'method': method,
-                    'analysis_run_id': analysis_run_id
+                    "patent_id": record["p"]["application_number"],
+                    "technology_id": record["t"]["technology_id"],
+                    "technology_name": record["t"].get("technology_name"),
+                    "confidence": confidence,
+                    "method": method,
+                    "analysis_run_id": analysis_run_id,
                 }
-        
+
         raise HTTPException(status_code=404, detail="Patent or Technology not found")
 
     @staticmethod
@@ -257,34 +262,34 @@ class GraphDatabase:
         analysis_run_id: Optional[str] = None,
         patent_id: Optional[str] = None,
         technology_id: Optional[str] = None,
-        confidence_threshold: float = 0.0
+        confidence_threshold: float = 0.0,
     ) -> List[Dict[str, Any]]:
         query_conditions = []
         parameters = {}
-        
+
         base_query = """
         MATCH (p:Patent)-[r:BELONGS_TO]->(t:Technology)
         WHERE 1=1
         """
-        
+
         if analysis_run_id:
             query_conditions.append("r.analysis_run_id = $analysis_run_id")
-            parameters['analysis_run_id'] = analysis_run_id
-            
+            parameters["analysis_run_id"] = analysis_run_id
+
         if patent_id:
             query_conditions.append("p.application_number = $patent_id")
-            parameters['patent_id'] = patent_id
-            
+            parameters["patent_id"] = patent_id
+
         if technology_id:
             query_conditions.append("t.technology_id = $technology_id")
-            parameters['technology_id'] = technology_id
-            
+            parameters["technology_id"] = technology_id
+
         query_conditions.append("r.confidence >= $confidence_threshold")
-        parameters['confidence_threshold'] = confidence_threshold
-        
+        parameters["confidence_threshold"] = confidence_threshold
+
         if query_conditions:
             base_query += " AND " + " AND ".join(query_conditions)
-        
+
         base_query += """
         RETURN 
             p.application_number as patent_id,
@@ -303,10 +308,10 @@ class GraphDatabase:
         ORDER BY r.confidence DESC
         LIMIT 100
         """
-        
+
         async for session in get_neo4j_session():
             result = await session.run(base_query, parameters)
             records = await result.data()
             return records
-        
+
         return []
