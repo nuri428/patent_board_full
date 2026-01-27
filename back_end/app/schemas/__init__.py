@@ -29,6 +29,12 @@ from .chat import (
 )
 from .notification import Notification, NotificationCreate
 from .analytics import AnalyticsData, SystemMetrics, UserAnalytics, PatentAnalytics
+from .mcp import (
+    SemanticSearchRequest,
+    NetworkAnalysisRequest,
+    TechMappingRequest,
+    AnalysisWorkbenchRequest,
+)
 
 __all__ = [
     # User schemas
@@ -69,4 +75,9 @@ __all__ = [
     "SystemMetrics",
     "UserAnalytics",
     "PatentAnalytics",
+    # MCP analysis schemas
+    "SemanticSearchRequest",
+    "NetworkAnalysisRequest",
+    "TechMappingRequest",
+    "AnalysisWorkbenchRequest",
 ]

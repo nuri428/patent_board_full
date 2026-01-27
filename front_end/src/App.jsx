@@ -5,6 +5,7 @@ import PatentSearch from './pages/PatentSearch';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import GraphAnalysis from './pages/GraphAnalysis';
+import AnalysisWorkbench from './pages/AnalysisWorkbench';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedLayout from './components/Layout/ProtectedLayout';
 
@@ -20,6 +21,7 @@ const App = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/search" element={<PatentSearch />} />
             <Route path="/graph" element={<GraphAnalysis />} />
+            <Route path="/analysis" element={<AnalysisWorkbench />} />
             <Route path="/settings" element={<Settings />} />
 
             {/* Placeholders for future routes */}
