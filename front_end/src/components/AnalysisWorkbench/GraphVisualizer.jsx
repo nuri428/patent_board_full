@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     ReactFlow,
+    ReactFlowProvider,
     Background,
     Controls,
     MiniMap,
     useNodesState,
     useEdgesState,
+    useReactFlow,
     MarkerType
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -22,11 +24,24 @@ const NODE_COLORS = {
 const BATCH_SIZE = 30;
 const BATCH_DELAY = 100;
 
-const GraphVisualizer = ({ data }) => {
+// Inner component that uses the ReactFlow hooks
+const GraphVisualizerInner = ({ data }) => {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [loading, setLoading] = useState(true);
     const [progress, setProgress] = useState(0);
+    const { fitView } = useReactFlow();
+
+    // Auto-fit view when loading completes
+    useEffect(() => {
+        if (!loading && nodes.length > 0) {
+            // Small delay to ensure all nodes are rendered
+            const timer = setTimeout(() => {
+                fitView({ padding: 0.2, duration: 500 });
+            }, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, nodes.length, fitView]);
 
     // Progressive Loading Logic
     useEffect(() => {
@@ -197,6 +212,15 @@ const GraphVisualizer = ({ data }) => {
                 </div>
             </div>
         </div>
+    );
+};
+
+// Wrapper component that provides ReactFlowProvider
+const GraphVisualizer = ({ data }) => {
+    return (
+        <ReactFlowProvider>
+            <GraphVisualizerInner data={data} />
+        </ReactFlowProvider>
     );
 };
 
