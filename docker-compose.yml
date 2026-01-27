@@ -44,7 +44,7 @@ services:
       - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-patent-board}
 
       # MCP Server Configuration
-      - MCP_SERVER_URL=${MCP_SERVER_URL:-http://patent-board-mcp:8080}
+      - MCP_SERVER_URL=http://patent-board-mcp:8080
 
       # Application Configuration
       - PROJECT_NAME=Patent Board
