@@ -1,32 +1,46 @@
 import asyncio
-import sys
 import os
-from sqlalchemy import text
+import sys
 
-sys.path.append(os.getcwd())
+# Ensure we can import from mcp root
+sys.path.append("/app/mcp")
 
-from database import auth_engine
+try:
+    from database import get_neo4j_session
+    from config.settings import settings
+except ImportError as e:
+    print(f"Import Error: {e}")
+    sys.exit(1)
 
 
 async def inspect():
-    print("--- Inspecting Table Schema ---")
-    async with auth_engine.connect() as conn:
-        try:
-            result = await conn.execute(text("DESCRIBE mcp_api_keys"))
-            rows = result.fetchall()
-            print(
-                f"{'Field':<20} {'Type':<20} {'Null':<10} {'Key':<10} {'Default':<20}"
-            )
-            print("-" * 80)
-            for row in rows:
-                # row is a tuple, typically (Field, Type, Null, Key, Default, Extra)
-                print(
-                    f"{str(row[0]):<20} {str(row[1]):<20} {str(row[2]):<10} {str(row[3]):<10} {str(row[4]):<20}"
-                )
-        except Exception as e:
-            print(f"Error inspecting table: {e}")
+    print("Inspecting Neo4j Schema... VERSION 2")
+    async for session in get_neo4j_session():
+        # 1. Count Problem nodes & Get Properties
+        res = await session.run("MATCH (p:Problem) RETURN p LIMIT 1")
+        rec = await res.single()
+        if rec:
+            node = rec["p"]
+            print(f"Problem Node Properties: {dict(node)}")
+        else:
+            print("Problem Nodes: 0")
 
-    await auth_engine.dispose()
+        # 2. Check Labels present
+        res = await session.run("CALL db.labels() YIELD label")
+        labels = [r["label"] for r in await res.data()]
+        print(f"All Labels: {labels}")
+
+        # 3. Check Relationship Types
+        res = await session.run("CALL db.relationshipTypes() YIELD relationshipType")
+        rels = [r["relationshipType"] for r in await res.data()]
+        print(f"All Relationships: {rels}")
+
+        # 4. Check SOLVES connection
+        res = await session.run("MATCH ()-[r:SOLVES]->() RETURN count(r) as count")
+        rec = await res.single()
+        print(f"SOLVES Relationships: {rec['count']}")
+
+        return
 
 
 if __name__ == "__main__":
