@@ -32,7 +32,7 @@ class GraphDatabase:
         # We will check both direct Patent->Problem and indirect Patent->Solution->Problem
         query = """
         MATCH (p:Problem)
-        WHERE toLower(p.text) CONTAINS toLower($keyword)
+        WHERE toLower(p.description) CONTAINS toLower($keyword)
         
         OPTIONAL MATCH (pat:Patent)-[:SOLVES]->(p)
         OPTIONAL MATCH (pat2:Patent)-[:USES]->(sol:Solution)-[:SOLVES]->(p)
@@ -41,8 +41,8 @@ class GraphDatabase:
         WHERE patent IS NOT NULL
         
         RETURN 
-            p.text as problem,
-            sol.text as solution,
+            p.description as problem,
+            sol.description as solution,
             patent.registration_number as patent_number,
             patent.title as title
         LIMIT 10
@@ -61,10 +61,11 @@ class GraphDatabase:
         """
         query = """
         MATCH (t:Technology)
-        WHERE toLower(t.name) CONTAINS toLower($keyword)
+        WHERE toUpper(t.code) CONTAINS toUpper($keyword)
         MATCH (p:Patent)-[:BELONGS_TO]->(t)
         RETURN 
-            t.name as technology,
+            t.code as technology_code,
+            t.level as technology_level,
             count(p) as patent_count,
             collect(p.title)[..5] as top_patents
         ORDER BY patent_count DESC
