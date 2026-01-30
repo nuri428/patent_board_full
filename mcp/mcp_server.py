@@ -17,6 +17,12 @@ from db.models import AnalysisRun
 from db.graph import GraphDatabase
 from services.embedding_service import EmbeddingService
 from config.settings import settings
+from tools.patent_identifier import (
+    PatentIdentifierTool, 
+    PatentUrlGenerator,
+    PatentIdentifier,
+    PatentUrl
+)
 
 
 # --- Input Schemas ---
@@ -128,6 +134,34 @@ class TechnologyMappingFilterInput(BaseModel):
     )
 
 
+# Patent Identifier Tools Input/Output Schemas
+class PatentExtractionInput(BaseModel):
+    text: str = Field(..., description="Text to extract patent identifiers from")
+
+
+class PatentUrlGenerationInput(BaseModel):
+    patent_ids: List[str] = Field(..., description="List of patent identifiers")
+    country: str = Field(..., description="Country code (US, KR, WIPO)")
+    sources: Optional[List[str]] = Field(None, description="URL sources to generate (default: ['google'])")
+
+
+class PatentAnalysisInput(BaseModel):
+    text: str = Field(..., description="Text to analyze for patent identifiers and generate URLs")
+    include_sources: Optional[List[str]] = Field(None, description="URL sources to include (default: ['google'])")
+
+
+# Patent Tools Response Schemas
+class PatentExtractionResponse(BaseModel):
+    found: List[Dict] = Field(default_factory=list, description="Found patent identifiers")
+    raw_text: str = Field(..., description="Original input text")
+    has_patents: bool = Field(False, description="Whether any patents were found")
+
+
+class PatentUrlResponse(BaseModel):
+    urls: List[Dict] = Field(default_factory=list, description="Generated URLs")
+    errors: List[str] = Field(default_factory=list, description="Errors encountered")
+
+
 class AnalysisRunResultsInput(BaseModel):
     analysis_run_id: str = Field(..., description="Analysis run ID")
     include_opensearch: bool = Field(True, description="Include OpenSearch results")
@@ -235,6 +269,18 @@ async def list_tools(key: Any = Depends(verify_api_key)):
         {
             "name": "get_analysis_run_results",
             "description": "Get comprehensive results for a specific analysis run including OpenSearch and Neo4j data.",
+        },
+        {
+            "name": "extract_patent_ids",
+            "description": "Extract patent identifiers from text using regex patterns for US, KR, and WIPO patents.",
+        },
+        {
+            "name": "generate_patent_urls",
+            "description": "Generate official database URLs for patent identifiers from Google Patents, USPTO, KIPRIS.",
+        },
+        {
+            "name": "analyze_patent_text",
+            "description": "Comprehensive patent text analysis - extract IDs and generate authoritative URLs.",
         },
     ]
 
@@ -733,6 +779,118 @@ async def get_analysis_run_results(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to get analysis run results: {str(e)}"
+        )
+
+
+# --- Patent Identifier Tools Implementation ---
+
+@mcp_app.post("/tools/extract_patent_ids", response_model=StandardResponse)
+async def extract_patent_ids(
+    input: PatentExtractionInput, key: Any = Depends(verify_api_key)
+):
+    """Extract patent identifiers from text using regex patterns for US, KR, and WIPO patents."""
+    try:
+        identifier_tool = PatentIdentifierTool()
+        extraction_result = identifier_tool.extract_patent_ids(input.text)
+        
+        response_data = extraction_result.dict()
+        
+        return wrap_response(
+            response_data, 
+            engine="Patent-Identifier-Regex",
+            total=len(extraction_result.found)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Patent ID extraction failed: {str(e)}"
+        )
+
+
+@mcp_app.post("/tools/generate_patent_urls", response_model=StandardResponse)
+async def generate_patent_urls(
+    input: PatentUrlGenerationInput, key: Any = Depends(verify_api_key)
+):
+    """Generate official database URLs for patent identifiers from Google Patents, USPTO, KIPRIS."""
+    try:
+        url_generator = PatentUrlGenerator()
+        
+        # Create PatentIdentifier objects from the provided IDs
+        patent_identifiers = []
+        for patent_id in input.patent_ids:
+            # Simple country detection based on patent ID prefix
+            country = input.country
+            if country == "auto":
+                if patent_id.startswith("US"):
+                    country = "US"
+                elif patent_id.startswith("KR"):
+                    country = "KR"
+                elif patent_id.startswith("WO"):
+                    country = "WIPO"
+                else:
+                    country = "GENERIC"
+            
+            patent_identifiers.append(PatentIdentifier(
+                id=patent_id,
+                country=country,
+                type="unknown",
+                raw_text=patent_id
+            ))
+        
+        # Generate URLs
+        sources = input.sources or ["google"]
+        url_result = url_generator.generate_urls(patent_identifiers, sources)
+        
+        response_data = url_result.dict()
+        
+        return wrap_response(
+            response_data,
+            engine="Patent-URL-Generator",
+            total=len(url_result.urls)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"URL generation failed: {str(e)}"
+        )
+
+
+@mcp_app.post("/tools/analyze_patent_text", response_model=StandardResponse)
+async def analyze_patent_text(
+    input: PatentAnalysisInput, key: Any = Depends(verify_api_key)
+):
+    """Comprehensive patent text analysis - extract IDs and generate authoritative URLs."""
+    try:
+        # Use the integrated tool that does both extraction and URL generation
+        url_generator = PatentUrlGenerator()
+        include_sources = input.include_sources or ["google"]
+        
+        # Generate complete response (extracts patents + creates URLs)
+        complete_response = url_generator.generate_complete_response(
+            text=input.text,
+            include_sources=include_sources
+        )
+        
+        response_data = {
+            "text_analysis": {
+                "found_patents": complete_response.get("extracted_patents", []),
+                "total_count": complete_response.get("patent_count", 0),
+                "has_patents": complete_response.get("has_patents", False)
+            },
+            "url_generation": {
+                "urls": complete_response.get("generated_urls", []),
+                "total_urls": len(complete_response.get("generated_urls", [])),
+                "errors": complete_response.get("errors", [])
+            },
+            "summary": complete_response
+        }
+        
+        return wrap_response(
+            response_data,
+            engine="Patent-Text-Analyzer",
+            total=complete_response.get("patent_count", 0)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Patent text analysis failed: {str(e)}"
         )
 
 

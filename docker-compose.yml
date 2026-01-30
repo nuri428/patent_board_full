@@ -139,6 +139,75 @@ services:
       timeout: 10s
       retries: 3
 
+  # ============================================
+  # LangGraph Chatbot Service
+  # ============================================
+  langgraph:
+    build:
+      context: .
+      dockerfile: docker/langgraph/Dockerfile
+    container_name: patent-board-langgraph
+    restart: unless-stopped
+    ports:
+      - "8003:8001"
+    environment:
+      # Database Configuration (PA System)
+      - PA_SYSTEM_DB_URL=${PA_SYSTEM_DB_URL}
+      - PA_SYSTEM_DB_HOST=${PA_SYSTEM_DB_HOST}
+      - PA_SYSTEM_DB_PORT=${PA_SYSTEM_DB_PORT}
+      - PA_SYSTEM_DB_NAME=${PA_SYSTEM_DB_NAME}
+      - PA_SYSTEM_DB_USER=${PA_SYSTEM_DB_USER}
+      - PA_SYSTEM_DB_PASSWORD=${PA_SYSTEM_DB_PASSWORD}
+      
+      # Cache Configuration (Redis)
+      - REDIS_URL=${REDIS_URL}
+      
+      # AI Services Configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4-turbo-preview}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-patent-board-langgraph}
+      
+      # MCP Integration
+      - MCP_SERVER_URL=http://patent-board-mcp:8080
+      
+      # Application Configuration
+      - HOST=0.0.0.0
+      - PORT=8001
+      - DEBUG=${DEBUG:-true}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      
+      # LangGraph Configuration
+      - MAX_CONVERSATION_LENGTH=${MAX_CONVERSATION_LENGTH:-1000}
+      - MAX_CONTEXT_TOKENS=${MAX_CONTEXT_TOKENS:-4000}
+      - RESPONSE_TIMEOUT=${RESPONSE_TIMEOUT:-30}
+      
+    volumes:
+      - ./back_end:/app/back_end
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+      - ./scripts:/app/scripts
+    networks:
+      - patent-board-network
+    depends_on:
+      - backend
+      - mcp
+      - redis
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health", "||", "exit", "1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
 # ============================================
 # Network Configuration
 # ============================================
