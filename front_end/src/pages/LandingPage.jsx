@@ -1,313 +1,221 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
 
 function LandingPage({ onGetStarted }) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-            {/* Hero Section */}
-            <div className="relative overflow-hidden">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-                    <div className="text-center">
-                        <div className="flex justify-center mb-6">
-                            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 rounded-2xl shadow-lg">
-                                <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
+        <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+            {/* Navigation */}
+            <nav className="fixed top-0 w-full z-50 glass-morphism py-4">
+                <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <div className="bg-indigo-600 p-2 rounded-lg">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                         </div>
-                        
-                        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                            Patent Board
-                        </h1>
-                        <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-                            AI-powered patent analysis platform with intelligent chat interface and automated report generation
-                        </p>
-                        
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                        <span className="text-xl font-bold tracking-tight text-slate-900">Patent Board</span>
+                    </div>
+                    <div className="hidden md:flex items-center gap-8">
+                        <a href="#features" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Features</a>
+                        <a href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">How it works</a>
+                        <button onClick={onGetStarted} className="premium-button-primary text-sm">Get Started</button>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Hero Section */}
+            <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="text-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 mb-6">
+                                <span className="flex h-2 w-2 rounded-full bg-indigo-600 mr-2 animate-pulse"></span>
+                                AI-Powered Patent Intelligence
+                            </span>
+                        </motion.div>
+
+                        <motion.h1
+                            className="text-5xl md:text-7xl font-bold text-slate-900 mb-8 tracking-tight"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                        >
+                            The Next Era of <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Patent Analysis</span>
+                        </motion.h1>
+
+                        <motion.p
+                            className="text-xl md:text-2xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                        >
+                            Elevate your intellectual property strategy with our multi-agent AI system.
+                            From intelligent chat to node-network analysis, all in one premium workspace.
+                        </motion.p>
+
+                        <motion.div
+                            className="flex flex-col sm:flex-row gap-4 justify-center"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                        >
                             <button
                                 onClick={onGetStarted}
-                                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                                className="premium-button-primary text-lg px-10 py-4"
                             >
-                                Get Started Free
+                                Start Analysis Free
                             </button>
                             <button
                                 onClick={() => window.scrollTo({ top: document.getElementById('features')?.offsetTop || 0, behavior: 'smooth' })}
-                                className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-50 transition-colors duration-200"
+                                className="bg-white text-slate-900 border border-slate-200 px-10 py-4 rounded-xl text-lg font-semibold hover:bg-slate-50 transition-all duration-200 shadow-sm"
                             >
-                                Learn More
+                                Explorer Features
                             </button>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
-                
-                {/* Background decoration */}
-                <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute -top-40 -right-32 w-80 h-80 bg-blue-300 rounded-full opacity-10"></div>
-                    <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-indigo-300 rounded-full opacity-10"></div>
+
+                {/* Background Blobs */}
+                <div className="absolute top-0 inset-x-0 h-full -z-10">
+                    <div className="absolute top-1/4 -right-20 w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl animate-blob"></div>
+                    <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
                 </div>
-            </div>
+            </section>
 
             {/* Features Section */}
-            <div id="features" className="py-20 bg-white">
+            <section id="features" className="py-24 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                            Powerful Patent Analysis Features
+                    <div className="text-center mb-20">
+                        <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">
+                            Professional Features for Experts
                         </h2>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Advanced AI tools designed for patent professionals and researchers
+                        <div className="w-20 h-1.5 bg-indigo-600 mx-auto rounded-full mb-6"></div>
+                        <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                            Advanced AI tools designed to simplify the most complex patent research tasks.
                         </p>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <FeatureCard
-                            icon={
-                                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                </svg>
-                            }
-                            title="AI-Powered Chat"
-                            description="Natural language interface for patent queries with context-aware responses and source citations"
+                            icon={<ChatIcon />}
+                            title="Contextual AI Chat"
+                            description="Engage with a specialized AI agent that understands patent law and technical hierarchies, providing cited references from global databases."
                         />
-                        
                         <FeatureCard
-                            icon={
-                                <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                            }
-                            title="Advanced Analytics"
-                            description="Comprehensive patent analysis with market landscape, competitive intelligence, and strategic insights"
+                            icon={<GraphIcon />}
+                            title="Graph Network Analysis"
+                            description="Visualize competitor landscapes and patent citations through interactive node-network graphs powered by Neo4j."
                         />
-                        
                         <FeatureCard
-                            icon={
-                                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            }
-                            title="Automated Reports"
-                            description="Generate detailed patent analysis reports with technical assessment, market insights, and recommendations"
+                            icon={<ReportIcon />}
+                            title="Automated Reporting"
+                            description="Generate comprehensive professional reports with technical assessment, market trends, and risk analysis in seconds."
                         />
-                        
                         <FeatureCard
-                            icon={
-                                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            }
-                            title="Multi-Agent AI"
-                            description="LangGraph-powered multi-agent workflow for comprehensive analysis and intelligent decision support"
+                            icon={<AgentIcon />}
+                            title="Multi-Agent Workflows"
+                            description="Leverage LangGraph to orchestrate multiple specialized agents working in parallel to verify data and refine insights."
                         />
-                        
                         <FeatureCard
-                            icon={
-                                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
-                                </svg>
-                            }
-                            title="Database Integration"
-                            description="Seamless integration with patent databases including MariaDB for structured data and Neo4j for relationship mapping"
+                            icon={<DbIcon />}
+                            title="Unified Data Hub"
+                            description="Direct access to synchronized MariaDB, OpenSearch, and Neo4j architectures for unmatched search speed and depth."
                         />
-                        
                         <FeatureCard
-                            icon={
-                                <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            }
-                            title="Real-time Processing"
-                            description="Fast query processing with intelligent caching and multi-threaded AI workflows for instant insights"
+                            icon={<RealtimeIcon />}
+                            title="Real-time Insights"
+                            description="Experience lightning-fast processing with intelligent caching and asynchronous AI execution for instant decision support."
                         />
                     </div>
                 </div>
-            </div>
-
-            {/* How It Works */}
-            <div className="py-20 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                            How It Works
-                        </h2>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Get comprehensive patent insights in three simple steps
-                        </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <ProcessStep
-                            number="1"
-                            title="Ask Questions"
-                            description="Use our intelligent chat interface to ask questions about patents, technologies, or intellectual property topics in natural language"
-                            icon={
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                            }
-                        />
-                        
-                        <ProcessStep
-                            number="2"
-                            title="AI Analysis"
-                            description="Our multi-agent AI system analyzes your query using advanced language models and searches through comprehensive patent databases"
-                            icon={
-                                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                </svg>
-                            }
-                        />
-                        
-                        <ProcessStep
-                            number="3"
-                            title="Get Insights"
-                            description="Receive comprehensive analysis with patent citations, technical insights, market analysis, and actionable recommendations"
-                            icon={
-                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            }
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Technology Stack */}
-            <div className="py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                            Built on Advanced Technology
-                        </h2>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Enterprise-grade stack for reliable and scalable patent analysis
-                        </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        <TechCard
-                            name="LangGraph"
-                            description="Multi-agent AI workflows"
-                            color="blue"
-                        />
-                        <TechCard
-                            name="OpenAI GPT"
-                            description="Advanced language models"
-                            color="green"
-                        />
-                        <TechCard
-                            name="FastAPI"
-                            description="High-performance backend"
-                            color="purple"
-                        />
-                        <TechCard
-                            name="React"
-                            description="Modern frontend interface"
-                            color="orange"
-                        />
-                        <TechCard
-                            name="Neo4j"
-                            description="Graph database for relationships"
-                            color="red"
-                        />
-                        <TechCard
-                            name="MariaDB"
-                            description="Structured data storage"
-                            color="indigo"
-                        />
-                        <TechCard
-                            name="Tailwind CSS"
-                            description="Responsive design system"
-                            color="pink"
-                        />
-                        <TechCard
-                            name="Vite"
-                            description="Fast development build"
-                            color="yellow"
-                        />
-                    </div>
-                </div>
-            </div>
+            </section>
 
             {/* CTA Section */}
-            <div className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                        Ready to Transform Your Patent Research?
+            <section className="py-24 bg-slate-900 overflow-hidden relative">
+                <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
+                        Transform Your Research Workflow Today.
                     </h2>
-                    <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-                        Join thousands of patent professionals using AI-powered insights to make better decisions faster
+                    <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto">
+                        Join patent attorneys and R&D managers who use Patent Board to stay ahead of the curve.
                     </p>
-                    
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button
-                            onClick={onGetStarted}
-                            className="bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                        >
-                            Start Your Free Analysis
-                        </button>
-                        <button
-                            onClick={() => window.open('/docs', '_blank')}
-                            className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200"
-                        >
-                            View Documentation
-                        </button>
-                    </div>
+
+                    <button
+                        onClick={onGetStarted}
+                        className="bg-white text-slate-900 px-10 py-5 rounded-2xl text-xl font-bold shadow-2xl hover:bg-slate-50 transform hover:scale-105 transition-all duration-200"
+                    >
+                        Create Your Free Account
+                    </button>
                 </div>
-            </div>
+                {/* Visual decoration for CTA */}
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+            </section>
+
+            {/* Footer */}
+            <footer className="py-12 bg-slate-50 border-t border-slate-200">
+                <div className="max-w-7xl mx-auto px-4 flex flex-col md:row justify-between items-center gap-6">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xl font-bold text-slate-900">Patent Board</span>
+                    </div>
+                    <p className="text-slate-500 text-sm italic">
+                        © 2026 Patent Board AI. Precision. Speed. Intelligence.
+                    </p>
+                </div>
+            </footer>
         </div>
     );
 }
+
+// Icons
+const ChatIcon = () => (
+    <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+    </div>
+);
+const GraphIcon = () => (
+    <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+    </div>
+);
+const ReportIcon = () => (
+    <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+    </div>
+);
+const AgentIcon = () => (
+    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.183.319l-3.077 1.913A1 1 0 002.5 19h15a1 1 0 00.992-.883l.936-12a1 1 0 00-1.874-.43L19.428 15.428z" /></svg>
+    </div>
+);
+const DbIcon = () => (
+    <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
+    </div>
+);
+const RealtimeIcon = () => (
+    <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+    </div>
+);
 
 // Feature Card Component
 function FeatureCard({ icon, title, description }) {
     return (
-        <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-            <div className="mb-6">{icon}</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
-            <p className="text-gray-600 leading-relaxed">{description}</p>
-        </div>
-    );
-}
-
-// Process Step Component
-function ProcessStep({ number, title, description, icon }) {
-    return (
-        <div className="text-center">
-            <div className="mb-6">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {number}
-                    </div>
-                </div>
-                {icon}
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
-            <p className="text-gray-600 leading-relaxed">{description}</p>
-        </div>
-    );
-}
-
-// Technology Card Component
-function TechCard({ name, description, color }) {
-    const colorClasses = {
-        blue: 'bg-blue-100 text-blue-800',
-        green: 'bg-green-100 text-green-800',
-        purple: 'bg-purple-100 text-purple-800',
-        orange: 'bg-orange-100 text-orange-800',
-        red: 'bg-red-100 text-red-800',
-        indigo: 'bg-indigo-100 text-indigo-800',
-        pink: 'bg-pink-100 text-pink-800',
-        yellow: 'bg-yellow-100 text-yellow-800'
-    };
-    
-    return (
-        <div className="text-center">
-            <div className={`${colorClasses[color]} px-4 py-3 rounded-lg font-semibold mb-2`}>
-                {name}
-            </div>
-            <p className="text-gray-600 text-sm">{description}</p>
-        </div>
+        <motion.div
+            className="premium-card p-10 group"
+            whileHover={{ y: -5 }}
+        >
+            <div className="mb-6 group-hover:scale-110 transition-transform duration-300 origin-left">{icon}</div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">{title}</h3>
+            <p className="text-slate-600 leading-relaxed text-lg">{description}</p>
+        </motion.div>
     );
 }
 

@@ -158,31 +158,31 @@ services:
       - PA_SYSTEM_DB_NAME=${PA_SYSTEM_DB_NAME}
       - PA_SYSTEM_DB_USER=${PA_SYSTEM_DB_USER}
       - PA_SYSTEM_DB_PASSWORD=${PA_SYSTEM_DB_PASSWORD}
-      
+
       # Cache Configuration (Redis)
-      - REDIS_URL=${REDIS_URL}
-      
+      - REDIS_URL=redis://patent-board-redis:6379
+
       # AI Services Configuration
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4-turbo-preview}
       - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
       - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-patent-board-langgraph}
-      
+
       # MCP Integration
       - MCP_SERVER_URL=http://patent-board-mcp:8080
-      
+
       # Application Configuration
       - HOST=0.0.0.0
       - PORT=8001
       - DEBUG=${DEBUG:-true}
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      
+
       # LangGraph Configuration
       - MAX_CONVERSATION_LENGTH=${MAX_CONVERSATION_LENGTH:-1000}
       - MAX_CONTEXT_TOKENS=${MAX_CONTEXT_TOKENS:-4000}
       - RESPONSE_TIMEOUT=${RESPONSE_TIMEOUT:-30}
-      
+
     volumes:
       - ./back_end:/app/back_end
       - ./shared:/app/shared
@@ -207,6 +207,23 @@ services:
         reservations:
           cpus: '1.0'
           memory: 1G
+
+  # ============================================
+  # Infrastructure Services
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: patent-board-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - patent-board-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 # ============================================
 # Network Configuration

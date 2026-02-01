@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FileText, Database, Activity, Plus } from 'lucide-react';
+import { FileText, Database, Activity, Plus, TrendingUp, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import StatCard from '../components/Dashboard/StatCard';
@@ -20,21 +20,16 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                // Fetch reports
                 const reportsRes = await api.get('/reports/?skip=0&limit=5');
                 const reports = reportsRes.data;
                 setRecentReports(reports);
 
-                // Fetch Stats (Mock for now or derive from reports/user)
-                // If admin, we could fetch /admin/statistics
-                // For now, let's derive from available data
                 setStats({
-                    totalReports: reports.length, // This should ideally be a count endpoint
-                    totalPatents: 12503, // Mock global stat
-                    credits: 500 // Mock credits
+                    totalReports: reports.length,
+                    totalPatents: 12503,
+                    credits: 500
                 });
 
-                // If user is admin, try fetching real stats
                 if (user?.is_admin) {
                     try {
                         const adminStats = await api.get('/admin/statistics');
@@ -65,97 +60,139 @@ const Dashboard = () => {
             title: 'Active Reports',
             value: stats.totalReports,
             icon: FileText,
-            color: 'bg-blue-100',
+            color: 'bg-indigo-50 text-indigo-600',
             trend: 12
         },
         {
             title: 'Analyzed Patents',
             value: stats.totalPatents.toLocaleString(),
             icon: Database,
-            color: 'bg-purple-100',
+            color: 'bg-emerald-50 text-emerald-600',
             trend: 5
         },
         {
             title: 'AI Credits',
             value: stats.credits,
             icon: Activity,
-            color: 'bg-green-100',
+            color: 'bg-amber-50 text-amber-600',
             trend: 0
         },
     ];
 
     if (loading) {
-        return <div className="flex h-screen items-center justify-center">Loading...</div>;
+        return (
+            <div className="flex h-[60vh] items-center justify-center">
+                <div className="text-center">
+                    <div className="spinner-border text-indigo-600" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-4 text-slate-500 font-medium">Syncing with patent intelligence...</p>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div className="space-y-8">
+        <div className="max-w-[1600px] mx-auto space-y-10 p-2 md:p-6">
             {/* Header */}
-            <div className="flex justify-between items-center">
+            <header className="flex flex-col md:row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">
-                        Welcome back, {user?.full_name || user?.username}
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+                        Intel Intelligence Dashboard
                     </h1>
-                    <p className="text-gray-500 mt-1">Here's what's happening with your projects today.</p>
+                    <p className="text-slate-500 mt-1 flex items-center gap-2">
+                        Welcome back, <span className="font-semibold text-indigo-600">{user?.full_name || user?.username}</span>
+                        <span className="h-1 w-1 rounded-full bg-slate-300"></span>
+                        Last updated: {new Date().toLocaleDateString()}
+                    </p>
                 </div>
-                <Link
-                    to="/reports/new"
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
-                >
-                    <Plus className="w-5 h-5" /> New Report
-                </Link>
-            </div>
+                <div className="flex items-center gap-3">
+                    <Link
+                        to="/reports/new"
+                        className="premium-button-primary flex items-center gap-2"
+                    >
+                        <Plus className="w-5 h-5" /> New Analysis
+                    </Link>
+                </div>
+            </header>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {statCards.map((stat, index) => (
                     <motion.div
                         key={index}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
+                        className="premium-card p-6"
                     >
-                        <StatCard {...stat} />
+                        <div className="flex justify-between items-start mb-4">
+                            <div className={`${stat.color} p-3 rounded-xl`}>
+                                <stat.icon className="w-6 h-6" />
+                            </div>
+                            {stat.trend > 0 && (
+                                <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                                    <TrendingUp className="w-3 h-3" /> +{stat.trend}%
+                                </span>
+                            )}
+                        </div>
+                        <h3 className="text-slate-500 text-sm font-medium mb-1">{stat.title}</h3>
+                        <div className="text-3xl font-bold text-slate-900 tracking-tight">{stat.value}</div>
                     </motion.div>
                 ))}
-            </div>
+            </section>
 
             {/* Main Content Area */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 {/* Recent Reports Section */}
-                <div className="lg:col-span-2">
-                    <RecentReports reports={recentReports} />
-                </div>
+                <section className="lg:col-span-8 space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-bold text-slate-900">Recent Investigations</h2>
+                        <Link to="/reports" className="text-indigo-600 text-sm font-semibold flex items-center gap-1 hover:underline">
+                            View All <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    </div>
+                    <div className="premium-card overflow-hidden">
+                        <RecentReports reports={recentReports} />
+                    </div>
+                </section>
 
-                {/* Quick Actions / Side Panel */}
-                <div className="space-y-6">
-                    <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+                {/* Side Panel */}
+                <aside className="lg:col-span-4 space-y-8">
+                    {/* Pro Callout */}
+                    <div className="bg-slate-900 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden group">
                         <div className="relative z-10">
-                            <h3 className="text-lg font-bold mb-2">Upgrade to Pro</h3>
-                            <p className="text-indigo-100 text-sm mb-4">Get access to advanced patent analytics and unlimited reports.</p>
-                            <button className="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
-                                Upgrade Plan
+                            <h3 className="text-2xl font-bold mb-3 tracking-tight">Expand Your <br />Reach with Pro</h3>
+                            <p className="text-slate-400 text-sm mb-6 leading-relaxed">Unlock advanced patent landscaping and real-time competitor tracking alerts.</p>
+                            <button className="bg-white text-slate-900 w-full py-4 rounded-xl font-bold hover:bg-slate-50 transition-colors shadow-lg shadow-white/10">
+                                Upgrade Workspace
                             </button>
                         </div>
-                        <div className="absolute right-[-20px] bottom-[-20px] opacity-20">
-                            <Activity className="w-32 h-32" />
-                        </div>
+                        <div className="absolute top-[-20%] right-[-10%] opacity-10 blur-3xl w-48 h-48 bg-indigo-500 rounded-full group-hover:bg-indigo-400 transition-colors duration-500"></div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 className="font-semibold text-gray-800 mb-4">Quick Search</h3>
-                        <div className="space-y-3">
-                            <input
-                                type="text"
-                                placeholder="Search by patent ID or keyword..."
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                            />
-                            <button className="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
-                                Search
+                    {/* Quick Search Card */}
+                    <div className="premium-card p-8">
+                        <h3 className="font-bold text-slate-900 text-lg mb-6">Omni-Search</h3>
+                        <div className="space-y-4">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Patent ID, Keyword, or IPC..."
+                                    className="w-full pl-4 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm transition-all"
+                                />
+                            </div>
+                            <button className="w-full bg-slate-950 text-white py-4 rounded-2xl font-bold hover:bg-slate-900 transition-all shadow-xl shadow-slate-200 active:scale-95">
+                                Pulse Search
                             </button>
                         </div>
+                        <div className="mt-6 flex flex-wrap gap-2">
+                            <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Trending</span>
+                            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded">Semiconductor</span>
+                            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded">AR/VR</span>
+                        </div>
                     </div>
-                </div>
+                </aside>
             </div>
         </div>
     );

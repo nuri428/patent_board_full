@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { Send, X, Keyboard, Sparkles, Lightbulb, BarChart3, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-function ChatInput({ onSendMessage, disabled = false, placeholder = 'Type your message...' }) {
+function ChatInput({ onSendMessage, disabled = false, placeholder = 'Search patent intelligence...' }) {
     const [message, setMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const inputRef = useRef(null);
 
-    // Auto-focus input when component mounts or when not disabled
     useEffect(() => {
         if (inputRef.current && !disabled) {
             inputRef.current.focus();
@@ -35,7 +36,6 @@ function ChatInput({ onSendMessage, disabled = false, placeholder = 'Type your m
             await onSendMessage(messageToSend);
         } catch (error) {
             console.error('Failed to send message:', error);
-            // The parent component will handle the error display
         } finally {
             setIsTyping(false);
         }
@@ -43,13 +43,35 @@ function ChatInput({ onSendMessage, disabled = false, placeholder = 'Type your m
 
     const handleClear = () => {
         setMessage('');
+        inputRef.current?.focus();
     };
 
     const isSendDisabled = !message.trim() || disabled || isTyping;
 
+    const quickPrompts = [
+        { label: 'Deep Analysis', icon: Sparkles, text: 'Perform a deep analysis of the current patent landscape for Generative AI.' },
+        { label: 'Top Competitors', icon: Lightbulb, text: 'Identify the top 5 competitors based on recent patent filings in the EV sector.' },
+        { label: 'Technology Gap', icon: BarChart3, text: 'Show me any technology white spaces in the solid-state battery domain.' }
+    ];
+
     return (
         <div className="chat-input-container">
-            <div className="input-group">
+            {/* Quick Prompts Bar */}
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4 mb-2">
+                {quickPrompts.map((prompt, idx) => (
+                    <button
+                        key={idx}
+                        onClick={() => !disabled && onSendMessage(prompt.text)}
+                        disabled={disabled || isTyping}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-500 whitespace-nowrap hover:bg-white hover:border-indigo-200 hover:text-indigo-600 transition-all active:scale-95"
+                    >
+                        <prompt.icon size={12} strokeWidth={2.5} />
+                        {prompt.label}
+                    </button>
+                ))}
+            </div>
+
+            <div className="input-wrapper group shadow-sm">
                 <input
                     ref={inputRef}
                     type="text"
@@ -61,75 +83,41 @@ function ChatInput({ onSendMessage, disabled = false, placeholder = 'Type your m
                     disabled={disabled || isTyping}
                     aria-label="Chat message input"
                 />
-                
-                <div className="input-group-append">
+
+                <div className="flex items-center gap-2 pr-2">
+                    <AnimatePresence>
+                        {message && (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                onClick={handleClear}
+                                className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                                type="button"
+                            >
+                                <X size={18} />
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
+
                     <button
-                        className="btn btn-primary"
+                        className="btn-send disabled:opacity-50 disabled:cursor-not-allowed"
                         type="button"
                         onClick={handleSend}
                         disabled={isSendDisabled}
-                        title="Send message (Enter)"
                     >
-                        <i className={`bi ${isTyping ? 'bi-hourglass-split' : 'bi-send'}`}></i>
-                        <span className="ms-1 d-none d-sm-inline">
-                            {isTyping ? 'Sending...' : 'Send'}
-                        </span>
+                        {isTyping ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                     </button>
-                    
-                    {message && (
-                        <button
-                            className="btn btn-outline-secondary"
-                            type="button"
-                            onClick={handleClear}
-                            disabled={disabled || isTyping}
-                            title="Clear input"
-                        >
-                            <i className="bi bi-x-lg"></i>
-                        </button>
-                    )}
                 </div>
             </div>
-            
-            {/* Input hints */}
-            <div className="input-hints mt-2">
-                <small className="text-muted">
-                    <i className="bi bi-keyboard me-1"></i>
-                    Press Enter to send, Shift+Enter for new line
-                </small>
-            </div>
-            
-            {/* Quick actions */}
-            <div className="quick-actions mt-3">
-                <div className="d-flex gap-2 flex-wrap">
-                    <button
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={() => onSendMessage('Hello! Can you help me with patent analysis?')}
-                        disabled={disabled || isTyping}
-                        title="Send greeting message"
-                    >
-                        <i className="bi bi-chat-dots me-1"></i>
-                        Quick Start
-                    </button>
-                    
-                    <button
-                        className="btn btn-sm btn-outline-info"
-                        onClick={() => onSendMessage('What patents are related to artificial intelligence in healthcare?')}
-                        disabled={disabled || isTyping}
-                        title="Ask about AI in healthcare patents"
-                    >
-                        <i className="bi bi-lightbulb me-1"></i>
-                        AI + Healthcare
-                    </button>
-                    
-                    <button
-                        className="btn btn-sm btn-outline-warning"
-                        onClick={() => onSendMessage('Analyze the competitive landscape for machine learning patents')}
-                        disabled={disabled || isTyping}
-                        title="Request competitive analysis"
-                    >
-                        <i className="bi bi-graph-up me-1"></i>
-                        Market Analysis
-                    </button>
+
+            <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-1.5 opacity-40">
+                    <Keyboard size={12} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Enter to analyze pulse</span>
+                </div>
+                <div className="text-[10px] font-bold text-slate-300">
+                    Powered by PatentBoard Multi-Agent v2
                 </div>
             </div>
         </div>

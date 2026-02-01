@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { User, Bot, Clock, Paperclip, ChevronRight, AlertTriangle, Loader2 } from 'lucide-react';
 import PatentLink from '../PatentLink';
 
 function ChatMessage({ message }) {
@@ -12,132 +13,106 @@ function ChatMessage({ message }) {
     };
 
     const isUser = role === 'user';
-    const isAssistant = role === 'assistant';
 
-    const getSourceBadge = (source) => {
-        if (!source) return null;
-        
-        const getIcon = (type) => {
-            switch (type) {
-                case 'patent': return '📄';
-                case 'document': return '📄';
-                case 'analysis': return '🔍';
-                default: return '📚';
-            }
-        };
-
-        return (
-            <span 
-                className="badge bg-light text-dark me-1 mb-1"
-                style={{ fontSize: '0.75rem' }}
-                title={source.title || source.name}
-            >
-                {getIcon(source.type)} {source.title?.substring(0, 20)}{source.title?.length > 20 ? '...' : ''}
-            </span>
-        );
-    };
-
-    const renderContent = () => {
-        if (error) {
-            return (
-                <div className="text-danger">
-                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                    {content}
-                </div>
-            );
+    const getSourceIcon = (type) => {
+        switch (type) {
+            case 'patent': return '📄';
+            case 'document': return '📄';
+            case 'analysis': return '🔍';
+            default: return '📚';
         }
-
-        return (
-            <div className="chat-message-content">
-                <p className="mb-0">{content}</p>
-                
-                {patent_urls && patent_urls.length > 0 && (
-                    <div className="patent-urls-container mt-3 mb-2">
-                        <div className="d-flex align-items-center mb-2">
-                            <i className="bi bi-file-earmark-text text-primary me-2"></i>
-                            <small className="text-muted fw-bold">
-                                Related Patent Links ({patent_urls.length}):
-                            </small>
-                        </div>
-                        <div className="patent-links">
-                            {patent_urls.map((url_info, index) => (
-                                <PatentLink 
-                                    key={index}
-                                    patent={{
-                                        url: url_info.url,
-                                        title: url_info.title,
-                                        country: url_info.country,
-                                        patent_id: url_info.patent_id
-                                    }}
-                                    source={url_info.source}
-                                    className="mb-2"
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
-                
-                {/* Sources section */}
-                {sources && sources.length > 0 && (
-                    <div className="sources-container mt-2">
-                        <small className="text-muted">
-                            <i className="bi bi-info-circle me-1"></i>
-                            Sources:
-                        </small>
-                        <div className="sources-badges mt-1">
-                            {sources.map((source, index) => (
-                                <React.Fragment key={index}>
-                                    {getSourceBadge(source)}
-                                </React.Fragment>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Metadata section */}
-                {Object.keys(metadata).length > 0 && (
-                    <div className="metadata-container mt-2">
-                        <small className="text-muted">Metadata:</small>
-                        <pre className="small bg-light p-2 rounded mt-1">
-                            {JSON.stringify(metadata, null, 2)}
-                        </pre>
-                    </div>
-                )}
-            </div>
-        );
     };
 
     return (
         <div className={`chat-message ${isUser ? 'user-message' : 'assistant-message'} ${pending ? 'pending' : ''} ${error ? 'error' : ''}`}>
-            <div className="message-container">
-                <div className="message-header">
-                    <div className="d-flex justify-content-between align-items-center">
-                        <div className="message-role">
-                            {isUser ? (
-                                <span className="badge bg-primary">
-                                    <i className="bi bi-person me-1"></i>You
-                                </span>
-                            ) : (
-                                <span className="badge bg-success">
-                                    <i className="bi bi-robot me-1"></i>Assistant
-                                </span>
+            <div className="message-container group shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className={`message-header flex items-center justify-between px-4 py-2 opacity-50 text-[10px] uppercase font-black tracking-widest border-b ${isUser ? 'border-white/10' : 'border-slate-100'}`}>
+                    <div className="flex items-center gap-1.5">
+                        {isUser ? <User size={10} strokeWidth={3} /> : <Bot size={10} strokeWidth={3} />}
+                        <span>{isUser ? 'Strategy Explorer' : 'AI Analysis Logic'}</span>
+                    </div>
+                    {timestamp && (
+                        <div className="flex items-center gap-1">
+                            <Clock size={10} />
+                            <span>{formatTime(timestamp)}</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="message-body p-4 md:p-5">
+                    {error ? (
+                        <div className="flex items-start gap-2 text-rose-500 font-bold">
+                            <AlertTriangle size={16} className="mt-0.5" />
+                            <p className="text-sm">{content}</p>
+                        </div>
+                    ) : (
+                        <div className="chat-message-content prose prose-sm max-w-none prose-slate">
+                            <p className="whitespace-pre-wrap leading-relaxed text-[0.9375rem]">
+                                {content}
+                            </p>
+
+                            {patent_urls && patent_urls.length > 0 && (
+                                <div className="patent-urls-container mt-6 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-1.5 h-4 bg-indigo-600 rounded-full"></div>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Linked Intelligence ({patent_urls.length})</span>
+                                    </div>
+                                    <div className="grid gap-2">
+                                        {patent_urls.map((url_info, index) => (
+                                            <PatentLink
+                                                key={index}
+                                                patent={{
+                                                    url: url_info.url,
+                                                    title: url_info.title,
+                                                    country: url_info.country,
+                                                    patent_id: url_info.patent_id
+                                                }}
+                                                source={url_info.source}
+                                                className="hover:scale-[1.01] transition-transform"
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {sources && sources.length > 0 && (
+                                <div className="sources-container mt-4 flex flex-wrap gap-1.5">
+                                    {sources.map((source, index) => (
+                                        <span
+                                            key={index}
+                                            className="sources-badges badge flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-white hover:border-indigo-200 transition-all cursor-pointer"
+                                            title={source.title || source.name}
+                                        >
+                                            <span className="opacity-70">{getSourceIcon(source.type)}</span>
+                                            {source.title?.substring(0, 15)}{source.title?.length > 15 ? '...' : ''}
+                                            <ChevronRight size={10} className="text-slate-300" />
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+
+                            {Object.keys(metadata).length > 0 && (
+                                <div className="metadata-container mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <details className="cursor-pointer">
+                                        <summary className="text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-600 list-none flex items-center gap-1">
+                                            <ChevronRight size={10} className="transform group-open:rotate-90 transition-transform" />
+                                            Technical Metadata
+                                        </summary>
+                                        <pre className="text-[10px] bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2 font-mono overflow-x-auto text-slate-500">
+                                            {JSON.stringify(metadata, null, 2)}
+                                        </pre>
+                                    </details>
+                                </div>
                             )}
                         </div>
-                        <div className="message-timestamp">
-                            <small className="text-muted">{formatTime(timestamp)}</small>
-                        </div>
-                    </div>
-                </div>
-                
-                <div className="message-body">
-                    {renderContent()}
-                    
+                    )}
+
                     {pending && (
-                        <div className="message-pending">
-                            <div className="typing-indicator">
-                                <span className="dot"></span>
-                                <span className="dot"></span>
-                                <span className="dot"></span>
+                        <div className="message-pending mt-4">
+                            <div className="typing-indicator flex gap-1.5">
+                                <motion.span animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-1.5 h-1.5 bg-indigo-600 rounded-full" />
+                                <motion.span animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1.5 h-1.5 bg-indigo-600 rounded-full" />
+                                <motion.span animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-1.5 h-1.5 bg-indigo-600 rounded-full" />
                             </div>
                         </div>
                     )}

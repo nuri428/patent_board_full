@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useChatbot } from '../context/ChatbotContext';
+import { useChatbot } from '../../context/ChatbotContext';
 import SessionList from './SessionList';
 import ConversationHistory from './ConversationHistory';
 import ChatInput from './ChatInput';
@@ -142,9 +142,9 @@ function Chatbot({ userId, layout = 'split' }) {
                         disabled={!isConnected || !isInitialized || isLoading}
                         placeholder={
                             !isConnected ? 'Chat service unavailable' :
-                            !isInitialized ? 'Initializing...' :
-                            isLoading ? 'Processing...' :
-                            'Ask about patents, analysis, or reports...'
+                                !isInitialized ? 'Initializing...' :
+                                    isLoading ? 'Processing...' :
+                                        'Ask about patents, analysis, or reports...'
                         }
                     />
                 </div>
@@ -236,9 +236,9 @@ function Chatbot({ userId, layout = 'split' }) {
                             disabled={!isConnected || !isInitialized || isLoading}
                             placeholder={
                                 !isConnected ? 'Chat service unavailable' :
-                                !isInitialized ? 'Initializing...' :
-                                isLoading ? 'Processing...' :
-                                'Ask about patents, analysis, or reports...'
+                                    !isInitialized ? 'Initializing...' :
+                                        isLoading ? 'Processing...' :
+                                            'Ask about patents, analysis, or reports...'
                             }
                         />
                     </div>

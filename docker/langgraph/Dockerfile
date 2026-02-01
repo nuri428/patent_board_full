@@ -19,25 +19,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
-COPY back_end/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY back_end/pyproject.toml .
+COPY back_end/uv.lock .
+COPY README.md .
 
-# Install additional dependencies for langgraph and chatbot
-RUN pip install --no-cache-dir \
-    langgraph \
-    langgraph-checkpoint \
-    langchain-openai \
-    redis \
-    aiomysql \
-    sqlalchemy[asyncio] \
-    pydantic \
-    python-dotenv \
-    httpx
+RUN pip install --no-cache-dir uv && \
+    uv sync
 
 # Copy application code
-COPY back_end/ /app/back_end/
-COPY shared/ /app/shared/
-COPY scripts/ /app/scripts/
+COPY . .
 
 # Create logs directory
 RUN mkdir -p /app/logs
