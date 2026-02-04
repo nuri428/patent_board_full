@@ -3,6 +3,59 @@ from database import get_neo4j_session
 from fastapi import HTTPException
 
 
+"""
+Neo4j Index Strategy Documentation
+==================================
+
+INDEXING STRATEGY:
+The patent graph uses Neo4j's native indexing capabilities for optimal query performance.
+
+CURRENT INDEXES (to be created in Neo4j):
+----------------------------------------
+1. Patent Node Indexes:
+   - CREATE INDEX patent_id_idx IF NOT EXISTS FOR (p:Patent) ON (p.patent_id)
+   - CREATE INDEX patent_app_number_idx IF NOT EXISTS FOR (p:Patent) ON (p.application_number)
+   - CREATE INDEX patent_reg_number_idx IF NOT EXISTS FOR (p:Patent) ON (p.registration_number)
+   - CREATE INDEX patent_title_idx IF NOT EXISTS FOR (p:Patent) ON (p.title)
+
+2. Technology Node Indexes:
+   - CREATE INDEX tech_id_idx IF NOT EXISTS FOR (t:Technology) ON (t.technology_id)
+   - CREATE INDEX tech_code_idx IF NOT EXISTS FOR (t:Technology) ON (t.technology_code)
+
+3. Corporation Node Indexes:
+   - CREATE INDEX corp_name_idx IF NOT EXISTS FOR (c:Corporation) ON (c.name)
+   - CREATE INDEX corp_code_idx IF NOT EXISTS FOR (c:Corporation) ON (c.customer_code)
+
+4. Inventor Node Indexes:
+   - CREATE INDEX inventor_name_idx IF NOT EXISTS FOR (i:Inventor) ON (i.name)
+
+5. Constraint Indexes (Unique):
+   - CREATE CONSTRAINT patent_app_number_unique IF NOT EXISTS
+     FOR (p:Patent) REQUIRE p.application_number IS UNIQUE
+   - CREATE CONSTRAINT tech_id_unique IF NOT EXISTS
+     FOR (t:Technology) REQUIRE t.technology_id IS UNIQUE
+
+QUERY OPTIMIZATION PATTERNS:
+--------------------------
+1. MATCH with property filters use indexes automatically
+2. Full-text search uses: CALL db.index.fulltext.queryNodes()
+3. Relationship traversal optimized by direction
+
+PERFORMANCE NOTES:
+----------------
+- Patent lookups by application_number are primary key lookups (fastest)
+- Technology code lookups use B-tree indexes
+- Full-text search on titles/descriptions uses Lucene indexes
+- Relationship traversals benefit from dense node optimization
+
+RECOMMENDED MAINTENANCE:
+----------------------
+- Run CALL db.stats.retrieve('GRAPH COUNTS') monthly
+- Monitor index selectivity via SHOW INDEXES
+- Rebuild indexes if selectivity drops below 0.5
+"""
+
+
 class GraphDatabase:
     @staticmethod
     async def get_competitors(company_name: str) -> List[Dict[str, Any]]:

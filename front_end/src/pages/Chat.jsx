@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChatbotProvider, useChatbot } from '../context/ChatbotContext';
 import Chatbot from '../components/Chatbot/Chatbot';
 import LimitedChat from '../components/Chatbot/LimitedChat';
@@ -7,6 +8,7 @@ import LimitedChat from '../components/Chatbot/LimitedChat';
 function ChatPage() {
     const { authStatus, reinitializeOnAuthChange } = useChatbot();
     const [isAuthChecking, setIsAuthChecking] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         // Simulate auth checking delay
@@ -40,12 +42,8 @@ function ChatPage() {
         return (
             <LimitedChat 
                 onGetStarted={() => {
-                    // Demo login - create demo credentials
-                    const demoUserId = `demo_user_${Date.now()}`;
-                    localStorage.setItem('userId', demoUserId);
-                    localStorage.setItem('token', 'demo_token');
-                    // Trigger re-initialization
-                    reinitializeOnAuthChange();
+                    // Redirect to login page instead of using demo token
+                    navigate('/login');
                 }}
             />
         );

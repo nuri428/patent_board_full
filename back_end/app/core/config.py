@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
 
+    # Elasticsearch / OpenSearch
+    ELASTICSEARCH_URL: str = "http://localhost:9200"
+
     # API
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = "your-secret-key-here-change-in-production"
@@ -33,7 +36,7 @@ class Settings(BaseSettings):
     OPENAI_PRESENCE_PENALTY: float = 0.0
 
     # MCP Server
-    MCP_SERVER_URL: str = "http://localhost:8081"
+    MCP_SERVER_URL: str = "http://localhost:8082"
     MCP_TIMEOUT: int = 30
 
     # LangGraph Configuration
@@ -42,7 +45,7 @@ class Settings(BaseSettings):
     RESPONSE_TIMEOUT: int = 30
     CHECKPOINT_MEMORY_BACKEND: str = "memory"  # "memory", "redis", "sql"
 
-# CORS
+    # CORS
     BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:3000",  # React frontend
         "http://localhost:8002",
@@ -85,41 +88,83 @@ Relevant patents found:
 
     # Context Engineering Configuration
     CONTEXT_ENGINEERING_PATENT_KEYWORDS: List[str] = [
-        "patent", "patents", "intellectual property", "ip", "invention",
-        "innovation", "technology", "application", "filing", "grant",
-        "prior art", "claims", "abstract", "description", "specification",
-        "trademark", "copyright", "licensing", "franchise", "royalty"
+        "patent",
+        "patents",
+        "intellectual property",
+        "ip",
+        "invention",
+        "innovation",
+        "technology",
+        "application",
+        "filing",
+        "grant",
+        "prior art",
+        "claims",
+        "abstract",
+        "description",
+        "specification",
+        "trademark",
+        "copyright",
+        "licensing",
+        "franchise",
+        "royalty",
     ]
-    
+
     CONTEXT_ENGINEERING_TECHNOLOGY_DOMAINS: Dict[str, List[str]] = {
-        "artificial intelligence": ["AI", "machine learning", "neural network", "deep learning"],
+        "artificial intelligence": [
+            "AI",
+            "machine learning",
+            "neural network",
+            "deep learning",
+        ],
         "biotechnology": ["biotech", "genetic", "DNA", "RNA", "protein"],
         "software": ["software", "algorithm", "code", "program", "application"],
         "hardware": ["hardware", "device", "circuit", "electronic", "semiconductor"],
         "chemistry": ["chemical", "compound", "molecule", "synthesis", "catalyst"],
-        "mechanical": ["mechanical", "machine", "apparatus", "system", "process"]
+        "mechanical": ["mechanical", "machine", "apparatus", "system", "process"],
     }
-    
+
     CONTEXT_ENGINEERING_PATENT_VERBS: List[str] = [
-        "search", "find", "lookup", "analyze", "examine", "research",
-        "compare", "study", "review", "summarize", "explain", "describe"
+        "search",
+        "find",
+        "lookup",
+        "analyze",
+        "examine",
+        "research",
+        "compare",
+        "study",
+        "review",
+        "summarize",
+        "explain",
+        "describe",
     ]
-    
-    CONTEXT_ENGINEERING_PATENT_ID_PATTERN: str = r'\b(?:US|WO|EP|JP|CN|KR|CA|AU|DE|FR|GB|IL|RU)[0-9]{5,}\b'
-    
+
+    CONTEXT_ENGINEERING_PATENT_ID_PATTERN: str = (
+        r"\b(?:US|WO|EP|JP|CN|KR|CA|AU|DE|FR|GB|IL|RU)[0-9]{5,}\b"
+    )
+
     # User Pattern Analysis Configuration
     USER_PATTERN_ANALYSIS_ENABLED: bool = True
     USER_PATTERN_KEYWORD_THRESHOLD: int = 3
     USER_PATTERN_PATENT_ID_THRESHOLD: int = 1
     USER_PATTERN_VERB_THRESHOLD: int = 2
-    
+
     # Technical Assessment Configuration
     TECHNICAL_COMPLEXITY_TERMS: List[str] = [
-        "algorithm", "neural network", "deep learning", "machine learning",
-        "artificial intelligence", "blockchain", "quantum", "nanotechnology",
-        "biotechnology", "genetic", "molecular", "synthetic"
+        "algorithm",
+        "neural network",
+        "deep learning",
+        "machine learning",
+        "artificial intelligence",
+        "blockchain",
+        "quantum",
+        "nanotechnology",
+        "biotechnology",
+        "genetic",
+        "molecular",
+        "synthetic",
     ]
-    
+
     # URL Generation Configuration
     URL_GENERATION_SOURCES: List[str] = ["google", "uspto", "kipris"]
     URL_GENERATION_DEFAULT_COUNTRY: str = "auto"
@@ -127,72 +172,92 @@ Relevant patents found:
     class Config:
         env_file = ".env"
         extra = "ignore"
-    
+
     def validate_configuration(self) -> bool:
         """Validate configuration settings and log warnings for missing critical settings"""
         validation_passed = True
-        
+
         # Check OpenAI configuration
         if not self.OPENAI_API_KEY:
             logger.warning("OPENAI_API_KEY is not set. AI features will be disabled.")
             validation_passed = False
-        
+
         if not self.OPENAI_MODEL:
-            logger.warning("OPENAI_MODEL is not set. Using default gpt-4-turbo-preview.")
+            logger.warning(
+                "OPENAI_MODEL is not set. Using default gpt-4-turbo-preview."
+            )
             self.OPENAI_MODEL = "gpt-4-turbo-preview"
-        
+
         # Check database URLs
         if not self.MARIADB_URL:
             logger.error("MARIADB_URL is not set. Database connection will fail.")
             validation_passed = False
-        
+
         if not self.PA_SYSTEM_DB_URL:
-            logger.error("PA_SYSTEM_DB_URL is not set. Chatbot system database connection will fail.")
+            logger.error(
+                "PA_SYSTEM_DB_URL is not set. Chatbot system database connection will fail."
+            )
             validation_passed = False
-        
+
         if not self.REDIS_URL:
             logger.warning("REDIS_URL is not set. Redis cache will be disabled.")
             # Redis is optional, so don't fail validation
-        
+
         # Check MCP server URL
         if not self.MCP_SERVER_URL:
-            logger.warning("MCP_SERVER_URL is not set. Patent search functionality will be disabled.")
+            logger.warning(
+                "MCP_SERVER_URL is not set. Patent search functionality will be disabled."
+            )
             validation_passed = False
-        
+
         # Validate configuration values
         if self.OPENAI_TEMPERATURE < 0 or self.OPENAI_TEMPERATURE > 2:
-            logger.warning(f"OPENAI_TEMPERATURE {self.OPENAI_TEMPERATURE} is outside recommended range (0-2)")
-        
+            logger.warning(
+                f"OPENAI_TEMPERATURE {self.OPENAI_TEMPERATURE} is outside recommended range (0-2)"
+            )
+
         if self.OPENAI_MAX_TOKENS < 100 or self.OPENAI_MAX_TOKENS > 32000:
-            logger.warning(f"OPENAI_MAX_TOKENS {self.OPENAI_MAX_TOKENS} is outside typical range (100-32000)")
-        
+            logger.warning(
+                f"OPENAI_MAX_TOKENS {self.OPENAI_MAX_TOKENS} is outside typical range (100-32000)"
+            )
+
         if self.MAX_CONTEXT_TOKENS < 1000 or self.MAX_CONTEXT_TOKENS > 100000:
-            logger.warning(f"MAX_CONTEXT_TOKENS {self.MAX_CONTEXT_TOKENS} seems unusually high")
-        
+            logger.warning(
+                f"MAX_CONTEXT_TOKENS {self.MAX_CONTEXT_TOKENS} seems unusually high"
+            )
+
         # Validate CORS origins
         if not self.BACKEND_CORS_ORIGINS:
             logger.error("BACKEND_CORS_ORIGINS is empty. CORS will not work properly.")
             validation_passed = False
-        
+
         # Validate ContextEngineering settings
         if not self.CONTEXT_ENGINEERING_PATENT_KEYWORDS:
-            logger.error("CONTEXT_ENGINEERING_PATENT_KEYWORDS is empty. Patent intent detection will fail.")
+            logger.error(
+                "CONTEXT_ENGINEERING_PATENT_KEYWORDS is empty. Patent intent detection will fail."
+            )
             validation_passed = False
-        
+
         if not self.CONTEXT_ENGINEERING_TECHNOLOGY_DOMAINS:
-            logger.error("CONTEXT_ENGINEERING_TECHNOLOGY_DOMAINS is empty. Domain detection will fail.")
+            logger.error(
+                "CONTEXT_ENGINEERING_TECHNOLOGY_DOMAINS is empty. Domain detection will fail."
+            )
             validation_passed = False
-        
+
         # Validate URL generation settings
         if not self.URL_GENERATION_SOURCES:
-            logger.warning("URL_GENERATION_SOURCES is empty. Patent URL generation will fail.")
+            logger.warning(
+                "URL_GENERATION_SOURCES is empty. Patent URL generation will fail."
+            )
             validation_passed = False
-        
+
         if validation_passed:
             logger.info("Configuration validation passed successfully")
         else:
-            logger.warning("Some configuration validation checks failed. Please check your environment variables.")
-        
+            logger.warning(
+                "Some configuration validation checks failed. Please check your environment variables."
+            )
+
         return validation_passed
 
 
@@ -201,4 +266,6 @@ settings = Settings()
 
 # Perform validation on startup
 if not settings.validate_configuration():
-    logger.warning("Some configuration validation checks failed. Please check your environment variables.")
+    logger.warning(
+        "Some configuration validation checks failed. Please check your environment variables."
+    )

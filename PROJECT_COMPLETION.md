@@ -44,62 +44,27 @@
 
 ```
 patent_board_full/
-├── app/
-│   ├── __init__.py              # FastAPI app initialization
-│   ├── api/v1/                 # API routes
-│   │   ├── api.py              # API router aggregation
-│   │   ├── endpoints/           # Individual endpoint modules
-│   │   │   ├── auth.py          # Authentication endpoints
-│   │   │   ├── patents.py        # Patent search/details
-│   │   │   ├── chat.py          # AI chat interface
-│   │   │   ├── reports.py       # Report generation
-│   │   │   ├── admin.py          # Administration features
-│   │   │   ├── analytics.py      # Data analytics
-│   │   │   ├── export.py         # Data export
-│   │   │   ├── user.py           # User dashboard
-│   │   │   └── notifications.py  # Notification system
-│   ├── core/
-│   │   └── config.py           # Configuration management
-│   ├── db/
-│   │   └── __init__.py         # Database connections (MariaDB + Neo4j)
-│   ├── crud/
-│   │   └── __init__.py         # Database operations
-│   ├── models/
-│   │   └── __init__.py         # SQLAlchemy models
-│   ├── schemas/
-│   │   └── __init__.py         # Pydantic schemas
-│   ├── mcp/
-│   │   └── __init__.py         # MCP client integration
-│   ├── langgraph/
-│   │   └── __init__.py         # Multi-agent report generation
-│   └── web/
-│       ├── routes.py             # Web page routes
-│       ├── templates/            # HTML templates
-│       │   ├── index.html       # Home page
-│       │   ├── patents.html     # Patent search
-│       │   ├── chat.html       # AI chat
-│       │   ├── reports.html     # Report management
-│       │   ├── admin.html       # Administration
-│       │   ├── analytics.html   # Analytics dashboard
-│       │   └── dashboard.html  # User dashboard
-│       └── static/              # CSS/JS assets
-│           ├── css/
-│           │   └── main.css
-│           └── js/
-│               ├── patents.js     # Patent search functionality
-│               ├── chat.js        # AI chat interface
-│               ├── admin.js        # Admin panel
-│               ├── analytics.js   # Analytics dashboard
-│               ├── dashboard.js   # User dashboard
-│               └── notifications.js # Notification system
-├── scripts/
-│   └── deploy.sh             # Deployment script
-├── pyproject.toml              # Dependencies and build config
-├── docker-compose.yml           # Development Docker setup
-├── docker-compose.prod.yml      # Production Docker setup
-├── Dockerfile                 # Container build definition
-├── .env.example              # Environment variables template
-└── README.md                 # Project documentation
+├── back_end/
+│   ├── app/
+│   │   ├── api/v1/                 # API routes
+│   │   │   └── endpoints/           # chat, reports, patents, auth, etc.
+│   │   ├── core/                   # config.py
+│   │   ├── db/                     # database connection
+│   │   ├── crud/                   # DB operations
+│   │   ├── models/                 # SQLAlchemy models
+│   │   ├── langgraph/              # AI agents (Chatbot, ReportGenerator)
+│   │   └── web/                    # Legacy web routes
+│   ├── pyproject.toml
+│   └── start.sh
+├── front_end/
+│   ├── src/
+│   │   ├── pages/                  # Landing, Dashboard, Chat, etc.
+│   │   ├── components/             # UI components
+│   │   └── context/                # AuthContext
+│   ├── package.json
+│   └── vite.config.js
+├── docker-compose.yml
+└── README.md
 ```
 
 ## 🛠️ Technology Stack
@@ -384,11 +349,11 @@ Built with ❤️ for patent professionals and researchers using:
 This project is currently under active development. While the core infrastructure and patent search capabilities are established, several high-level AI features and specific frontend pages are in the implementation phase.
 
 ### 📊 Current Metrics
-- **Core Infrastructure**: 100% ✅
-- **Patent Search**: 90% (Semantic search pending)
-- **AI Chat**: 30% (Placeholder endpoint)
-- **Reports**: 20% (Placeholder frontend)
-- **MCP Integration**: 60% (Admin functional, tools pending)
-- **Production Ready**: 50% (Docker setup exists, but logic pending)
+- **Core Infrastructure**: 90% (MCP/Config refinement pending) ✅
+- **Patent Search**: 90% (Semantic search UI connection pending)
+- **AI Chat**: 60% (LangGraph logic exists, API connection pending)
+- **Reports**: 50% (LangGraph logic exists, API/Frontend connection pending)
+- **MCP Integration**: 70% (Proxy exists, 실데이터 연동 최적화 필요)
+- **Production Ready**: 50% (Docker exists, Auth/Stability pending)
 
 The platform provides enterprise-grade patent analysis capabilities with modern web technologies and comprehensive automation features.
