@@ -6,7 +6,7 @@ import LimitedChat from '../components/Chatbot/LimitedChat';
 
 // Main chat page component
 function ChatPage() {
-    const { authStatus, reinitializeOnAuthChange } = useChatbot();
+    const { authStatus, initializeChatbot } = useChatbot();
     const [isAuthChecking, setIsAuthChecking] = useState(true);
     const navigate = useNavigate();
 
@@ -21,8 +21,10 @@ function ChatPage() {
 
     useEffect(() => {
         // Re-initialize when auth status changes
-        reinitializeOnAuthChange();
-    }, [authStatus, reinitializeOnAuthChange]);
+        if (authStatus.isAuthenticated && initializeChatbot) {
+            initializeChatbot();
+        }
+    }, [authStatus.isAuthenticated]);
 
     if (isAuthChecking) {
         return (
@@ -40,7 +42,7 @@ function ChatPage() {
     // Show LimitedChat for unauthenticated users
     if (!authStatus.isAuthenticated) {
         return (
-            <LimitedChat 
+            <LimitedChat
                 onGetStarted={() => {
                     // Redirect to login page instead of using demo token
                     navigate('/login');

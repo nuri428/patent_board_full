@@ -14,9 +14,7 @@ COPY back_end/pyproject.toml back_end/uv.lock ./
 COPY README.md .
 
 # Install dependencies into a virtualenv
-RUN uv venv /opt/venv && \
-    . /opt/venv/bin/activate && \
-    uv sync --no-dev --no-install-project
+RUN uv sync --no-dev --no-install-project
 
 # Runtime stage
 FROM python:3.12-slim AS runtime
@@ -30,7 +28,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy virtualenv from builder
-COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app/.venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application code
@@ -44,4 +42,4 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]
+CMD ["/opt/venv/bin/python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]

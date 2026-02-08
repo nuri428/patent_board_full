@@ -14,11 +14,13 @@ import asyncio
 import logging
 
 # Import our modules
-from ..memory import MemoryManager, SQLMemoryBackend, RedisMemoryBackend
-from ..agents import ChatbotAgent, ContextEngineering
-from ..agents.patent_agent import PatentAgent
+from .memory import MemoryManager
+from .backends.sql_memory import SQLMemoryBackend
+from .backends.redis_memory import RedisMemoryBackend
+from .agents import ChatbotAgent, ContextEngineering
+from .agents.patent_agent import PatentAgent
 from ..mcp_client import get_mcp_client, MCPClient
-from ..models.database import PropertyType
+from .models.database import PropertyType
 from app.core.config import settings
 
 # Set up logging

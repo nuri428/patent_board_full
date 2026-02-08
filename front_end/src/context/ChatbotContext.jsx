@@ -111,11 +111,11 @@ export function ChatbotProvider({ children }) {
     // Check authentication status and set appropriate API
     useEffect(() => {
         const { isAuthenticated, userId, mode } = checkAuthStatus();
-        dispatch({ 
-            type: ActionTypes.SET_AUTH_STATUS, 
-            payload: { isAuthenticated, userId, mode } 
+        dispatch({
+            type: ActionTypes.SET_AUTH_STATUS,
+            payload: { isAuthenticated, userId, mode }
         });
-        
+
         // Set the appropriate API based on auth status
         setApi(getChatbotAPI());
     }, []);
@@ -130,11 +130,11 @@ export function ChatbotProvider({ children }) {
     const initializeChatbot = async () => {
         try {
             dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-            
+
             // Check if LangGraph service is healthy
             const health = await api.health();
             dispatch({ type: ActionTypes.SET_CONNECTED, payload: true });
-            
+
             // Get authentication status and load user data if authenticated
             const { isAuthenticated, userId } = state.authStatus;
             if (isAuthenticated && userId) {
@@ -142,11 +142,11 @@ export function ChatbotProvider({ children }) {
                     // Load user's sessions
                     const sessions = await api.getUserSessions(userId);
                     dispatch({ type: ActionTypes.SET_SESSIONS, payload: sessions });
-                    
+
                     // Load user properties
                     const properties = await api.getUserProperties(userId);
                     dispatch({ type: ActionTypes.SET_USER_PROPERTIES, payload: properties });
-                    
+
                     // If no current session and there are existing sessions, use the most recent one
                     if (sessions.length > 0 && !state.currentSession) {
                         await loadSession(sessions[0].id);
@@ -156,13 +156,13 @@ export function ChatbotProvider({ children }) {
                     // Continue with limited mode if user data loading fails
                 }
             }
-            
+
             dispatch({ type: ActionTypes.SET_INITIALIZED, payload: true });
         } catch (error) {
             console.error('Failed to initialize chatbot:', error);
-            dispatch({ 
-                type: ActionTypes.SET_ERROR, 
-                payload: 'Failed to connect to chat service. Please try again later.' 
+            dispatch({
+                type: ActionTypes.SET_ERROR,
+                payload: 'Failed to connect to chat service. Please try again later.'
             });
             dispatch({ type: ActionTypes.SET_CONNECTED, payload: false });
         } finally {
@@ -173,7 +173,7 @@ export function ChatbotProvider({ children }) {
     const createSession = async (userId) => {
         try {
             dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-            
+
             const newSessionData = await api.createSession(userId);
             const newSession = {
                 id: newSessionData.session_id,
@@ -186,13 +186,13 @@ export function ChatbotProvider({ children }) {
             };
             dispatch({ type: ActionTypes.SET_CURRENT_SESSION, payload: newSession });
             dispatch({ type: ActionTypes.SET_SESSIONS, payload: [newSession, ...state.sessions] });
-            
+
             return newSession;
         } catch (error) {
             console.error('Failed to create session:', error);
-            dispatch({ 
-                type: ActionTypes.SET_ERROR, 
-                payload: 'Failed to create new chat session.' 
+            dispatch({
+                type: ActionTypes.SET_ERROR,
+                payload: 'Failed to create new chat session.'
             });
             throw error;
         } finally {
@@ -203,20 +203,20 @@ export function ChatbotProvider({ children }) {
     const loadSession = async (sessionId) => {
         try {
             dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-            
+
             const session = await api.getSession(sessionId);
             dispatch({ type: ActionTypes.SET_CURRENT_SESSION, payload: session });
-            
+
             // Load messages for this session (this would need to be implemented in the backend)
             // For now, we'll start with empty messages
             dispatch({ type: ActionTypes.SET_MESSAGES, payload: [] });
-            
+
             return session;
         } catch (error) {
             console.error('Failed to load session:', error);
-            dispatch({ 
-                type: ActionTypes.SET_ERROR, 
-                payload: 'Failed to load chat session.' 
+            dispatch({
+                type: ActionTypes.SET_ERROR,
+                payload: 'Failed to load chat session.'
             });
             throw error;
         } finally {
@@ -226,14 +226,14 @@ export function ChatbotProvider({ children }) {
 
     const sendMessage = async (message, sessionId = null) => {
         const currentSessionId = sessionId || state.currentSession?.id;
-        
+
         if (!currentSessionId) {
             throw new Error('No active session');
         }
 
         try {
             dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-            
+
             // Add user message to UI immediately
             const userMessage = {
                 id: Date.now().toString(),
@@ -242,18 +242,18 @@ export function ChatbotProvider({ children }) {
                 timestamp: new Date().toISOString(),
                 pending: true
             };
-            
+
             dispatch({ type: ActionTypes.ADD_MESSAGE, payload: userMessage });
-            
+
             // Send message to LangGraph service
             const response = await api.chat(message, currentSessionId);
-            
+
             // Remove pending flag and update with AI response
             const updatedUserMessage = {
                 ...userMessage,
                 pending: false
             };
-            
+
             const aiMessage = {
                 id: response.session_id || Date.now().toString(),
                 content: response.response?.content || response.response || 'I apologize, but I had trouble processing your request.',
@@ -263,13 +263,13 @@ export function ChatbotProvider({ children }) {
                 metadata: response.metadata || response.context || {},
                 patent_urls: response.response?.patent_urls || []
             };
-            
+
             dispatch({ type: ActionTypes.SET_MESSAGES, payload: [...state.messages.filter(msg => msg.id !== userMessage.id), updatedUserMessage, aiMessage] });
-            
+
             return aiMessage;
         } catch (error) {
             console.error('Failed to send message:', error);
-            
+
             // Update user message to show error
             const errorMessage = {
                 ...state.messages[state.messages.length - 1],
@@ -277,17 +277,17 @@ export function ChatbotProvider({ children }) {
                 content: 'Sorry, I encountered an error. Please try again.',
                 error: true
             };
-            
-            dispatch({ 
-                type: ActionTypes.SET_MESSAGES, 
-                payload: [...state.messages.slice(0, -1), errorMessage] 
+
+            dispatch({
+                type: ActionTypes.SET_MESSAGES,
+                payload: [...state.messages.slice(0, -1), errorMessage]
             });
-            
-            dispatch({ 
-                type: ActionTypes.SET_ERROR, 
-                payload: 'Failed to send message. Please try again.' 
+
+            dispatch({
+                type: ActionTypes.SET_ERROR,
+                payload: 'Failed to send message. Please try again.'
             });
-            
+
             throw error;
         } finally {
             dispatch({ type: ActionTypes.SET_LOADING, payload: false });
@@ -329,7 +329,6 @@ export function ChatbotProvider({ children }) {
         clearChat,
         refreshSessions,
         initializeChatbot,
-        reinitializeOnAuthChange,
         api
     };
 

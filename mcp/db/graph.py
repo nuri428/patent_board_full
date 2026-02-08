@@ -160,7 +160,7 @@ class GraphDatabase:
         degree_centrality_query = """
         MATCH (n)
         WHERE n:Corporation OR n:Patent OR n:Technology
-        WITH n, size((n)--()) as degree
+        WITH n, COUNT { (n)--() } as degree
         WHERE degree > 0
         RETURN 
             labels(n)[0] as node_type,
@@ -175,7 +175,7 @@ class GraphDatabase:
         betweenness_centrality_query = """
         MATCH (n)
         WHERE n:Corporation OR n:Technology
-        WITH n, size((n)-[]-()) as connections
+        WITH n, COUNT { (n)-[]-() } as connections
         WHERE connections > 2
         MATCH paths = allShortestPaths((start)-[*..3]-(end))
         WHERE ANY(node IN nodes(paths) WHERE node = n)

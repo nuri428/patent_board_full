@@ -38,7 +38,7 @@ async def search_patents(
             user_id=current_user.id,
             username=current_user.email,
             resource_type="patent",
-            description=f"Searched patents with query: {search_params.query}",
+            description=f"Searched patents with filters: {search_params.model_dump(exclude_none=True)}",
             ip_address=request.client.host if request.client else None,
             user_agent=request.headers.get("user-agent"),
             payload={"params": search_params.model_dump()},

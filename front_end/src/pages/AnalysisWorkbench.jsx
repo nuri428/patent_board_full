@@ -210,5 +210,3 @@ const AnalysisWorkbench = () => {
 };
 
 export default AnalysisWorkbench;
-
-export default AnalysisWorkbench;
