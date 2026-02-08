@@ -6,20 +6,25 @@ from app.models import User, Report, ChatSession, Notification
 from app.schemas import UserCreate, UserUpdate
 import bcrypt
 
-# Monkeypatch bcrypt for passlib compatibility (if needed)
-try:
-    if not hasattr(bcrypt, "__about__"):
 
-        class About:
-            __version__ = getattr(bcrypt, "__version__", "unknown")
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt directly."""
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password, salt).decode('utf-8')
 
-        bcrypt.__about__ = About()
-except Exception:
-    pass
 
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against a bcrypt hash."""
+    if isinstance(plain_password, str):
+        plain_password = plain_password.encode('utf-8')
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode('utf-8')
+    try:
+        return bcrypt.checkpw(plain_password, hashed_password)
+    except Exception:
+        return False
 
 
 class UserCRUD:
@@ -55,7 +60,7 @@ class UserCRUD:
 
     async def create(self, user_create: UserCreate) -> User:
         """Create new user"""
-        hashed_password = pwd_context.hash(user_create.password)
+        hashed_password = hash_password(user_create.password)
 
         db_user = User(
             email=user_create.email,
@@ -80,7 +85,7 @@ class UserCRUD:
         update_data = user_update.model_dump(exclude_unset=True)
 
         if "password" in update_data:
-            update_data["hashed_password"] = pwd_context.hash(
+            update_data["hashed_password"] = hash_password(
                 update_data.pop("password")
             )
 
@@ -107,7 +112,7 @@ class UserCRUD:
         if not user or not user.is_active:
             return None
 
-        if not pwd_context.verify(password, user.hashed_password):
+        if not verify_password(password, user.hashed_password):
             return None
 
         return user

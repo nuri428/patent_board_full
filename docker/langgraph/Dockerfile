@@ -33,7 +33,7 @@ COPY . .
 RUN mkdir -p /app/logs
 
 # Set up Python path
-ENV PYTHONPATH=/app:$PYTHONPATH
+ENV PYTHONPATH=/app/back_end:/app:$PYTHONPATH
 
 # Expose port
 EXPOSE 8001

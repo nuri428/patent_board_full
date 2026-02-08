@@ -46,3 +46,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Use shell form to allow environment variable expansion
 CMD /opt/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT}
+
