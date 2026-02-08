@@ -12,6 +12,7 @@ const PatentSearch = () => {
         ipc: '',
         inventor: '',
         status: '',
+        country: '',
         filing_date_from: '',
         filing_date_to: '',
         limit: 10,
@@ -74,11 +75,13 @@ const PatentSearch = () => {
                 data = await patentAPI.search(params);
             }
 
-            setResults(data.patents);
-            setTotal(data.total);
+            setResults(data.patents || []);
+            setTotal(data.total || 0);
             setSearched(true);
         } catch (error) {
             console.error("Search failed:", error);
+            setResults([]);
+            setTotal(0);
         } finally {
             setLoading(false);
         }
@@ -243,6 +246,46 @@ const PatentSearch = () => {
                                             onChange={handleChange}
                                             className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
                                         />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                                    <div className="relative">
+                                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                        <select
+                                            name="country"
+                                            value={searchParams.country}
+                                            onChange={handleChange}
+                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white"
+                                        >
+                                            <option value="">All Countries</option>
+                                            <option value="KR">Korea (KR)</option>
+                                            <option value="US">USA (US)</option>
+                                            <option value="EP">Europe (EP)</option>
+                                            <option value="JP">Japan (JP)</option>
+                                            <option value="CN">China (CN)</option>
+                                            <option value="WO">WIPO (WO)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <div className="relative">
+                                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                        <select
+                                            name="status"
+                                            value={searchParams.status}
+                                            onChange={handleChange}
+                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white"
+                                        >
+                                            <option value="">All Statuses</option>
+                                            <option value="active">Active</option>
+                                            <option value="wait">Wait</option>
+                                            <option value="dead">Dead</option>
+                                            <option value="expired">Expired</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -425,8 +468,8 @@ const PatentSearch = () => {
                                 <div className="flex items-center justify-between p-6 border-b border-gray-100">
                                     <div className="flex items-center gap-3">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${selectedPatent.country === 'KR'
-                                                ? 'bg-blue-100 text-blue-700'
-                                                : 'bg-purple-100 text-purple-700'
+                                            ? 'bg-blue-100 text-blue-700'
+                                            : 'bg-purple-100 text-purple-700'
                                             }`}>
                                             {selectedPatent.country}
                                         </span>

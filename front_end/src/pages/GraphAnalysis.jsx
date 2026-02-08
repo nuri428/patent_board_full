@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { graphAPI } from '../api/mcp';
+import { graphAPI, visualizationAPI } from '../api/mcp';
 import { Network, Search, Cpu, GitMerge, Info, AlertTriangle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import GraphVisualizer from '../components/AnalysisWorkbench/GraphVisualizer';
 
@@ -74,6 +74,9 @@ const transformResultToGraph = (data, tabType) => {
                 }
             });
         });
+    } else if (tabType === 'network_map') {
+        // Network map data: {nodes: [{id, label, group}], edges: [{id, from, to, label}]}
+        return data;
     }
 
     return nodes.length > 0 ? { nodes, edges } : null;
@@ -92,6 +95,7 @@ const GraphAnalysis = () => {
     const [techKeyword, setTechKeyword] = useState('');
     const [pathStart, setPathStart] = useState('');
     const [pathEnd, setPathEnd] = useState('');
+    const [patentId, setPatentId] = useState('');
 
     // IPC Classification States
     const [ipcSection, setIpcSection] = useState('');
@@ -187,6 +191,9 @@ const GraphAnalysis = () => {
                 case 'path':
                     data = await graphAPI.findPath(pathStart, pathEnd);
                     break;
+                case 'network_map':
+                    data = await visualizationAPI.getNetworkMap({ patent_id: patentId });
+                    break;
             }
             setResult(data);
         } catch (err) {
@@ -229,7 +236,8 @@ const GraphAnalysis = () => {
                     { id: 'competitor', label: 'Competitor Map', icon: Network },
                     { id: 'problem', label: 'Problem Discovery', icon: Search },
                     { id: 'cluster', label: 'IPC Classification', icon: Cpu },
-                    { id: 'path', label: 'Path Finder', icon: GitMerge }
+                    { id: 'path', label: 'Path Finder', icon: GitMerge },
+                    { id: 'network_map', label: 'Network Map', icon: Network }
                 ].map(tab => {
                     const Icon = tab.icon;
                     return (
@@ -293,6 +301,30 @@ const GraphAnalysis = () => {
                             >
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                                 Analyze
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'network_map' && (
+                    <div className="space-y-4 max-w-2xl text-center mx-auto">
+                        <h2 className="text-xl font-bold text-gray-800">Patent Network Visualizer</h2>
+                        <p className="text-gray-500 text-sm">Visualize citation and similarity networks for a specific patent from Neo4j.</p>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-50 outline-none transition-all"
+                                placeholder="Enter Patent ID (e.g. 1020230001234)"
+                                value={patentId}
+                                onChange={(e) => setPatentId(e.target.value)}
+                            />
+                            <button
+                                onClick={() => handleSearch('network_map')}
+                                disabled={loading || !patentId}
+                                className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 shadow-lg shadow-purple-200 flex items-center gap-2 disabled:opacity-50 transition-all"
+                            >
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Network className="w-4 h-4" />}
+                                Visualize Network
                             </button>
                         </div>
                     </div>

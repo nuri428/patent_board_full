@@ -15,28 +15,24 @@ async def get_analytics_overview(db: AsyncSession = Depends(get_db)):
     last_30_days = today - timedelta(days=30)
     last_year = today - timedelta(days=365)
 
-    total_patents = await db.execute(select(func.count(PatentModel.patent_id)))
+    total_patents = await db.execute(select(func.count(Patent.patent_id)))
     total_patents_count = total_patents.scalar() or 0
 
     patents_last_30 = await db.execute(
-        select(func.count(PatentModel.patent_id)).where(
-            PatentModel.created_at >= last_30_days
-        )
+        select(func.count(Patent.patent_id)).where(Patent.created_at >= last_30_days)
     )
     patents_last_30_count = patents_last_30.scalar() or 0
 
     patents_last_year = await db.execute(
-        select(func.count(PatentModel.patent_id)).where(
-            PatentModel.created_at >= last_year
-        )
+        select(func.count(Patent.patent_id)).where(Patent.created_at >= last_year)
     )
     patents_last_year_count = patents_last_year.scalar() or 0
 
-    total_reports = await db.execute(select(func.count(ReportModel.id)))
+    total_reports = await db.execute(select(func.count(Report.id)))
     total_reports_count = total_reports.scalar() or 0
 
     reports_last_30 = await db.execute(
-        select(func.count(ReportModel.id)).where(ReportModel.created_at >= last_30_days)
+        select(func.count(Report.id)).where(Report.created_at >= last_30_days)
     )
     reports_last_30_count = reports_last_30.scalar() or 0
 
@@ -55,12 +51,12 @@ async def get_patents_timeline(db: AsyncSession = Depends(get_db), days: int = 3
 
     timeline_query = (
         select(
-            func.date(PatentModel.created_at).label("date"),
-            func.count(PatentModel.patent_id).label("count"),
+            func.date(Patent.created_at).label("date"),
+            func.count(Patent.patent_id).label("count"),
         )
-        .where(PatentModel.created_at >= start_date)
-        .group_by(func.date(PatentModel.created_at))
-        .order_by(func.date(PatentModel.created_at))
+        .where(Patent.created_at >= start_date)
+        .group_by(func.date(Patent.created_at))
+        .order_by(func.date(Patent.created_at))
     )
 
     result = await db.execute(timeline_query)
@@ -79,18 +75,18 @@ async def get_patents_by_month(db: AsyncSession = Depends(get_db), months: int =
 
     monthly_query = (
         select(
-            extract("year", PatentModel.created_at).label("year"),
-            extract("month", PatentModel.created_at).label("month"),
-            func.count(PatentModel.patent_id).label("count"),
+            extract("year", Patent.created_at).label("year"),
+            extract("month", Patent.created_at).label("month"),
+            func.count(Patent.patent_id).label("count"),
         )
-        .where(PatentModel.created_at >= start_date)
+        .where(Patent.created_at >= start_date)
         .group_by(
-            extract("year", PatentModel.created_at),
-            extract("month", PatentModel.created_at),
+            extract("year", Patent.created_at),
+            extract("month", Patent.created_at),
         )
         .order_by(
-            extract("year", PatentModel.created_at),
-            extract("month", PatentModel.created_at),
+            extract("year", Patent.created_at),
+            extract("month", Patent.created_at),
         )
     )
 
@@ -112,9 +108,9 @@ async def get_patents_by_month(db: AsyncSession = Depends(get_db), months: int =
 
 @router.get("/patents/by-status")
 async def get_patents_by_status(db: AsyncSession = Depends(get_db)):
-    status_query = select(
-        PatentModel.status, func.count(PatentModel.patent_id)
-    ).group_by(PatentModel.status)
+    status_query = select(Patent.status, func.count(Patent.patent_id)).group_by(
+        Patent.status
+    )
 
     result = await db.execute(status_query)
     status_data = result.all()
@@ -139,10 +135,10 @@ async def get_patents_by_status(db: AsyncSession = Depends(get_db)):
 @router.get("/patents/top-assignees")
 async def get_top_assignees(db: AsyncSession = Depends(get_db), limit: int = 10):
     assignee_query = (
-        select(PatentModel.assignee, func.count(PatentModel.patent_id))
-        .where(PatentModel.assignee.isnot(None))
-        .group_by(PatentModel.assignee)
-        .order_by(func.count(PatentModel.patent_id).desc())
+        select(Patent.assignee, func.count(Patent.patent_id))
+        .where(Patent.assignee.isnot(None))
+        .group_by(Patent.assignee)
+        .order_by(func.count(Patent.patent_id).desc())
         .limit(limit)
     )
 
@@ -163,15 +159,15 @@ async def get_filing_trends(db: AsyncSession = Depends(get_db), years: int = 5):
 
     filing_trends_query = (
         select(
-            extract("year", PatentModel.filing_date).label("year"),
-            func.count(PatentModel.patent_id).label("count"),
+            extract("year", Patent.filing_date).label("year"),
+            func.count(Patent.patent_id).label("count"),
         )
         .where(
-            PatentModel.filing_date.isnot(None),
-            extract("year", PatentModel.filing_date) >= start_year,
+            Patent.filing_date.isnot(None),
+            extract("year", Patent.filing_date) >= start_year,
         )
-        .group_by(extract("year", PatentModel.filing_date))
-        .order_by(extract("year", PatentModel.filing_date))
+        .group_by(extract("year", Patent.filing_date))
+        .order_by(extract("year", Patent.filing_date))
     )
 
     result = await db.execute(filing_trends_query)
@@ -186,12 +182,12 @@ async def get_filing_trends(db: AsyncSession = Depends(get_db), years: int = 5):
 
 @router.get("/reports/analytics")
 async def get_reports_analytics(db: AsyncSession = Depends(get_db)):
-    total_reports = await db.execute(select(func.count(ReportModel.id)))
+    total_reports = await db.execute(select(func.count(Report.id)))
     total_reports_count = total_reports.scalar() or 0
 
-    report_types_query = select(
-        ReportModel.report_type, func.count(ReportModel.id)
-    ).group_by(ReportModel.report_type)
+    report_types_query = select(Report.report_type, func.count(Report.id)).group_by(
+        Report.report_type
+    )
 
     result = await db.execute(report_types_query)
     report_types = result.all()

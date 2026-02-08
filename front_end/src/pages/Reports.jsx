@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { 
-    FileText, 
-    Loader2, 
-    Plus, 
-    RefreshCw, 
-    CheckCircle, 
-    XCircle, 
-    Clock, 
+import {
+    FileText,
+    Loader2,
+    Plus,
+    RefreshCw,
+    CheckCircle,
+    XCircle,
+    Clock,
     AlertCircle,
     Download,
     Trash2
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8005';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const Reports = () => {
     const { user } = useAuth();
@@ -40,7 +40,7 @@ const Reports = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/api/v1/reports/`, {
                 headers: {
@@ -65,10 +65,10 @@ const Reports = () => {
     // Poll for status updates on pending/processing reports
     useEffect(() => {
         fetchReports();
-        
+
         // Set up polling interval
         const interval = setInterval(() => {
-            const hasActiveReports = reports.some(r => 
+            const hasActiveReports = reports.some(r =>
                 r.status === 'pending' || r.status === 'processing'
             );
             if (hasActiveReports) {
@@ -81,11 +81,11 @@ const Reports = () => {
 
     const handleGenerateReport = async (e) => {
         e.preventDefault();
-        
+
         try {
             setGenerating(true);
             setError(null);
-            
+
             const token = localStorage.getItem('token');
             const patentIds = newReport.patent_ids
                 .split(',')
@@ -111,11 +111,11 @@ const Reports = () => {
             }
 
             const data = await response.json();
-            
+
             // Close modal and refresh reports
             setShowGenerateModal(false);
             setNewReport({ topic: '', report_type: 'comprehensive', patent_ids: '' });
-            
+
             // Add the new report to the list immediately
             const newReportObj = {
                 id: data.report_id,
@@ -126,9 +126,9 @@ const Reports = () => {
                 created_at: new Date().toISOString(),
                 owner_id: user?.id
             };
-            
+
             setReports(prev => [newReportObj, ...prev]);
-            
+
         } catch (err) {
             setError(err.message);
         } finally {
@@ -248,7 +248,7 @@ const Reports = () => {
                                 {reports.map((report) => {
                                     const status = statusConfig[report.status] || statusConfig.pending;
                                     const StatusIcon = status.icon;
-                                    
+
                                     return (
                                         <tr key={report.id} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="p-4">
@@ -306,11 +306,11 @@ const Reports = () => {
 
             {/* Generate Report Modal */}
             {showGenerateModal && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
                     onClick={() => !generating && setShowGenerateModal(false)}
                 >
-                    <div 
+                    <div
                         className="bg-white rounded-2xl shadow-2xl max-w-lg w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -320,7 +320,7 @@ const Reports = () => {
                                 Create a patent analysis report on a specific topic
                             </p>
                         </div>
-                        
+
                         <form onSubmit={handleGenerateReport} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
