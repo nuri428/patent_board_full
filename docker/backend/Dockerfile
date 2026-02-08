@@ -14,9 +14,7 @@ COPY back_end/pyproject.toml back_end/uv.lock ./
 COPY README.md .
 
 # Install dependencies into a virtualenv
-RUN uv venv /opt/venv && \
-    . /opt/venv/bin/activate && \
-    uv sync --no-dev --no-install-project
+RUN uv sync --no-dev --no-install-project
 
 # Runtime stage
 FROM python:3.12-slim AS runtime
@@ -30,7 +28,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy virtualenv from builder
-COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app/.venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application code
@@ -39,10 +37,12 @@ COPY . .
 # Add back_end to PYTHONPATH
 ENV PYTHONPATH=/app/back_end:/app
 
-EXPOSE 8001
+# Default port - can be overridden by environment variable
+ENV BACKEND_PORT=8001
+EXPOSE ${BACKEND_PORT}
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8001/health || exit 1
+    CMD curl -f http://localhost:${BACKEND_PORT}/health || exit 1
 
-# Production entrypoint - reload is disabled by default in production via env/command
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]
+# Use shell form to allow environment variable expansion
+CMD /opt/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT}
