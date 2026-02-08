@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -58,6 +58,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Patent Board"
     VERSION: str = "1.0.0"
     DEBUG: bool = True
+    ENVIRONMENT: str = "development"
 
     # Chatbot Configuration
     CHATBOT_DEFAULT_TEMPERATURE: float = 0.7

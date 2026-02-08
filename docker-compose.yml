@@ -53,7 +53,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
 
       # CORS Configuration
-      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-http://localhost:3300,http://localhost:3301,http://localhost:8001,http://localhost:8005}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-http://localhost:8081,http://localhost:8005,http://localhost:8082}
 
     volumes:
       - ./back_end:/app/back_end
@@ -92,7 +92,7 @@ services:
     container_name: patent-board-frontend
     restart: unless-stopped
     ports:
-      - "3301:3000"
+      - "8081:3000"
     environment:
       - VITE_API_URL=http://localhost:8005/api/v1
       - CHOKIDAR_USEPOLLING=true

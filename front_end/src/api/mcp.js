@@ -47,4 +47,11 @@ export const patentMcpAPI = {
     }
 };
 
+export const visualizationAPI = {
+    getNetworkMap: async (params) => {
+        const response = await api.post('/visualization/network-map', params);
+        return response.data;
+    }
+};
+
 export default callMcpProxy;

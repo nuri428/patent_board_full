@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 import logging
 import asyncio
 from datetime import datetime
@@ -9,9 +8,56 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.api import api_router
 from app.routes import web_router
 from app.core.config import settings
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse, FileResponse
+import os
+
+frontend_dist_path = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../../front_end/dist")
+)
 
 
-logging.basicConfig(level=logging.DEBUG)
+import json
+import time
+
+
+# Custom JSON Formatter
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        log_record = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "module": record.module,
+            "funcName": record.funcName,
+        }
+        if record.exc_info:
+            log_record["exception"] = self.formatException(record.exc_info)
+        return json.dumps(log_record)
+
+
+# Initialize logging based on environment
+def setup_logging():
+    level = logging.DEBUG if settings.DEBUG else logging.INFO
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+
+    # Remove existing handlers
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+
+    handler = logging.StreamHandler()
+    if settings.ENVIRONMENT == "production":
+        handler.setFormatter(JsonFormatter())
+    else:
+        # Standard formatted output for development
+        formatter = logging.Formatter("%(levelname)s: [%(name)s] %(message)s")
+        handler.setFormatter(formatter)
+
+    root_logger.addHandler(handler)
+
+
+setup_logging()
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
@@ -39,10 +85,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# Request Logging Middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+
+    logger.info(
+        f"Request: {request.method} {request.url.path} "
+        f"Status: {response.status_code} "
+        f"Duration: {duration:.4f}s"
+    )
+    return response
+
+
 # Include API Router
 app.include_router(api_router, prefix="/api/v1")
 
-# Include Web Router (Legacy/Template based)
+# Include Web Router (Empty legacy router)
 app.include_router(web_router)
 
 
@@ -50,8 +112,10 @@ async def check_mariadb() -> Dict[str, Any]:
     """Check MariaDB connectivity"""
     try:
         from shared.database import AsyncSessionLocal
+
         async with AsyncSessionLocal() as db:
             from sqlalchemy import text
+
             result = await db.execute(text("SELECT 1"))
             await result.fetchone()
             return {"status": "healthy", "message": "Connected"}
@@ -64,9 +128,9 @@ async def check_neo4j() -> Dict[str, Any]:
     """Check Neo4j connectivity"""
     try:
         from neo4j import AsyncGraphDatabase
+
         driver = AsyncGraphDatabase.driver(
-            settings.NEO4J_URI,
-            auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
+            settings.NEO4J_URI, auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
         )
         async with driver.session() as session:
             result = await session.run("RETURN 1 as num")
@@ -97,6 +161,7 @@ async def check_redis() -> Dict[str, Any]:
     """Check Redis connectivity"""
     try:
         import redis.asyncio as redis
+
         client = redis.from_url(settings.REDIS_URL, socket_connect_timeout=5)
         await client.ping()
         await client.close()
@@ -116,35 +181,42 @@ async def health_check():
 async def health_check_detailed():
     """Detailed health check with service dependencies"""
     start_time = datetime.utcnow()
-    
+
     # Run all checks concurrently
     results = await asyncio.gather(
         check_mariadb(),
         check_neo4j(),
         check_mcp_server(),
         check_redis(),
-        return_exceptions=True
+        return_exceptions=True,
     )
-    
+
     checks = {
-        "mariadb": results[0] if not isinstance(results[0], Exception) else {"status": "unhealthy", "message": str(results[0])},
-        "neo4j": results[1] if not isinstance(results[1], Exception) else {"status": "unhealthy", "message": str(results[1])},
-        "mcp_server": results[2] if not isinstance(results[2], Exception) else {"status": "unhealthy", "message": str(results[2])},
-        "redis": results[3] if not isinstance(results[3], Exception) else {"status": "unhealthy", "message": str(results[3]), "optional": True},
+        "mariadb": results[0]
+        if not isinstance(results[0], Exception)
+        else {"status": "unhealthy", "message": str(results[0])},
+        "neo4j": results[1]
+        if not isinstance(results[1], Exception)
+        else {"status": "unhealthy", "message": str(results[1])},
+        "mcp_server": results[2]
+        if not isinstance(results[2], Exception)
+        else {"status": "unhealthy", "message": str(results[2])},
+        "redis": results[3]
+        if not isinstance(results[3], Exception)
+        else {"status": "unhealthy", "message": str(results[3]), "optional": True},
     }
-    
+
     # Determine overall status
     critical_services = ["mariadb", "neo4j", "mcp_server"]
     all_healthy = all(
-        checks[service]["status"] == "healthy" 
-        for service in critical_services
+        checks[service]["status"] == "healthy" for service in critical_services
     )
-    
+
     end_time = datetime.utcnow()
     response_time_ms = (end_time - start_time).total_seconds() * 1000
-    
+
     status_code = 200 if all_healthy else 503
-    
+
     return JSONResponse(
         status_code=status_code,
         content={
@@ -152,6 +224,31 @@ async def health_check_detailed():
             "timestamp": end_time.isoformat(),
             "response_time_ms": round(response_time_ms, 2),
             "version": settings.VERSION,
-            "services": checks
-        }
+            "services": checks,
+        },
     )
+
+
+# Serve Frontend SPA - Defined at the end to avoid shadowing routes
+if os.path.exists(frontend_dist_path):
+    # Mount assets directory first
+    assets_path = os.path.join(frontend_dist_path, "assets")
+    if os.path.exists(assets_path):
+        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+
+    # Catch-all route for SPA
+    @app.get("/{full_path:path}")
+    async def serve_spa(request: Request, full_path: str):
+        # Check if requested path is an API call or health check
+        if full_path.startswith("api/") or full_path.startswith("health"):
+            return JSONResponse(status_code=404, content={"detail": "Not Found"})
+
+        # Check if the file exists in the dist folder
+        file_path = os.path.join(frontend_dist_path, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+
+        # Fallback to index.html for SPA routing
+        return FileResponse(os.path.join(frontend_dist_path, "index.html"))
+else:
+    logger.warning(f"Frontend dist directory not found at {frontend_dist_path}")
