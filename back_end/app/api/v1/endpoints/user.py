@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from shared.database import get_db
-from app.models import Patent, Report, ChatSession
+from app.models import Patent, Report, ChatSession, ChatMessage
 from typing import Dict, Any
 from datetime import datetime, timedelta
 
@@ -14,39 +14,39 @@ async def get_user_dashboard(db: AsyncSession = Depends(get_db)):
     today = datetime.now()
     last_30_days = today - timedelta(days=30)
 
-    total_patents = await db.execute(select(func.count(PatentModel.patent_id)))
+    total_patents = await db.execute(select(func.count(Patent.patent_id)))
     total_patents_count = total_patents.scalar() or 0
 
     recent_patents_query = (
-        select(PatentModel)
-        .where(PatentModel.created_at >= last_30_days)
-        .order_by(PatentModel.created_at.desc())
+        select(Patent)
+        .where(Patent.created_at >= last_30_days)
+        .order_by(Patent.created_at.desc())
         .limit(5)
     )
     recent_patents_result = await db.execute(recent_patents_query)
     recent_patents = recent_patents_result.scalars().all()
 
     user_reports_query = (
-        select(ReportModel)
-        .where(ReportModel.created_at >= last_30_days)
-        .order_by(ReportModel.created_at.desc())
+        select(Report)
+        .where(Report.created_at >= last_30_days)
+        .order_by(Report.created_at.desc())
         .limit(5)
     )
     user_reports_result = await db.execute(user_reports_query)
     user_reports = user_reports_result.scalars().all()
 
     chat_history_query = (
-        select(ChatHistoryModel)
-        .where(ChatHistoryModel.timestamp >= last_30_days)
-        .order_by(ChatHistoryModel.timestamp.desc())
+        select(ChatMessage)
+        .where(ChatMessage.timestamp >= last_30_days)
+        .order_by(ChatMessage.timestamp.desc())
         .limit(10)
     )
     chat_history_result = await db.execute(chat_history_query)
     chat_history = chat_history_result.scalars().all()
 
     patents_by_status_query = select(
-        PatentModel.status, func.count(PatentModel.patent_id)
-    ).group_by(PatentModel.status)
+        Patent.status, func.count(Patent.patent_id)
+    ).group_by(Patent.status)
     status_result = await db.execute(patents_by_status_query)
     status_distribution = dict(status_result.all())
 
@@ -143,12 +143,12 @@ async def get_user_activity(db: AsyncSession = Depends(get_db), days: int = 7):
 
     patents_query = (
         select(
-            func.date(PatentModel.created_at).label("date"),
-            func.count(PatentModel.patent_id).label("patent_count"),
+            func.date(Patent.created_at).label("date"),
+            func.count(Patent.patent_id).label("patent_count"),
         )
-        .where(PatentModel.created_at >= start_date)
-        .group_by(func.date(PatentModel.created_at))
-        .order_by(func.date(PatentModel.created_at).desc())
+        .where(Patent.created_at >= start_date)
+        .group_by(func.date(Patent.created_at))
+        .order_by(func.date(Patent.created_at).desc())
     )
 
     patents_result = await db.execute(patents_query)
@@ -156,12 +156,12 @@ async def get_user_activity(db: AsyncSession = Depends(get_db), days: int = 7):
 
     reports_query = (
         select(
-            func.date(ReportModel.created_at).label("date"),
-            func.count(ReportModel.id).label("report_count"),
+            func.date(Report.created_at).label("date"),
+            func.count(Report.id).label("report_count"),
         )
-        .where(ReportModel.created_at >= start_date)
-        .group_by(func.date(ReportModel.created_at))
-        .order_by(func.date(ReportModel.created_at).desc())
+        .where(Report.created_at >= start_date)
+        .group_by(func.date(Report.created_at))
+        .order_by(func.date(Report.created_at).desc())
     )
 
     reports_result = await db.execute(reports_query)
@@ -182,8 +182,8 @@ async def get_user_activity(db: AsyncSession = Depends(get_db), days: int = 7):
 @router.get("/recommendations")
 async def get_user_recommendations(db: AsyncSession = Depends(get_db)):
     similar_patents_query = (
-        select(PatentModel)
-        .where(PatentModel.status == "granted")
+        select(Patent)
+        .where(Patent.status == "granted")
         .order_by(func.random())
         .limit(3)
     )
@@ -192,10 +192,10 @@ async def get_user_recommendations(db: AsyncSession = Depends(get_db)):
     similar_patents = similar_result.scalars().all()
 
     trending_assignees_query = (
-        select(PatentModel.assignee, func.count(PatentModel.patent_id))
-        .where(PatentModel.created_at >= datetime.now() - timedelta(days=30))
-        .group_by(PatentModel.assignee)
-        .order_by(func.count(PatentModel.patent_id).desc())
+        select(Patent.assignee, func.count(Patent.patent_id))
+        .where(Patent.created_at >= datetime.now() - timedelta(days=30))
+        .group_by(Patent.assignee)
+        .order_by(func.count(Patent.patent_id).desc())
         .limit(5)
     )
 

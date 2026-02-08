@@ -8,6 +8,7 @@ import GraphAnalysis from './pages/GraphAnalysis';
 import AnalysisWorkbench from './pages/AnalysisWorkbench';
 import ChatPage from './pages/Chat';
 import Reports from './pages/Reports';
+import Admin from './pages/Admin';
 import LandingPage from './pages/LandingPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationsProvider } from './context/NotificationsContext';
@@ -44,6 +45,7 @@ const AppContent = () => {
               <Route path="/analysis" element={<AnalysisWorkbench />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/reports" element={<Reports />} />
+              <Route path="/admin" element={<Admin />} />
             </Route>
           </>
         ) : (

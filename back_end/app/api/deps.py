@@ -1,4 +1,4 @@
-from typing import Generator, Optional
+from typing import Generator, Optional, List
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
@@ -59,9 +59,24 @@ async def get_current_active_user(
 async def get_current_active_superuser(
     current_user: User = Depends(get_current_active_user),
 ) -> User:
-    if not current_user.is_admin:
+    if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="The user doesn't have enough privileges",
         )
     return current_user
+
+
+class RoleChecker:
+    def __init__(self, allowed_roles: List[str]):
+        self.allowed_roles = allowed_roles
+
+    async def __call__(
+        self, current_user: User = Depends(get_current_active_user)
+    ) -> User:
+        if current_user.role not in self.allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Role '{current_user.role}' is not allowed to access this resource",
+            )
+        return current_user

@@ -13,6 +13,7 @@ from app.api.v1.endpoints import (
     prompts,
     mcp,
     patents,
+    visualization,
 )
 
 api_router = APIRouter()
@@ -31,3 +32,6 @@ api_router.include_router(workspaces.router, prefix="/workspaces", tags=["worksp
 api_router.include_router(prompts.router, prefix="/prompts", tags=["prompts"])
 api_router.include_router(mcp.router, prefix="/mcp", tags=["mcp"])
 api_router.include_router(patents.router, prefix="/patents", tags=["patents"])
+api_router.include_router(
+    visualization.router, prefix="/visualization", tags=["visualization"]
+)

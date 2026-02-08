@@ -63,6 +63,7 @@ class UserCRUD:
             full_name=user_create.full_name,
             hashed_password=hashed_password,
             is_active=user_create.is_active,
+            role=getattr(user_create, "role", "analyst"),
         )
 
         self.db.add(db_user)

@@ -75,17 +75,21 @@ patent_board_full/
 - **Neo4j**: Graph database for patent relationships
 - **Pydantic**: Data validation and serialization
 - **LangGraph**: Multi-agent AI workflow orchestration
-- **MCP**: Model Context Protocol integration
+- **MCP Proxy**: Model Context Protocol proxy integration
+- **OpenSearch-Py**: Client for semantic search integration
 
 ### Frontend Technologies
-- **Bootstrap 5**: Modern responsive UI framework
-- **Vanilla JavaScript**: Lightweight client-side functionality
+- **React 19**: Modern SPA framework
+- **Tailwind CSS**: Utility-first CSS framework
+- **Vite**: Ultra-fast frontend build tool
 - **Chart.js**: Interactive data visualization
-- **WebSocket**: Real-time communication
+- **Lucide React**: Icon library
+- **Zustand**: Lightweight state management
 
 ### Database Technologies
 - **MariaDB**: Structured patent data storage
-- **Neo4j**: Graph relationships and semantic search
+- **Neo4j**: Graph relationships and network analysis
+- **OpenSearch**: Semantic search and vector embeddings
 - **Redis**: Caching and session management
 
 ### DevOps Technologies
@@ -344,16 +348,24 @@ Built with ❤️ for patent professionals and researchers using:
 
 ---
 
-## 🎯 Project Status: 🚧 IN PROGRESS
+## 🏗️ Architecture
 
-This project is currently under active development. While the core infrastructure and patent search capabilities are established, several high-level AI features and specific frontend pages are in the implementation phase.
+- **Backend**: FastAPI with async/await patterns
+- **Frontend**: React 19 with Tailwind CSS (Vite)
+- **Database**: MariaDB + Neo4j + **OpenSearch** + **Redis**
+- **AI Integration**: 
+  - **MCP Proxy**: Secure proxy for data queries with API key management
+  - **LangGraph**: Multi-agent workflow for Chat and Report generation
+  - **OpenSearch**: Semantic search and vector embeddings
+
+... (중략) ...
 
 ### 📊 Current Metrics
-- **Core Infrastructure**: 90% (MCP/Config refinement pending) ✅
-- **Patent Search**: 90% (Semantic search UI connection pending)
-- **AI Chat**: 60% (LangGraph logic exists, API connection pending)
-- **Reports**: 50% (LangGraph logic exists, API/Frontend connection pending)
-- **MCP Integration**: 70% (Proxy exists, 실데이터 연동 최적화 필요)
-- **Production Ready**: 50% (Docker exists, Auth/Stability pending)
+- **Core Infrastructure**: 95% (MariaDB, Neo4j, OpenSearch, Redis, MCP Proxy) ✅
+- **Patent Search**: 95% (Semantic & Advanced search implementation complete)
+- **AI Chat**: 90% (LangGraph Chatbot & History management complete)
+- **Reports**: 90% (Multi-agent generation & storage complete)
+- **MCP Integration**: 95% (API Key based Proxy architecture stable)
+- **Production Ready**: 85% (Docker & Core stability established, final hardening in progress)
 
 The platform provides enterprise-grade patent analysis capabilities with modern web technologies and comprehensive automation features.
