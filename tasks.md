@@ -51,10 +51,17 @@
 ## 🚀 진행 중인 작업 (In Progress)
 
 ### 현재 진행 상태
-- **AI Chat API Implementation**: `crud/chat.py` 로직의 API 엔드포인트 연결 중 (진행률 30%)
-- **Reports Page & LangGraph Integration**: 리포트 생성 워크플로우 및 프론트엔드 연동 중 (진행률 20%)
-- **FastAPI-MCP Integration**: `/mcp` 엔드포인트 내 실제 데이터 연동 및 툴 노출 로직 개선 중 (진행률 60%)
-- **데이터베이스 최적화**: 인덱스 및 쿼리 튜닝 필요
+- **시스템 안정화**: 대량 특허 인덱싱 및 검색 성능 최적화 (진행률 80%)
+- **분석 도구 기능 확장**: Analysis Workbench 내 시각화 도구 추가 (진행률 70%)
+- **보안 및 권한 관리**: RBAC 기반 세부 접근 제어 고도화 (진행률 90%)
+- **테스크 자동화**: 주기적 특허 수집 및 분석 파이프라인 안정화 (진행률 85%)
+
+## ✅ 최근 완료된 주요 작업
+- [x] **AI Chat API Implementation**: LangGraph 기반 챗봇 연동 및 히스토리 관리 완료
+- [x] **Reports Page & LangGraph Integration**: 멀티 에이전트 기반 리포트 생성 및 저장소 연동 완료
+- [x] **FastAPI-MCP Proxy Integration**: 사용자별 API Key 기반 MCP 프록시 레이어 구축 완료
+- [x] **OpenSearch Semantic Search**: 특허 데이터 벡터라이징 및 시맨틱 검색 엔진 구축 완료
+- [x] **Frontend Modernization**: React 19 + Tailwind CSS 기반 고성능 UI/UX 전환 완료
 
 ## 📅 향후 작업 계획 (Future Tasks)
 
