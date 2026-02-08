@@ -14,6 +14,33 @@ if not hasattr(bcrypt, "__about__"):
 
     bcrypt.__about__ = About()
 
+
+# Monkeypatch bcrypt.hashpw to truncate passwords to 71 bytes (avoid 72-byte limit)
+_original_hashpw = bcrypt.hashpw
+
+
+def _patched_hashpw(password, salt):
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    if len(password) > 71:
+        password = password[:71]
+    return _original_hashpw(password, salt)
+
+
+bcrypt.hashpw = _patched_hashpw
+
+
+# Monkeypatch passlib's detect_wrap_bug to avoid RuntimeError on startup
+import passlib.handlers.bcrypt
+
+
+def _patched_detect_wrap_bug(ident):
+    return False
+
+
+passlib.handlers.bcrypt.detect_wrap_bug = _patched_detect_wrap_bug
+
+
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
