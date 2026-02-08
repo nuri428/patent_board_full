@@ -11,7 +11,7 @@ services:
     container_name: patent-board-backend
     restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "${DEV_BACKEND_PORT:-8005}:${BACKEND_PORT:-8001}"
     environment:
       # Database Configuration
       - MARIADB_URL=${MARIADB_URL}
@@ -63,7 +63,7 @@ services:
       - ssl:/app/ssl:ro
 
     networks:
-      - patent-board-network
+      - patent-board-network-dev
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -92,15 +92,15 @@ services:
     container_name: patent-board-frontend
     restart: unless-stopped
     ports:
-      - "8080:3000"
+      - "${DEV_FRONTEND_PORT:-8081}:${FRONTEND_PORT:-3000}"
     environment:
-      - VITE_API_URL=/api/v1
+      - VITE_API_URL=http://localhost:${DEV_BACKEND_PORT:-8005}/api/v1
       - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./front_end:/app
       - /app/node_modules
     networks:
-      - patent-board-network
+      - patent-board-network-dev
     depends_on:
       - backend
 
@@ -114,7 +114,7 @@ services:
     container_name: patent-board-mcp
     restart: unless-stopped
     ports:
-      - "8082:8080"
+      - "${DEV_MCP_PORT:-8082}:${MCP_PORT:-8080}"
     environment:
       - MARIADB_URL=${MARIADB_URL}
       - PATENTDB_URL=${MARIADB_URL}
@@ -129,7 +129,7 @@ services:
       - ./shared:/app/shared
       - logs:/app/logs
     networks:
-      - patent-board-network
+      - patent-board-network-dev
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -150,7 +150,7 @@ services:
     container_name: patent-board-langgraph
     restart: unless-stopped
     ports:
-      - "8003:8001"
+      - "${DEV_LANGGRAPH_PORT:-8003}:${LANGGRAPH_PORT:-8001}"
     environment:
       # Database Configuration (PA System)
       - PA_SYSTEM_DB_URL=${PA_SYSTEM_DB_URL}
@@ -190,7 +190,7 @@ services:
       - ./logs:/app/logs
       - ./scripts:/app/scripts
     networks:
-      - patent-board-network
+      - patent-board-network-dev
     depends_on:
       - backend
       - mcp
@@ -217,9 +217,9 @@ services:
     container_name: patent-board-redis
     restart: unless-stopped
     ports:
-      - "6380:6379"
+      - "${DEV_REDIS_PORT:-6380}:${REDIS_PORT:-6379}"
     networks:
-      - patent-board-network
+      - patent-board-network-dev
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -230,7 +230,7 @@ services:
 # Network Configuration
 # ============================================
 networks:
-  patent-board-network:
+  patent-board-network-dev:
     driver: bridge
     ipam:
       config:

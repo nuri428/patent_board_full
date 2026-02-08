@@ -37,9 +37,13 @@ COPY . .
 # Add back_end to PYTHONPATH
 ENV PYTHONPATH=/app/back_end:/app
 
-EXPOSE 5000
+# Default port - can be overridden by environment variable
+ENV BACKEND_PORT=8001
+EXPOSE ${BACKEND_PORT}
 
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${BACKEND_PORT}/health || exit 1
 
-CMD ["/opt/venv/bin/python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]
+# Use shell form to allow environment variable expansion
+CMD /opt/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT}
+
