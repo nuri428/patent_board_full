@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    CheckCircle, 
-    XCircle, 
-    Info, 
-    AlertTriangle, 
-    X 
+import {
+    CheckCircle,
+    XCircle,
+    Info,
+    AlertTriangle,
+    X
 } from 'lucide-react';
 
 const iconMap = {
@@ -17,28 +17,32 @@ const iconMap = {
 
 const colorMap = {
     success: {
-        bg: 'bg-green-50',
-        border: 'border-green-200',
+        bg: 'bg-white/80',
+        border: 'border-green-100',
         icon: 'text-green-500',
         progress: 'bg-green-500',
+        accent: 'bg-green-500',
     },
     error: {
-        bg: 'bg-red-50',
-        border: 'border-red-200',
+        bg: 'bg-white/80',
+        border: 'border-red-100',
         icon: 'text-red-500',
         progress: 'bg-red-500',
+        accent: 'bg-red-500',
     },
     info: {
-        bg: 'bg-blue-50',
-        border: 'border-blue-200',
+        bg: 'bg-white/80',
+        border: 'border-blue-100',
         icon: 'text-blue-500',
         progress: 'bg-blue-500',
+        accent: 'bg-blue-500',
     },
     warning: {
-        bg: 'bg-yellow-50',
-        border: 'border-yellow-200',
+        bg: 'bg-white/80',
+        border: 'border-yellow-100',
         icon: 'text-yellow-500',
         progress: 'bg-yellow-500',
+        accent: 'bg-yellow-500',
     },
 };
 
@@ -59,12 +63,13 @@ const Toast = ({ notification, onRemove, duration = 5000 }) => {
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 100, scale: 0.9 }}
+            initial={{ opacity: 0, x: 100, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className={`relative w-full max-w-sm overflow-hidden rounded-lg border shadow-lg ${colors.bg} ${colors.border}`}
+            className={`relative w-96 overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl ${colors.bg} ${colors.border}`}
         >
+            <div className={`absolute top-0 left-0 w-1.5 h-full ${colors.accent}`} />
             {/* Progress bar */}
             <motion.div
                 initial={{ width: '100%' }}

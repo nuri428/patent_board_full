@@ -3,8 +3,18 @@ import { useAuth } from './AuthContext';
 
 const NotificationsContext = createContext(null);
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8005';
-const WS_BASE_URL = API_BASE_URL.replace(/^http/, 'ws');
+const getWsBaseUrl = () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (apiUrl && apiUrl.startsWith('http')) {
+        return apiUrl.replace(/^http/, 'ws');
+    }
+    // Fallback to current host for relative paths or production
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const host = window.location.host || 'localhost:8005';
+    return `${protocol}://${host}`;
+};
+
+const WS_BASE_URL = getWsBaseUrl();
 
 export const NotificationsProvider = ({ children }) => {
     const { user } = useAuth();
