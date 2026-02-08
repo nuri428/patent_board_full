@@ -6,13 +6,16 @@ from app.models import User, Report, ChatSession, Notification
 from app.schemas import UserCreate, UserUpdate
 import bcrypt
 
-# Monkeypatch bcrypt for passlib compatibility
-if not hasattr(bcrypt, "__about__"):
+# Monkeypatch bcrypt for passlib compatibility (if needed)
+try:
+    if not hasattr(bcrypt, "__about__"):
 
-    class About:
-        __version__ = bcrypt.__version__
+        class About:
+            __version__ = getattr(bcrypt, "__version__", "unknown")
 
-    bcrypt.__about__ = About()
+        bcrypt.__about__ = About()
+except Exception:
+    pass
 
 
 # Monkeypatch bcrypt.hashpw to truncate passwords to 71 bytes (avoid 72-byte limit)
@@ -87,6 +90,7 @@ class UserCRUD:
             full_name=user_create.full_name,
             hashed_password=hashed_password,
             is_active=user_create.is_active,
+            role=getattr(user_create, "role", "analyst"),
         )
 
         self.db.add(db_user)

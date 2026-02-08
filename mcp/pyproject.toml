@@ -23,6 +23,10 @@ dependencies = [
     "langchain-openai>=0.0.5",
     "langchain-community>=0.0.10",
     "pandas>=2.3.3",
+    "opensearch-py>=2.4.0",
+    "FlagEmbedding>=1.2.5",
+    "torch>=2.0.0",
+    "transformers>=4.30.0",
 ]
 
 [build-system]

@@ -1,4 +1,4 @@
-# Patent Board - Patent Analysis Platform
+# Patent Board - Project Status (IN PROGRESS) 🚧
 
 ## 🏗️ Architecture
 
@@ -44,62 +44,27 @@
 
 ```
 patent_board_full/
-├── app/
-│   ├── __init__.py              # FastAPI app initialization
-│   ├── api/v1/                 # API routes
-│   │   ├── api.py              # API router aggregation
-│   │   ├── endpoints/           # Individual endpoint modules
-│   │   │   ├── auth.py          # Authentication endpoints
-│   │   │   ├── patents.py        # Patent search/details
-│   │   │   ├── chat.py          # AI chat interface
-│   │   │   ├── reports.py       # Report generation
-│   │   │   ├── admin.py          # Administration features
-│   │   │   ├── analytics.py      # Data analytics
-│   │   │   ├── export.py         # Data export
-│   │   │   ├── user.py           # User dashboard
-│   │   │   └── notifications.py  # Notification system
-│   ├── core/
-│   │   └── config.py           # Configuration management
-│   ├── db/
-│   │   └── __init__.py         # Database connections (MariaDB + Neo4j)
-│   ├── crud/
-│   │   └── __init__.py         # Database operations
-│   ├── models/
-│   │   └── __init__.py         # SQLAlchemy models
-│   ├── schemas/
-│   │   └── __init__.py         # Pydantic schemas
-│   ├── mcp/
-│   │   └── __init__.py         # MCP client integration
-│   ├── langgraph/
-│   │   └── __init__.py         # Multi-agent report generation
-│   └── web/
-│       ├── routes.py             # Web page routes
-│       ├── templates/            # HTML templates
-│       │   ├── index.html       # Home page
-│       │   ├── patents.html     # Patent search
-│       │   ├── chat.html       # AI chat
-│       │   ├── reports.html     # Report management
-│       │   ├── admin.html       # Administration
-│       │   ├── analytics.html   # Analytics dashboard
-│       │   └── dashboard.html  # User dashboard
-│       └── static/              # CSS/JS assets
-│           ├── css/
-│           │   └── main.css
-│           └── js/
-│               ├── patents.js     # Patent search functionality
-│               ├── chat.js        # AI chat interface
-│               ├── admin.js        # Admin panel
-│               ├── analytics.js   # Analytics dashboard
-│               ├── dashboard.js   # User dashboard
-│               └── notifications.js # Notification system
-├── scripts/
-│   └── deploy.sh             # Deployment script
-├── pyproject.toml              # Dependencies and build config
-├── docker-compose.yml           # Development Docker setup
-├── docker-compose.prod.yml      # Production Docker setup
-├── Dockerfile                 # Container build definition
-├── .env.example              # Environment variables template
-└── README.md                 # Project documentation
+├── back_end/
+│   ├── app/
+│   │   ├── api/v1/                 # API routes
+│   │   │   └── endpoints/           # chat, reports, patents, auth, etc.
+│   │   ├── core/                   # config.py
+│   │   ├── db/                     # database connection
+│   │   ├── crud/                   # DB operations
+│   │   ├── models/                 # SQLAlchemy models
+│   │   ├── langgraph/              # AI agents (Chatbot, ReportGenerator)
+│   │   └── web/                    # Legacy web routes
+│   ├── pyproject.toml
+│   └── start.sh
+├── front_end/
+│   ├── src/
+│   │   ├── pages/                  # Landing, Dashboard, Chat, etc.
+│   │   ├── components/             # UI components
+│   │   └── context/                # AuthContext
+│   ├── package.json
+│   └── vite.config.js
+├── docker-compose.yml
+└── README.md
 ```
 
 ## 🛠️ Technology Stack
@@ -110,17 +75,21 @@ patent_board_full/
 - **Neo4j**: Graph database for patent relationships
 - **Pydantic**: Data validation and serialization
 - **LangGraph**: Multi-agent AI workflow orchestration
-- **MCP**: Model Context Protocol integration
+- **MCP Proxy**: Model Context Protocol proxy integration
+- **OpenSearch-Py**: Client for semantic search integration
 
 ### Frontend Technologies
-- **Bootstrap 5**: Modern responsive UI framework
-- **Vanilla JavaScript**: Lightweight client-side functionality
+- **React 19**: Modern SPA framework
+- **Tailwind CSS**: Utility-first CSS framework
+- **Vite**: Ultra-fast frontend build tool
 - **Chart.js**: Interactive data visualization
-- **WebSocket**: Real-time communication
+- **Lucide React**: Icon library
+- **Zustand**: Lightweight state management
 
 ### Database Technologies
 - **MariaDB**: Structured patent data storage
-- **Neo4j**: Graph relationships and semantic search
+- **Neo4j**: Graph relationships and network analysis
+- **OpenSearch**: Semantic search and vector embeddings
 - **Redis**: Caching and session management
 
 ### DevOps Technologies
@@ -379,16 +348,24 @@ Built with ❤️ for patent professionals and researchers using:
 
 ---
 
-## 🎯 Project Status: ✅ COMPLETED
+## 🏗️ Architecture
 
-This comprehensive Patent Analysis Platform is fully implemented and ready for production deployment. All major features including advanced search, AI-powered analysis, user management, and administrative tools are fully functional.
+- **Backend**: FastAPI with async/await patterns
+- **Frontend**: React 19 with Tailwind CSS (Vite)
+- **Database**: MariaDB + Neo4j + **OpenSearch** + **Redis**
+- **AI Integration**: 
+  - **MCP Proxy**: Secure proxy for data queries with API key management
+  - **LangGraph**: Multi-agent workflow for Chat and Report generation
+  - **OpenSearch**: Semantic search and vector embeddings
 
-### 📊 Final Metrics
-- **Total Features Implemented**: 12/12 ✅
-- **API Endpoints**: 25+ endpoints
-- **Database Models**: Complete with relationships
-- **Frontend Pages**: 7 responsive pages
-- **AI Integration**: Full MCP + LangGraph workflow
-- **Production Ready**: Docker deployment configuration included
+... (중략) ...
+
+### 📊 Current Metrics
+- **Core Infrastructure**: 95% (MariaDB, Neo4j, OpenSearch, Redis, MCP Proxy) ✅
+- **Patent Search**: 95% (Semantic & Advanced search implementation complete)
+- **AI Chat**: 90% (LangGraph Chatbot & History management complete)
+- **Reports**: 90% (Multi-agent generation & storage complete)
+- **MCP Integration**: 95% (API Key based Proxy architecture stable)
+- **Production Ready**: 85% (Docker & Core stability established, final hardening in progress)
 
 The platform provides enterprise-grade patent analysis capabilities with modern web technologies and comprehensive automation features.

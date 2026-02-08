@@ -4,13 +4,18 @@ from shared.database import get_db
 from app.crud import get_patent_crud
 from app.schemas import PatentCreate, PatentUpdate, Patent
 from typing import List
+from app.api.deps import RoleChecker, get_current_active_user
 import uuid
 from datetime import datetime
 
 router = APIRouter()
 
 
-@router.post("/", response_model=Patent)
+@router.post(
+    "/",
+    response_model=Patent,
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin"]))],
+)
 async def create_patent(patent: PatentCreate, db: AsyncSession = Depends(get_db)):
     patent_crud = get_patent_crud(db)
     db_patent = await patent_crud.get_by_patent_id(patent.patent_id)
@@ -24,7 +29,11 @@ async def create_patent(patent: PatentCreate, db: AsyncSession = Depends(get_db)
     return Patent.model_validate(created_patent)
 
 
-@router.put("/{patent_id}", response_model=Patent)
+@router.put(
+    "/{patent_id}",
+    response_model=Patent,
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin"]))],
+)
 async def update_patent(
     patent_id: str, patent_update: PatentUpdate, db: AsyncSession = Depends(get_db)
 ):
@@ -37,7 +46,9 @@ async def update_patent(
     return Patent.model_validate(updated_patent)
 
 
-@router.delete("/{patent_id}")
+@router.delete(
+    "/{patent_id}", dependencies=[Depends(RoleChecker(allowed_roles=["admin"]))]
+)
 async def delete_patent(patent_id: str, db: AsyncSession = Depends(get_db)):
     patent_crud = get_patent_crud(db)
     success = await patent_crud.delete(patent_id)
@@ -48,7 +59,11 @@ async def delete_patent(patent_id: str, db: AsyncSession = Depends(get_db)):
     return {"message": "Patent deleted successfully"}
 
 
-@router.post("/bulk", response_model=List[Patent])
+@router.post(
+    "/bulk",
+    response_model=List[Patent],
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin"]))],
+)
 async def create_patents_bulk(
     patents: List[PatentCreate], db: AsyncSession = Depends(get_db)
 ):
@@ -98,7 +113,9 @@ async def get_patent_statistics(db: AsyncSession = Depends(get_db)):
     }
 
 
-@router.post("/{patent_id}/status")
+@router.post(
+    "/{patent_id}/status", dependencies=[Depends(RoleChecker(allowed_roles=["admin"]))]
+)
 async def update_patent_status(
     patent_id: str, new_status: str, db: AsyncSession = Depends(get_db)
 ):

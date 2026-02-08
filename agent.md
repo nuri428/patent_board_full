@@ -8,19 +8,20 @@ This document provides comprehensive setup instructions and operational guidelin
 
 ### ✅ Completed Components
 - **FastAPI Backend**: Modern async REST API with modular structure
-- **Database Layer**: MariaDB + Neo4j integration with async connection management
-- **MCP Integration**: FastAPI-MCP server exposing patent database operations
-- **LangGraph Integration**: Multi-agent report generation system
-- **Frontend**: Bootstrap 5 + vanilla JavaScript with responsive design
-- **Authentication**: JWT-based security with token management
+- **Database Layer**: MariaDB + Neo4j + **OpenSearch** + **Redis**
+- **MCP Integration**: **Proxy-based** MCP integration with API Key management
+- **LangGraph Integration**: Multi-agent **Chatbot** and **Report Generation** system
+- **Frontend**: **React 19 + Tailwind CSS + Vite** (Modern SPA)
+- **Authentication**: JWT-based security with **RBAC** and MCP key management
 
 ### 🔧 Technology Stack
 ```
 Backend: FastAPI (Python 3.12+)
-Databases: MariaDB (structured) + Neo4j (graph)
+Databases: MariaDB (Structured) + Neo4j (Graph) + OpenSearch (Semantic)
+Caching: Redis
 AI Framework: LangGraph + OpenAI integration
-MCP Protocol: fastapi-mcp package
-Frontend: Bootstrap 5 + vanilla JavaScript
+MCP Protocol: Proxy architecture via app/api/v1/endpoints/mcp.py
+Frontend: React 19 + Tailwind CSS + Vite
 Package Manager: uv (fast Python package manager)
 ```
 
@@ -51,10 +52,10 @@ cp .env.example .env
 ```
 
 Access points:
-- **Web Interface**: http://localhost:8001
-- **API Documentation**: http://localhost:8001/docs
-- **MCP Server**: http://localhost:8001/mcp/
-- **Health Check**: http://localhost:8001/health
+- **Web Interface**: http://localhost:8081
+- **API Documentation**: http://localhost:8005/docs
+- **MCP Server**: http://localhost:8082
+- **Health Check**: http://localhost:8005/health
 
 ### 3. MCP Client Configuration (Claude Desktop)
 ```json
@@ -75,49 +76,51 @@ Access points:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│              AI Agent (Claude Desktop)        │
-│                     ↕ MCP Protocol           │
-│                     ↕ HTTP Request            │
-├─────────────────────────────────────────────┤
-│                FastAPI Application           │
-│  ┌─────────────┬─────────────┐    │
-│  │   MCP       │   Web API  │    │
-│  │   Server    │   Routes    │    │
-│  └─────────────┴─────────────┘    │
-│  ┌─────────────┬─────────────┐    │
-│  │    LangGraph │  Frontend  │    │
-│  │   Reports   │  Interface │    │
-│  └─────────────┴─────────────┘    │
-├─────────────────────────────────────────────┤
-│          Database Layer (Async)            │
-│  ┌─────────────┬─────────────┐    │
-│  │   MariaDB   │   Neo4j    │    │
-│  │ (Structured) │  (Graph)    │    │
-│  └─────────────┴─────────────┘    │
-└─────────────────────────────────────────────┘
+│              AI Agent (Claude Desktop)              │
+│                     ↕ MCP Protocol                  │
+├─────────────────────────────────────────────────────┤
+│                FastAPI Application                  │
+│  ┌─────────────┬─────────────┬─────────────┐        │
+│  │   MCP Proxy │   Web API   │  LangGraph  │        │
+│  │   (API Keys)│   (V1)      │  (Agents)   │        │
+│  └─────────────┴─────────────┴─────────────┘        │
+│  ┌─────────────┬─────────────┬─────────────┐        │
+│  │ OpenSearch  │    Redis    │   Frontend  │        │
+│  │ (Semantic)  │   (Cache)   │   (React)   │        │
+│  └─────────────┴─────────────┴─────────────┘        │
+├─────────────────────────────────────────────────────┤
+│          Database Layer (Async Integrations)        │
+│  ┌────────────────────┬────────────────────┐        │
+│  │      MariaDB       │       Neo4j        │        │
+│  │    (Structured)    │      (Graph)       │        │
+│  └────────────────────┴────────────────────┘        │
+└─────────────────────────────────────────────────────┘
 ```
 
 ## 📁 Key Features & Endpoints
 
-### MCP Server Tools
-- `POST /mcp/tools/list` - List available patent tools
-- `POST /mcp/tools/search_patents` - Search patents by query
-- `POST /mcp/tools/get_patent` - Get patent details by ID
-- `POST /mcp/tools/analyze_patents` - Analyze patent trends
+### MCP Proxy (V1)
+- `GET /api/v1/mcp/keys` - List user MCP API keys
+- `POST /api/v1/mcp/keys` - Generate new MCP API key
+- `POST /api/v1/mcp/proxy` - Proxy tool call to MCP server
+- `POST /api/v1/mcp/proxy/semantic-search` - OpenSearch semantic search
 
-### REST API Endpoints
+### REST API Endpoints (V1)
 - `GET /api/v1/patents/` - List patents with pagination
-- `POST /api/v1/patents/search` - Advanced patent search
-- `GET /api/v1/patents/{patent_id}` - Get patent details
-- `POST /api/v1/chat/ask` - AI-powered patent chat
-- `POST /api/v1/reports/generate` - Generate analysis reports
-- `GET /api/v1/reports/` - List generated reports
+- `POST /api/v1/patents/search` - Advanced search
+- `POST /api/v1/chat/ask` - LangGraph powered AI chat
+- `POST /api/v1/reports/generate` - Multi-agent report generation
+- `GET /api/v1/analytics/overview` - System metrics & trends
+- `GET /api/v1/export/patents/csv` - Export data to CSV/Excel/PDF
 
-### Frontend Pages
-- `/` - Dashboard with statistics and quick actions
-- `/patents` - Advanced search interface with filters
-- `/chat` - AI chat interface with history
-- `/reports` - Report generation and management
+### Frontend Structure (React)
+- `LandingPage` - Modern introduction & entry
+- `Dashboard` - Stats & activity overview
+- `PatentSearch` - Complex filtering & semantic search
+- `Chat` - AI assistant with history
+- `GraphAnalysis` - Neo4j visualization
+- `AnalysisWorkbench` - Focused patent review
+- `Admin` - Patent record management & system stats
 
 ## 🔍 MCP Implementation Details
 
@@ -189,15 +192,12 @@ def _build_graph():
 
 ### MariaDB Tables
 ```sql
--- Patents table
-CREATE TABLE patents (
-    patent_id VARCHAR(50) PRIMARY KEY,
-    title VARCHAR(500) NOT NULL,
+-- Patents table (Example)
+CREATE TABLE patent_master (
+    application_number VARCHAR(13) PRIMARY KEY,
+    title TEXT,
     abstract TEXT,
-    filing_date DATE,
-    status VARCHAR(20) DEFAULT 'pending',
-    assignee VARCHAR(255),
-    inventors JSON,
+    patent_status VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -206,7 +206,6 @@ CREATE TABLE reports (
     id VARCHAR(50) PRIMARY KEY,
     topic VARCHAR(500) NOT NULL,
     content TEXT NOT NULL,
-    patent_ids JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -253,7 +252,7 @@ LANGSMITH_API_KEY=your-langsmith-key
 
 # Application
 SECRET_KEY=your-super-secret-key
-BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8001
+BACKEND_CORS_ORIGINS=http://localhost:8081,http://localhost:8005
 ```
 
 ## 🧪 Development Workflow

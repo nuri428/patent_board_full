@@ -44,7 +44,7 @@ services:
       - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-patent-board}
 
       # MCP Server Configuration
-      - MCP_SERVER_URL=${MCP_SERVER_URL:-http://patent-board-mcp:8081}
+      - MCP_SERVER_URL=http://patent-board-mcp:8080
 
       # Application Configuration
       - PROJECT_NAME=Patent Board
@@ -53,7 +53,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
 
       # CORS Configuration
-      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-http://localhost:8080,http://localhost:5000}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-http://localhost:8080,http://localhost:5000,http://localhost:8082}
 
     volumes:
       - ./back_end:/app/back_end
@@ -64,6 +64,8 @@ services:
 
     networks:
       - patent-board-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:5000/health", "||", "exit", "1" ]
@@ -112,7 +114,7 @@ services:
     container_name: patent-board-mcp
     restart: unless-stopped
     ports:
-      - "8081:8080"
+      - "8082:8080"
     environment:
       - MARIADB_URL=${MARIADB_URL}
       - NEO4J_URI=${NEO4J_URI}
@@ -127,6 +129,8 @@ services:
       - logs:/app/logs
     networks:
       - patent-board-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - backend
     healthcheck:
@@ -134,6 +138,92 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # ============================================
+  # LangGraph Chatbot Service
+  # ============================================
+  langgraph:
+    build:
+      context: .
+      dockerfile: docker/langgraph/Dockerfile
+    container_name: patent-board-langgraph
+    restart: unless-stopped
+    ports:
+      - "8003:8001"
+    environment:
+      # Database Configuration (PA System)
+      - PA_SYSTEM_DB_URL=${PA_SYSTEM_DB_URL}
+      - PA_SYSTEM_DB_HOST=${PA_SYSTEM_DB_HOST}
+      - PA_SYSTEM_DB_PORT=${PA_SYSTEM_DB_PORT}
+      - PA_SYSTEM_DB_NAME=${PA_SYSTEM_DB_NAME}
+      - PA_SYSTEM_DB_USER=${PA_SYSTEM_DB_USER}
+      - PA_SYSTEM_DB_PASSWORD=${PA_SYSTEM_DB_PASSWORD}
+
+      # Cache Configuration (Redis)
+      - REDIS_URL=redis://patent-board-redis:6379
+
+      # AI Services Configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4-turbo-preview}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-patent-board-langgraph}
+
+      # MCP Integration
+      - MCP_SERVER_URL=http://patent-board-mcp:8080
+
+      # Application Configuration
+      - HOST=0.0.0.0
+      - PORT=8001
+      - DEBUG=${DEBUG:-true}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+      # LangGraph Configuration
+      - MAX_CONVERSATION_LENGTH=${MAX_CONVERSATION_LENGTH:-1000}
+      - MAX_CONTEXT_TOKENS=${MAX_CONTEXT_TOKENS:-4000}
+      - RESPONSE_TIMEOUT=${RESPONSE_TIMEOUT:-30}
+
+    volumes:
+      - ./back_end:/app/back_end
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+      - ./scripts:/app/scripts
+    networks:
+      - patent-board-network
+    depends_on:
+      - backend
+      - mcp
+      - redis
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health", "||", "exit", "1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  # ============================================
+  # Infrastructure Services
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: patent-board-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - patent-board-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 # ============================================
 # Network Configuration

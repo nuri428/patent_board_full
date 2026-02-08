@@ -12,6 +12,13 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from shared.database import Base
+import enum
+
+
+class UserRole(str, enum.Enum):
+    ADMIN = "admin"
+    ANALYST = "analyst"
+    VIEWER = "viewer"
 
 
 class User(Base):
@@ -23,7 +30,7 @@ class User(Base):
     full_name = Column(String(255))
     hashed_password = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
-    is_admin = Column(Boolean, default=False)
+    role = Column(String(50), default=UserRole.ANALYST.value)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

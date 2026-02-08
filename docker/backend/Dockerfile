@@ -1,23 +1,42 @@
-FROM python:3.12-slim
+# Build stage
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
     build-essential \
     libmariadb-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+
+COPY back_end/pyproject.toml back_end/uv.lock ./
+COPY README.md .
+
+# Install dependencies into a virtualenv
+RUN uv venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    uv sync --no-dev --no-install-project
+
+# Runtime stage
+FROM python:3.12-slim AS runtime
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libmariadb3 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY back_end/pyproject.toml .
-COPY README.md .
+# Copy virtualenv from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-RUN pip install --no-cache-dir uv && \
-    uv sync
-
-
+# Copy application code
 COPY . .
 
-# Add back_end to PYTHONPATH so 'app' module can be imported directly
+# Add back_end to PYTHONPATH
 ENV PYTHONPATH=/app/back_end:/app
 
 EXPOSE 5000

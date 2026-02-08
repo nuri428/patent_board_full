@@ -5,8 +5,8 @@ A comprehensive patent analysis platform built with FastAPI, featuring AI-powere
 ## 🏗️ Architecture
 
 - **Backend**: FastAPI with async/await patterns
-- **Frontend**: Bootstrap 5 with vanilla JavaScript
-- **Database**: MariaDB (structured data) + Neo4j (graph relationships)
+- **Frontend**: React + Vite with Tailwind CSS
+- **Database**: MariaDB (structured data) + Neo4j (graph relationships) + OpenSearch (semantic search)
 - **AI Integration**: 
   - **MCP**: Model Context Protocol for data queries
   - **LangGraph**: Multi-agent workflow for report generation
@@ -36,36 +36,25 @@ A comprehensive patent analysis platform built with FastAPI, featuring AI-powere
 
 ```
 patent_board_full/
-├── app/
-│   ├── __init__.py              # FastAPI app initialization
-│   ├── api/v1/                 # API routes
-│   │   ├── api.py              # API router aggregation
-│   │   └── endpoints/           # Individual endpoint modules
-│   │       ├── auth.py          # Authentication endpoints
-│   │       ├── patents.py        # Patent search/details
-│   │       ├── chat.py          # AI chat interface
-│   │       └── reports.py       # Report generation
-│   ├── core/
-│   │   └── config.py           # Configuration management
-│   ├── db/
-│   │   └── __init__.py         # Database connections (MariaDB + Neo4j)
-│   ├── crud/
-│   │   └── __init__.py         # Database operations
-│   ├── models/
-│   │   └── __init__.py         # SQLAlchemy models
-│   ├── schemas/
-│   │   └── __init__.py         # Pydantic schemas
-│   ├── mcp/
-│   │   └── __init__.py         # MCP client integration
-│   ├── langgraph/
-│   │   └── __init__.py         # Multi-agent report generation
-│   └── web/
-│       ├── routes.py             # Web page routes
-│       ├── templates/            # HTML templates
-│       └── static/              # CSS/JS assets
-├── pyproject.toml              # Dependencies and build config
-├── .env.example              # Environment variables template
-└── start.sh                  # Startup script
+├── back_end/
+│   ├── app/
+│   │   ├── api/v1/                 # API routes
+│   │   │   └── endpoints/           # Endpoint modules (chat, reports, etc.)
+│   │   ├── core/                   # Configuration management
+│   │   ├── db/                     # Database connections
+│   │   ├── crud/                   # Database operations
+│   │   ├── models/                 # SQLAlchemy models
+│   │   ├── langgraph/              # AI workflows (Chatbot, Reports)
+│   │   └── web/                    # Legacy/Page routes
+│   ├── pyproject.toml              # Backend dependencies
+│   └── start.sh                    # Backend startup script
+├── front_end/
+│   ├── src/                        # React components and pages
+│   ├── index.html                  # Entry point
+│   ├── package.json                # Frontend dependencies
+│   └── vite.config.js              # Vite configuration
+├── docker-compose.yml              # Services orchestration
+└── .env.example                    # Environment variables template
 ```
 
 ## 🛠️ Setup & Installation
@@ -105,9 +94,9 @@ patent_board_full/
 
 ## 🌐 Access Points
 
-- **Web Interface**: http://localhost:8001
-- **API Documentation**: http://localhost:8001/docs
-- **Health Check**: http://localhost:8001/health
+- **Web Interface**: http://localhost:3301
+- **API Documentation**: http://localhost:8005/docs
+- **Health Check**: http://localhost:8005/health
 
 ## 🔧 Configuration
 
@@ -139,6 +128,7 @@ Key `.env` settings:
 
 ### MCP (Model Context Protocol)
 - Provides unified interface to patent databases
+- Server running on: http://localhost:8082
 - Supports multiple query types: search, get, graph_search, semantic_search
 - Abstracts complex Neo4j Cypher queries
 - Handles both MariaDB and Neo4j data sources
@@ -257,9 +247,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **FastAPI** - Modern Python web framework
 - **MariaDB** - Structured data storage
 - **Neo4j** - Graph database for relationships
+- **OpenSearch** - Vector search for semantic discovery
 - **LangGraph** - Multi-agent AI workflows
-- **MCP** - Model Context Protocol
-- **Bootstrap 5** - Modern UI framework
+- **React + Vite** - Modern frontend development
+- **Tailwind CSS** - Utility-first styling
 - **uv** - Fast Python package manager
 
 Built with ❤️ for patent professionals and researchers.

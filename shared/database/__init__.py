@@ -22,6 +22,19 @@ mariadb_session_factory = async_sessionmaker(
     expire_on_commit=False,
 )
 
+# Patent Database (for patent search)
+patentdb_engine = create_async_engine(
+    settings.PATENTDB_URL,
+    echo=True,
+    future=True,
+)
+
+patentdb_session_factory = async_sessionmaker(
+    patentdb_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
+
 
 async def get_mariadb_db() -> AsyncGenerator[AsyncSession, None]:
     async with mariadb_session_factory() as session:
@@ -59,6 +72,14 @@ neo4j_connection = Neo4jConnection()
 
 def get_neo4j_db():
     return neo4j_connection.get_session()
+
+
+async def get_patentdb() -> AsyncGenerator[AsyncSession, None]:
+    async with patentdb_session_factory() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
 
 
 get_db = get_mariadb_db

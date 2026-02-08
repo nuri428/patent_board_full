@@ -7,38 +7,47 @@ import {
     Settings,
     LogOut,
     MessageSquare,
-    Zap
+    Zap,
+    Share2,
+    Database
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = () => {
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
 
     const navItems = [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
         { icon: FileText, label: 'Reports', path: '/reports' },
         { icon: MessageSquare, label: 'Chat', path: '/chat' },
         { icon: Search, label: 'Patent Search', path: '/search' },
+        { icon: Share2, label: 'Graph Analysis', path: '/graph' },
         { icon: Zap, label: 'Prompts', path: '/prompts' },
         { icon: Settings, label: 'Settings', path: '/settings' },
     ];
 
+    // Filter or add admin items based on user role
+    const filteredNavItems = [...navItems];
+    if (user?.role === 'admin') {
+        filteredNavItems.push({ icon: Database, label: 'Admin', path: '/admin' });
+    }
+
     return (
-        <div className="w-64 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 flex flex-col z-10">
+        <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col z-10">
             <div className="h-16 flex items-center px-6 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md">
-                        P
+                        O
                     </div>
                     <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                        PatentBoard
+                        Open Patent
                     </span>
                 </div>
             </div>
 
             <nav className="flex-1 overflow-y-auto py-4">
                 <ul className="space-y-1 px-3">
-                    {navItems.map((item) => (
+                    {filteredNavItems.map((item) => (
                         <li key={item.path}>
                             <NavLink
                                 to={item.path}

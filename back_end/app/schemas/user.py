@@ -24,9 +24,9 @@ class UserUpdate(BaseModel):
 
 class User(UserBase):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
-    is_admin: bool = False
+    role: str = "analyst"
     created_at: datetime
     updated_at: Optional[datetime] = None
 
