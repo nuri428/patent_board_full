@@ -10,6 +10,8 @@ from shared.database import get_db
 from app.crud import get_user_crud
 from app.schemas import UserCreate, User
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Request
+from app.crud.audit import get_audit_crud
 
 
 router = APIRouter()
@@ -32,6 +34,7 @@ class UserResponse(BaseModel):
     id: str
     email: str
     full_name: Optional[str] = None
+    role: str = "analyst"
     created_at: datetime
 
 
@@ -83,7 +86,7 @@ async def get_current_user(
 
 
 @router.post("/login", response_model=Token)
-async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
+async def login(request: Request, user: UserLogin, db: AsyncSession = Depends(get_db)):
     """사용자 로그인"""
     user_crud = get_user_crud(db)
 
@@ -100,6 +103,17 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
         data={"sub": str(db_user.id)}, expires_delta=access_token_expires
     )
 
+    # Audit Log
+    audit_crud = get_audit_crud(db)
+    await audit_crud.log(
+        action="login",
+        user_id=db_user.id,
+        username=db_user.email,
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
+        status="success",
+    )
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -108,13 +122,15 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
             "id": str(db_user.id),
             "email": db_user.email,
             "full_name": db_user.full_name,
-            "is_admin": db_user.is_admin,
+            "role": db_user.role,
         },
     }
 
 
 @router.post("/register", response_model=User)
-async def register(user: UserRegister, db: AsyncSession = Depends(get_db)):
+async def register(
+    request: Request, user: UserRegister, db: AsyncSession = Depends(get_db)
+):
     """사용자 회원가입"""
     user_crud = get_user_crud(db)
 
@@ -133,6 +149,17 @@ async def register(user: UserRegister, db: AsyncSession = Depends(get_db)):
             full_name=user.full_name,
             username=user.email.split("@")[0],  # Use email prefix as username
         )
+    )
+
+    # Audit Log
+    audit_crud = get_audit_crud(db)
+    await audit_crud.log(
+        action="register",
+        user_id=db_user.id,
+        username=db_user.email,
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
+        status="success",
     )
 
     return db_user
