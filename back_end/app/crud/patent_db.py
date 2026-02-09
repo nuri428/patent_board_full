@@ -128,7 +128,36 @@ class PatentDBCRUD:
     async def search_all_patents(
         self, search_params: PatentSearch
     ) -> Tuple[List[dict], int]:
-        """한국 + 해외 특허 통합 검색"""
+        """한국 + 해외 특허 통합 검색 (OpenSearch k-NN semantic search 지원)"""
+        # 만약 query 필드가 있다면 OpenSearch k-NN 시맨틱 검색 수행
+        if search_params.query:
+            from app.langgraph.mcp_client import get_mcp_client
+
+            mcp = await get_mcp_client()
+            try:
+                # OpenSearch k-NN 검색 (MCP 툴 활용)
+                semantic_results = await mcp.semantic_search(
+                    query=search_params.query, limit=search_params.limit
+                )
+
+                if semantic_results and "results" in semantic_results:
+                    patent_ids = [
+                        r.get("patent_id") for r in semantic_results["results"]
+                    ]
+                    # 검색된 ID들에 대해 상세 정보 MariaDB에서 조회
+                    # (간단하게 루프를 돌거나 IN 쿼리 사용)
+                    all_patents = []
+                    for pid in patent_ids:
+                        detail = await self.get_patent_detail(pid)
+                        if detail:
+                            all_patents.append(detail)
+
+                    return all_patents, len(all_patents)
+            except Exception as e:
+                # OpenSearch 실패 시 키워드 검색으로 폴백 하거나 로그 남김
+                print(f"Semantic search failed: {e}")
+
+        # 기본 RDB 키워드 검색 (기존 로직)
         kr_patents, kr_total = await self.search_kr_patents(search_params)
         foreign_patents, foreign_total = await self.search_foreign_patents(
             search_params
@@ -137,8 +166,6 @@ class PatentDBCRUD:
         all_patents = kr_patents + foreign_patents
         total = kr_total + foreign_total
 
-        # Sort by filing_date descending, handle limit/offset for combined results
-        # For now, just return combined results (pagination applied per-source)
         return all_patents, total
 
     async def get_patent_detail(self, patent_id: str) -> Optional[dict]:
@@ -205,6 +232,21 @@ class PatentDBCRUD:
             }
 
         return None
+    
+    async def get_statistics(self) -> dict:
+        """한국 및 해외 특허 통계 조회"""
+        kr_count_result = await self.db.execute(select(func.count()).select_from(PatentMaster))
+        us_count_result = await self.db.execute(
+            select(func.count()).select_from(ForeignPatentMaster)
+            .where(ForeignPatentMaster.country_code == 'US')
+        )
+        kr_total = kr_count_result.scalar() or 0
+        us_total = us_count_result.scalar() or 0
+        return {
+            "kr_total": kr_total,
+            "us_total": us_total,
+            "total": kr_total + us_total
+        }
 
 
 def get_patentdb_crud(db: AsyncSession) -> PatentDBCRUD:

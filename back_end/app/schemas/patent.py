@@ -81,6 +81,7 @@ class PatentDetail(Patent):
 class PatentSearch(BaseModel):
     limit: int = 100
     offset: int = 0
+    query: Optional[str] = None
     title: Optional[str] = None
     abstract: Optional[str] = None
     assignee: Optional[str] = None

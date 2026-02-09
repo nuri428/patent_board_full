@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
-from typing import Optional, List, Dict
+from pydantic import field_validator
+from typing import Optional, List, Dict, Any
 import logging
 
 logger = logging.getLogger(__name__)
@@ -46,13 +47,39 @@ class Settings(BaseSettings):
     CHECKPOINT_MEMORY_BACKEND: str = "memory"  # "memory", "redis", "sql"
 
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = [
+    BACKEND_CORS_ORIGINS: Any = [
         "http://localhost:3000",  # React frontend
         "http://localhost:8002",
         "http://localhost:3300",
         "http://localhost:3301",
         "http://localhost:8003",  # LangGraph API
     ]
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            if v.startswith("["):
+                import json
+                try:
+                    return json.loads(v)
+                except:
+                    pass
+            return [i.strip() for i in v.split(",")]
+        return v
+
+    @field_validator("URL_GENERATION_SOURCES", mode="before")
+    @classmethod
+    def assemble_url_sources(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            if v.startswith("["):
+                import json
+                try:
+                    return json.loads(v)
+                except:
+                    pass
+            return [i.strip() for i in v.split(",")]
+        return v
 
     # App
     PROJECT_NAME: str = "Patent Board"
@@ -167,7 +194,7 @@ Relevant patents found:
     ]
 
     # URL Generation Configuration
-    URL_GENERATION_SOURCES: List[str] = ["google", "uspto", "kipris"]
+    URL_GENERATION_SOURCES: Any = ["google", "uspto", "kipris"]
     URL_GENERATION_DEFAULT_COUNTRY: str = "auto"
 
     class Config:
