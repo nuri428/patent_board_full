@@ -21,17 +21,51 @@ services:
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
       - ENVIRONMENT=production
       - DEBUG=false
-      - LOG_LEVEL=INFO
+      - HEALTHCHECK_URL=http://localhost:8001/health
+      - MCP_SERVER_URL=http://patent-board-mcp-prod:8080
+      - OPENSEARCH_HOST=${OPENSEARCH_HOST}
+      - OPENSEARCH_PORT=${OPENSEARCH_PORT}
+    networks:
+      - patent-board-network-prod
+    depends_on:
+      - redis
+      - mcp
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+  mcp:
+    build:
+      context: .
+      dockerfile: docker/mcp/Dockerfile
+    container_name: patent-board-mcp-prod
+    restart: always
+    environment:
+      - MARIADB_URL=${MARIADB_URL}
+      - PATENTDB_URL=${PATENTDB_URL}
+      - NEO4J_URI=${NEO4J_URI}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENSEARCH_HOST=${OPENSEARCH_HOST}
+      - OPENSEARCH_PORT=${OPENSEARCH_PORT}
+      - OPENSEARCH_USER=${OPENSEARCH_USER}
+      - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
     networks:
       - patent-board-network-prod
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: 1G
+          cpus: '2.0'
+          memory: 4G
         reservations:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '1.0'
+          memory: 2G
 
   frontend:
     build:

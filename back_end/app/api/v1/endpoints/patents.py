@@ -48,6 +48,18 @@ async def search_patents(
     return {"patents": patents, "total": total}
 
 
+@router.get("/statistics", response_model=dict)
+async def get_patent_statistics(
+    db: AsyncSession = Depends(get_patentdb),
+) -> Any:
+    """
+    Get patent statistics (KR/US counts).
+    """
+    crud = get_patentdb_crud(db)
+    stats = await crud.get_statistics()
+    return stats
+
+
 @router.get("/{patent_id}", response_model=dict)
 async def get_patent_detail(
     patent_id: str, db: AsyncSession = Depends(get_patentdb)
