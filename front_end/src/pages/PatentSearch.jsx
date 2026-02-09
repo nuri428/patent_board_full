@@ -6,6 +6,7 @@ import { Search, Filter, Calendar, Building, FileText, ChevronLeft, ChevronRight
 const PatentSearch = () => {
     const [isAnalystMode, setIsAnalystMode] = useState(false);
     const [searchParams, setSearchParams] = useState({
+        query: '',
         title: '',
         abstract: '',
         assignee: '',
@@ -177,11 +178,11 @@ const PatentSearch = () => {
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <input
                                     type="text"
-                                    name="title"
-                                    placeholder="Enter search keywords or title..."
-                                    value={searchParams.title}
+                                    name="query"
+                                    placeholder="Enter search keywords or semantic query..."
+                                    value={searchParams.query || searchParams.title}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-lg"
+                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-lg bg-white text-slate-900"
                                 />
                             </div>
                         </div>
@@ -199,7 +200,7 @@ const PatentSearch = () => {
                                             placeholder="Deep search for technical terms..."
                                             value={searchParams.abstract}
                                             onChange={handleChange}
-                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white text-slate-900"
                                         />
                                     </div>
                                 </div>
@@ -214,7 +215,7 @@ const PatentSearch = () => {
                                             placeholder="e.g. H01M"
                                             value={searchParams.ipc}
                                             onChange={handleChange}
-                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white text-slate-900"
                                         />
                                     </div>
                                 </div>
@@ -229,7 +230,7 @@ const PatentSearch = () => {
                                             placeholder="Samsung, LG, etc."
                                             value={searchParams.assignee}
                                             onChange={handleChange}
-                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white text-slate-900"
                                         />
                                     </div>
                                 </div>
@@ -244,7 +245,7 @@ const PatentSearch = () => {
                                             placeholder="Inventor name..."
                                             value={searchParams.inventor}
                                             onChange={handleChange}
-                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white text-slate-900"
                                         />
                                     </div>
                                 </div>
@@ -298,7 +299,7 @@ const PatentSearch = () => {
                                             name="filing_date_from"
                                             value={searchParams.filing_date_from}
                                             onChange={handleChange}
-                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white text-slate-900"
                                         />
                                     </div>
                                 </div>
@@ -312,7 +313,7 @@ const PatentSearch = () => {
                                             name="filing_date_to"
                                             value={searchParams.filing_date_to}
                                             onChange={handleChange}
-                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white text-slate-900"
                                         />
                                     </div>
                                 </div>

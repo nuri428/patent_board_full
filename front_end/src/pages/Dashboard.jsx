@@ -11,7 +11,8 @@ const Dashboard = () => {
     const { user } = useAuth();
     const [stats, setStats] = useState({
         totalReports: 0,
-        totalPatents: 0,
+        krPatents: 0,
+        usPatents: 0,
         credits: 0
     });
     const [recentReports, setRecentReports] = useState([]);
@@ -20,13 +21,20 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const reportsRes = await api.get('/reports/?skip=0&limit=5');
-                const reports = reportsRes.data;
-                setRecentReports(reports);
+                // Fetch reports and stats concurrently
+                const [reportsRes, statsRes] = await Promise.all([
+                    api.get('/reports/?skip=0&limit=5'),
+                    api.get('/patents/statistics')
+                ]);
 
+                const reports = reportsRes.data;
+                const patentStats = statsRes.data;
+
+                setRecentReports(reports);
                 setStats({
                     totalReports: reports.length,
-                    totalPatents: 12503,
+                    krPatents: patentStats.kr_total,
+                    usPatents: patentStats.us_total,
                     credits: 500
                 });
 
@@ -35,7 +43,8 @@ const Dashboard = () => {
                         const adminStats = await api.get('/admin/statistics');
                         setStats(prev => ({
                             ...prev,
-                            totalPatents: adminStats.data.total_patents,
+                            // If admin stats are more comprehensive, we can use them
+                            // but for now we prioritize the specific KR/US counts
                             totalReports: adminStats.data.total_reports
                         }));
                     } catch (err) {
@@ -61,14 +70,21 @@ const Dashboard = () => {
             value: stats.totalReports,
             icon: FileText,
             color: 'bg-indigo-50 text-indigo-600',
-            trend: 12
+            trend: 0
         },
         {
-            title: 'Analyzed Patents',
-            value: stats.totalPatents.toLocaleString(),
+            title: 'KR Patents',
+            value: stats.krPatents.toLocaleString(),
             icon: Database,
             color: 'bg-emerald-50 text-emerald-600',
-            trend: 5
+            trend: 0
+        },
+        {
+            title: 'US Patents',
+            value: stats.usPatents.toLocaleString(),
+            icon: Database,
+            color: 'bg-blue-50 text-blue-600',
+            trend: 0
         },
         {
             title: 'AI Credits',
@@ -117,7 +133,7 @@ const Dashboard = () => {
             </header>
 
             {/* Stats Grid */}
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {statCards.map((stat, index) => (
                     <motion.div
                         key={index}
@@ -179,7 +195,7 @@ const Dashboard = () => {
                                 <input
                                     type="text"
                                     placeholder="Patent ID, Keyword, or IPC..."
-                                    className="w-full pl-4 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm transition-all"
+                                    className="w-full pl-4 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm transition-all text-slate-900"
                                 />
                             </div>
                             <button className="w-full bg-slate-950 text-white py-4 rounded-2xl font-bold hover:bg-slate-900 transition-all shadow-xl shadow-slate-200 active:scale-95">

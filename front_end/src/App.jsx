@@ -36,7 +36,7 @@ const AppContent = () => {
       <Routes>
         {isAuthenticated ? (
           <>
-            <Route path="/" element={<Navigate to="/chat" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route element={<ProtectedLayout />}>
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
