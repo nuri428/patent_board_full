@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     OPENSEARCH_PASSWORD: str = Field("admin", description="OpenSearch password")
     OPENSEARCH_USE_SSL: bool = Field(False, description="Use SSL for OpenSearch")
     OPENSEARCH_INDEX_PREFIX: str = Field("patents", description="OpenSearch index prefix")
+    OPENSEARCH_PATENT_INDEX: str = Field("unified-patents-v1", description="Full index name for patent semantic search")
 
     BGE_M3_MODEL_NAME: str = Field("BAAI/bge-m3", description="BGE-M3 model name")
     BGE_M3_DEVICE: str = Field("cpu", description="BGE-M3 device (cpu/cuda)")
