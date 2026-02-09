@@ -456,7 +456,7 @@ async def index_patent_sections(
 
         embeddings = await embedding_service.encode_text(input.section_content)
 
-        index_name = f"{settings.OPENSEARCH_INDEX_PREFIX}_sections"
+        index_name = settings.OPENSEARCH_PATENT_INDEX
         doc = {
             "application_number": input.patent_id,
             "section_type": input.section_type,
@@ -529,7 +529,7 @@ async def search_patent_sections(
             )
 
         response = await opensearch.search(
-            index=f"{settings.OPENSEARCH_INDEX_PREFIX}_sections", body=search_body
+            index=settings.OPENSEARCH_PATENT_INDEX, body=search_body
         )
 
         hits = response["hits"]["hits"]
@@ -553,26 +553,52 @@ async def semantic_search(
         embedding_service = EmbeddingService()
 
         query_embeddings = await embedding_service.encode_text(input.query)
+        
+        # Debug logging
+        print(f"[DEBUG] Query: {input.query}")
+        print(f"[DEBUG] Embedding length: {len(query_embeddings['dense_vector'])}")
+        print(f"[DEBUG] Embedding sample (first 5): {query_embeddings['dense_vector'][:5]}")
 
+        # Use script_score with knn_score function for nmslib index
         search_body = {
             "size": input.limit,
-            "min_score": input.similarity_threshold,
             "query": {
-                "knn": {
-                    "embedding": {
-                        "vector": query_embeddings["dense_vector"],
-                        "k": input.limit,
+                "script_score": {
+                    "query": {"match_all": {}},
+                    "script": {
+                        "source": "knn_score",
+                        "lang": "knn",
+                        "params": {
+                            "field": "embedding",
+                            "query_value": query_embeddings["dense_vector"],
+                            "space_type": "cosinesimil"
+                        }
                     }
                 }
-            },
+            }
         }
+        
+        # Apply min_score filter if specified
+        if input.similarity_threshold > 0:
+            search_body["min_score"] = input.similarity_threshold
 
         if input.analysis_run_id:
-            search_body["filter"] = {"term": {"analysis_run_id": input.analysis_run_id}}
+            # Wrap match_all in bool query to add filter
+            search_body["query"]["script_score"]["query"] = {
+                "bool": {
+                    "must": {"match_all": {}},
+                    "filter": {"term": {"analysis_run_id": input.analysis_run_id}}
+                }
+            }
 
+        print(f"[DEBUG] Search body: {json.dumps(search_body, indent=2, default=str)[:500]}")
+        
         response = await opensearch.search(
-            index=f"{settings.OPENSEARCH_INDEX_PREFIX}_sections", body=search_body
+            index=settings.OPENSEARCH_PATENT_INDEX, body=search_body
         )
+        
+        print(f"[DEBUG] Response total hits: {response.get('hits', {}).get('total', {})}")
+        print(f"[DEBUG] Response hits count: {len(response.get('hits', {}).get('hits', []))}")
 
         hits = response["hits"]["hits"]
         results = []
@@ -726,7 +752,7 @@ async def get_analysis_run_results(
                 }
 
                 response = await opensearch.search(
-                    index=f"{settings.OPENSEARCH_INDEX_PREFIX}_sections",
+                    index=settings.OPENSEARCH_PATENT_INDEX,
                     body=search_body,
                 )
 

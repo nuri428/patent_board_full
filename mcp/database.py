@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from neo4j import GraphDatabase, AsyncGraphDatabase
-from opensearchpy import OpenSearch
+from opensearchpy import OpenSearch, AsyncOpenSearch
 from typing import AsyncGenerator, Generator
 import contextlib
 import asyncio
@@ -77,7 +77,7 @@ async def get_neo4j_session():
         yield session
 
 
-opensearch_client = OpenSearch(
+opensearch_client = AsyncOpenSearch(
     hosts=[{
         'host': settings.OPENSEARCH_HOST, 
         'port': settings.OPENSEARCH_PORT
@@ -102,6 +102,6 @@ async def close_connections():
     await patent_engine.dispose()
     await auth_engine.dispose()
     await neo4j_driver.close()
-    # Close synchronous OpenSearch client (run in thread to avoid blocking)
+    # Close OpenSearch client
     if hasattr(opensearch_client, 'close'):
-        await asyncio.to_thread(opensearch_client.close)
+        await opensearch_client.close()
