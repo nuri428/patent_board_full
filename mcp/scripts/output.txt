@@ -1,0 +1,223 @@
+--- Inspecting OpenSearch Index: unified-patents-v1 ---
+
+[Mapping]
+{
+  "unified-patents-v1": {
+    "mappings": {
+      "properties": {
+        "abstract": {
+          "type": "text",
+          "fields": {
+            "en": {
+              "type": "text",
+              "analyzer": "english_analyzer"
+            },
+            "ko": {
+              "type": "text",
+              "analyzer": "korean_analyzer"
+            }
+          }
+        },
+        "applicants": {
+          "type": "text",
+          "fields": {
+            "en": {
+              "type": "text",
+              "analyzer": "english_analyzer"
+            },
+            "keyword": {
+              "type": "keyword"
+            },
+            "ko": {
+              "type": "text",
+              "analyzer": "korean_analyzer"
+            }
+          }
+        },
+        "application_date": {
+          "type": "date",
+          "format": "yyyy-MM-dd||yyyy/MM/dd||epoch_millis"
+        },
+        "application_number": {
+          "type": "keyword"
+        },
+        "chunk_order": {
+          "type": "long"
+        },
+        "country_code": {
+          "type": "keyword"
+        },
+        "cpc_codes": {
+          "type": "keyword"
+        },
+        "embedding": {
+          "type": "knn_vector",
+          "dimension": 1024,
+          "method": {
+            "engine": "nmslib",
+            "space_type": "cosinesimil",
+            "name": "hnsw",
+            "parameters": {
+              "ef_construction": 128,
+              "m": 16
+            }
+          }
+        },
+        "family_number": {
+          "type": "keyword"
+        },
+        "fss_config_version": {
+          "type": "integer"
+        },
+        "fss_fes_score": {
+          "type": "float"
+        },
+        "fss_gcr_score": {
+          "type": "float"
+        },
+        "fss_miv_score": {
+          "type": "float"
+        },
+        "fss_sampling_coverage": {
+          "type": "float"
+        },
+        "fss_sci_score": {
+          "type": "float"
+        },
+        "fss_tlt_score": {
+          "type": "float"
+        },
+        "fss_total_score": {
+          "type": "float"
+        },
+        "indexed_at": {
+          "type": "date"
+        },
+        "inventors": {
+          "type": "text",
+          "fields": {
+            "en": {
+              "type": "text",
+              "analyzer": "english_analyzer"
+            },
+            "keyword": {
+              "type": "keyword"
+            },
+            "ko": {
+              "type": "text",
+              "analyzer": "korean_analyzer"
+            }
+          }
+        },
+        "ipc_class": {
+          "type": "keyword"
+        },
+        "ipc_codes": {
+          "type": "keyword"
+        },
+        "ipc_codes_normalized": {
+          "type": "keyword"
+        },
+        "ipc_section": {
+          "type": "keyword"
+        },
+        "ipc_subclass": {
+          "type": "keyword"
+        },
+        "kg_extraction_method": {
+          "type": "keyword"
+        },
+        "kg_keyword_count": {
+          "type": "integer"
+        },
+        "kg_keywords": {
+          "type": "text",
+          "fields": {
+            "en": {
+              "type": "text",
+              "analyzer": "english_analyzer"
+            },
+            "keyword": {
+              "type": "keyword"
+            },
+            "ko": {
+              "type": "text",
+              "analyzer": "korean_analyzer"
+            }
+          }
+        },
+        "publication_date": {
+          "type": "date",
+          "format": "yyyy-MM-dd||yyyy/MM/dd||epoch_millis"
+        },
+        "publication_number": {
+          "type": "keyword"
+        },
+        "research_project_number": {
+          "type": "keyword"
+        },
+        "section_content": {
+          "type": "text",
+          "fields": {
+            "en": {
+              "type": "text",
+              "analyzer": "english_analyzer"
+            },
+            "ko": {
+              "type": "text",
+              "analyzer": "korean_analyzer"
+            }
+          }
+        },
+        "section_order": {
+          "type": "integer"
+        },
+        "section_title": {
+          "type": "text",
+          "fields": {
+            "en": {
+              "type": "text",
+              "analyzer": "english_analyzer"
+            },
+            "ko": {
+              "type": "text",
+              "analyzer": "korean_analyzer"
+            }
+          }
+        },
+        "section_type": {
+          "type": "keyword"
+        },
+        "title": {
+          "type": "text",
+          "fields": {
+            "en": {
+              "type": "text",
+              "analyzer": "english_analyzer"
+            },
+            "keyword": {
+              "type": "keyword"
+            },
+            "ko": {
+              "type": "text",
+              "analyzer": "korean_analyzer"
+            }
+          }
+        },
+        "updated_at": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}
+
+[Document Count]: 4829574
+
+[Sample Documents]
+- ID: US_14241169_1_7
+  Source: {'application_number': '14241169', 'country_code': 'US', 'publication_number': '11720695', 'title': 'Server-based electronic publication management', 'abstract': None, 'section_type': 'BACKGROUND', 'section_title': 'BACKGROUND', 'section_content': 'TIVE, COMMERCIAL, FINANCIAL, MANAGERIAL OR SUPERVISORY PURPOSES; SYSTEMS OR METHODS SPECIALLY ADAPTED FOR ADMINISTRATIVE, COMMERCIAL, FINANCIAL, MANAGERIAL OR SUPERVISORYÂ PURPOSES, NOT OTHERWISE PROVIDED FOR\n* G06Q10/00—Administration; Management\n* G06Q10/10—Office automation; Time management\n*     * G—PHYSICS\n* G06—COMPUTING OR CALCULATING; COUNTING\n* G06F—ELECTRIC DIGITAL DATA PROCESSING\n* G06F21/00—Security arrangements for protecting computers, components thereof, programs or data against unauthorised activity\n* G06F21/60—Protecting data\n* G06F21/62—Protecting access to data via a platform, e.g.', 'section_order': 1, 'chunk_order': 7, 'ipc_codes': [], 'cpc_codes': [], 'applicants': ['Armen Chircorian'], 'inventors': ['Armen Chircorian'], 'family_number': None, 'research_project_number': None, 'application_date': '2012-09-01', 'publication_date': '2014-07-31', 'embedding': 'Vector of size 1024', 'indexed_at': '2026-01-29T12:36:15.480594', 'updated_at': '2026-01-29T12:36:15.480594'}
+- ID: US_14241169_1_8
+  Source: {'application_number': '14241169', 'country_code': 'US', 'publication_number': '11720695', 'title': 'Server-based electronic publication management', 'abstract': None, 'section_type': 'BACKGROUND', 'section_title': 'BACKGROUND', 'section_content': 'using keys or access control rules\n*     * G—PHYSICS\n* G06—COMPUTING OR CALCULATING; COUNTING\n* G06F—ELECTRIC DIGITAL DATA PROCESSING\n* G06F40/00—Handling natural language data\n* G06F40/10—Text processing\n*     * G—PHYSICS\n* G06—COMPUTING OR CALCULATING; COUNTING\n* G06F—ELECTRIC DIGITAL DATA PROCESSING\n* G06F40/00—Handling natural language data\n* G06F40/10—Text processing\n* G06F40/12—Use of codes for handling textual entities\n* G06F40/14—Tree-structured documents\n*     * G—PHYSICS\n* G06—COMPUTING OR CALCULATING; COUNTING\n* G06F—ELECTRIC DIGITAL DATA PROCESSING\n* G06F40/00—Handling natural language data\n* G06F40/10—Text processing\n* G06F40/12—Use of codes for handling textual entities\n* G06F40/151—Transformation\n*     * G—PHYSICS\n* G06—COMPUTING OR CALCULATING; COUNTING\n* G06Q—INFORMATION AND COMMUNICATION TECHNOLOGY [ICT] SPECIALLY ADAPTED FOR ADMINISTRATIVE, COMMERCIAL, FINANCIAL, MANAGERIAL OR SUPERVISORY PURPOSES; SYSTEMS OR METHODS SPECIALLY ADAPTED FOR ADMINISTRATIVE, COMMERCIAL, ', 'section_order': 1, 'chunk_order': 8, 'ipc_codes': [], 'cpc_codes': [], 'applicants': ['Armen Chircorian'], 'inventors': ['Armen Chircorian'], 'family_number': None, 'research_project_number': None, 'application_date': '2012-09-01', 'publication_date': '2014-07-31', 'embedding': 'Vector of size 1024', 'indexed_at': '2026-01-29T12:36:15.480594', 'updated_at': '2026-01-29T12:36:15.480594'}
+- ID: US_14241169_1_13
+  Source: {'application_number': '14241169', 'country_code': 'US', 'publication_number': '11720695', 'title': 'Server-based electronic publication management', 'abstract': None, 'section_type': 'BACKGROUND', 'section_title': 'BACKGROUND', 'section_content': '* a serving entity such as a client server (e.g., implemented using one or more of: a cloud-based server, a dedicated (e.g., in-house) server, a database server, or some other type of serving entity). * This web application provides an environment that enables the users to create, share, and publish many types of information that are available in an electronic form. For example, the application may allow multiple users to corroborate, create, and share entire compiled books or publications at once with abilities for real-time management and non-linear processes. * non-linear processes include designing pages while writing content, and vice versa, or one before the other. * non-linear editing involves creating the output design and format before creating content, or vice versa. * non-linear editing involves cutting-and-pasting or dragging-and-dropping content into a previously created publication.', 'section_order': 1, 'chunk_order': 13, 'ipc_codes': [], 'cpc_codes': [], 'applicants': ['Armen Chircorian'], 'inventors': ['Armen Chircorian'], 'family_number': None, 'research_project_number': None, 'application_date': '2012-09-01', 'publication_date': '2014-07-31', 'embedding': 'Vector of size 1024', 'indexed_at': '2026-01-29T12:36:15.480594', 'updated_at': '2026-01-29T12:36:15.480594'}
