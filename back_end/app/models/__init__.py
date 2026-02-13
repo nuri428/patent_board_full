@@ -14,6 +14,9 @@ from sqlalchemy.sql import func
 from shared.database import Base
 import enum
 
+# Import archived session model
+from app.models.archived_session import ArchivedSession
+
 
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
