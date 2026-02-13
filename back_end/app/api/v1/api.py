@@ -14,6 +14,8 @@ from app.api.v1.endpoints import (
     mcp,
     patents,
     visualization,
+    health,
+    sessions,
 )
 
 api_router = APIRouter()
@@ -35,3 +37,5 @@ api_router.include_router(patents.router, prefix="/patents", tags=["patents"])
 api_router.include_router(
     visualization.router, prefix="/visualization", tags=["visualization"]
 )
+api_router.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
+api_router.include_router(health.router, tags=["health"])
