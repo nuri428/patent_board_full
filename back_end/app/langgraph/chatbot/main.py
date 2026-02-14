@@ -3,15 +3,17 @@ LangGraph Chatbot API Service
 Context-aware patent analysis chatbot with long-term memory and MCP integration.
 """
 
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, AsyncGenerator
 import uuid
 from datetime import datetime
 import asyncio
 import logging
+import json
 
 # Import our modules
 from .memory import MemoryManager
@@ -22,6 +24,7 @@ from .agents.patent_agent import PatentAgent
 from ..mcp_client import get_mcp_client, MCPClient
 from .models.database import PropertyType
 from app.core.config import settings
+from .auth_main import validate_jwt_token
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -146,6 +149,196 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat(),
         "service": "langgraph-chatbot"
     }
+
+
+async def stream_chat_response(
+    user_id: str,
+    session_id: str,
+    message: str,
+    message_metadata: Optional[Dict[str, Any]] = None,
+    title: Optional[str] = None,
+    request: Optional[Request] = None,
+) -> AsyncGenerator[str, None]:
+    """
+    Async generator that streams chat response tokens as SSE events.
+
+    Args:
+        user_id: User identifier
+        session_id: Session identifier
+        message: User message content
+        message_metadata: Optional message metadata
+        title: Optional conversation title
+        request: FastAPI Request object for disconnect detection
+
+    Yields:
+        SSE formatted event strings
+    """
+    event_id = 0
+    patent_urls = []
+
+    try:
+        # Analyze user message for patent content using PatentAgent
+        patent_analysis = None
+        if patent_agent:
+            try:
+                patent_analysis = await patent_agent.analyze_patent_text(message)
+            except Exception as e:
+                logger.warning(f"Patent analysis failed: {e}")
+
+        # Process the message with enhanced context
+        result = await chatbot_agent.process_message(
+            user_id=user_id,
+            session_id=session_id,
+            message_content=message,
+            message_metadata=message_metadata or {},
+            initial_state={
+                "context": {
+                    "session_title": title or "New Conversation",
+                    "patent_analysis": patent_analysis
+                }
+            }
+        )
+
+        # Extract patent URLs from analysis
+        if patent_analysis:
+            if isinstance(patent_analysis, dict) and 'patent_urls' in patent_analysis:
+                patent_urls = patent_analysis['patent_urls']
+            elif hasattr(patent_analysis, 'get'):
+                patent_urls = patent_analysis.get('patent_urls', [])
+
+        # Get the response content
+        response = result.get("response", {})
+        content = ""
+
+        if isinstance(response, dict):
+            content = response.get("content", str(response))
+        else:
+            content = str(response)
+
+        # Stream token-by-token
+        for char in content:
+            # Check if client disconnected
+            if request and await request.is_disconnected():
+                logger.info(f"Client disconnected during streaming (session: {session_id})")
+                break
+
+            event_id += 1
+
+            # Format SSE event with metadata
+            event_data = {
+                "token": char,
+                "session_id": session_id,
+                "type": "token"
+            }
+
+            sse_event = (
+                f"event: message\n"
+                f"id: {event_id}\n"
+                f"data: {json.dumps(event_data)}\n\n"
+            )
+
+            yield sse_event
+
+            # Small delay to prevent overwhelming the client
+            await asyncio.sleep(0.01)
+
+        # Send final event with patent URLs metadata
+        if patent_urls:
+            event_id += 1
+            final_event_data = {
+                "session_id": session_id,
+                "patent_urls": patent_urls,
+                "type": "metadata"
+            }
+            final_event = (
+                f"event: metadata\n"
+                f"id: {event_id}\n"
+                f"data: {json.dumps(final_event_data)}\n\n"
+            )
+            yield final_event
+
+        # Send done event
+        event_id += 1
+        done_event = (
+            f"event: done\n"
+            f"id: {event_id}\n"
+            f"data: {json.dumps({'session_id': session_id, 'type': 'done'})}\n\n"
+        )
+        yield done_event
+
+    except Exception as e:
+        # Log error but don't crash - send error event
+        logger.error(f"Error during streaming (session: {session_id}): {e}")
+        event_id += 1
+        error_event = (
+            f"event: error\n"
+            f"id: {event_id}\n"
+            f"data: {json.dumps({'error': str(e), 'session_id': session_id, 'type': 'error'})}\n\n"
+        )
+        yield error_event
+
+
+@app.get("/chat/stream")
+async def chat_stream(
+    message: str = Query(..., description="User message"),
+    session_id: Optional[str] = Query(None, description="Existing session ID"),
+    user_id: str = Query(..., description="User identifier"),
+    title: Optional[str] = Query(None, description="Conversation title"),
+    request: Request = None,
+    current_user_id: int = Depends(validate_jwt_token)
+):
+    """
+    SSE streaming endpoint for real-time chat responses.
+
+    Streams chat response tokens one by one using Server-Sent Events.
+
+    Query Parameters:
+        message: User message content
+        session_id: Optional existing session ID (auto-generated if not provided)
+        user_id: User identifier
+        title: Optional conversation title
+
+    Headers:
+        Authorization: Bearer JWT token (required)
+        Last-Event-ID: Last received event ID for reconnection support
+
+    Returns:
+        StreamingResponse with text/event-stream content type
+    """
+    # Verify user_id matches authenticated user
+    if str(current_user_id) != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied: user_id does not match authenticated user"
+        )
+
+    # Generate session ID if not provided
+    final_session_id = session_id or str(uuid.uuid4())
+
+    # Get Last-Event-ID for reconnection support
+    last_event_id = request.headers.get("Last-Event-ID")
+
+    # Log reconnection if applicable
+    if last_event_id:
+        logger.info(f"Client reconnecting from event ID: {last_event_id}")
+
+    # Return streaming response
+    return StreamingResponse(
+        stream_chat_response(
+            user_id=user_id,
+            session_id=final_session_id,
+            message=message,
+            message_metadata={},
+            title=title,
+            request=request
+        ),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat_message(request: ChatRequest):
