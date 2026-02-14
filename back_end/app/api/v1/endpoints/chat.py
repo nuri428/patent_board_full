@@ -1,18 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
+from typing import Optional, cast
 import httpx
 import uuid
-from datetime import datetime
+import logging
 
-from app.core.config import settings
 from app.api.deps import get_current_active_user
 from app.models import User
 from shared.database import get_db
 from app.crud.chat import get_chat_crud
+from app.crud.crud_confidence_score import get_confidence_score_crud
 from app.schemas.chat import ChatRequest, ChatResponse, ChatSessionCreate, ChatMessageCreate
+from app.services.confidence_calculator import ConfidenceCalculator
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # LangGraph Chatbot Service URL
 LANGGRAPH_CHATBOT_URL = "http://localhost:8001"
@@ -29,6 +31,8 @@ async def ask_question(
     Integrates with LangGraph chatbot service for intelligent responses.
     """
     chat_crud = get_chat_crud(db)
+    confidence_crud = get_confidence_score_crud(db)
+    confidence_calculator = ConfidenceCalculator()
     
     try:
         # Get or create session
@@ -119,7 +123,30 @@ async def ask_question(
                 sources=sources
             )
         )
-        
+
+        try:
+            confidence_result = confidence_calculator.calculate_confidence_details(
+                response=ai_response_content,
+                query=request.message,
+                sources_used=sources,
+            )
+            confidence_value = float(cast(float, confidence_result["confidence_value"]))
+            confidence_level = str(cast(str, confidence_result["confidence_level"]))
+            source_factors = cast(dict[str, object], confidence_result["source_factors"])
+            await confidence_crud.create(
+                session_id=session_uuid,
+                user_id=current_user.id,
+                confidence_value=confidence_value,
+                confidence_level=confidence_level,
+                source_factors=source_factors,
+            )
+        except Exception:
+            logger.exception(
+                "Failed to calculate/store confidence score: session_id=%s user_id=%s",
+                session_uuid,
+                current_user.id,
+            )
+
         return ChatResponse(
             message_id=ai_message.id,
             session_id=session_uuid,

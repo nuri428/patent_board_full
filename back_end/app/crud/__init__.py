@@ -7,6 +7,7 @@ from .analytics import AnalyticsCRUD, get_analytics_crud
 from .crud_archived_session import ArchivedSessionCRUD, get_archived_session_crud
 from .crud_patent_analysis import PatentAnalysisCRUD, get_patent_analysis_crud
 from .crud_session_favorite import SessionFavoriteCRUD, get_session_favorite_crud
+from .crud_confidence_score import ConfidenceScoreCRUD, get_confidence_score_crud
 
 __all__ = [
     "UserCRUD", "get_user_crud",
@@ -18,4 +19,5 @@ __all__ = [
     "ArchivedSessionCRUD", "get_archived_session_crud",
     "PatentAnalysisCRUD", "get_patent_analysis_crud",
     "SessionFavoriteCRUD", "get_session_favorite_crud",
+    "ConfidenceScoreCRUD", "get_confidence_score_crud",
 ]

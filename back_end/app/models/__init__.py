@@ -24,6 +24,7 @@ from app.models.patent_analysis import PatentAnalysis, PatentSource, PatentSourc
 from app.models.session_group import SessionGroup, GroupMember, SessionGroupTag
 
 from app.models.session_favorite import SessionFavorite
+from app.models.confidence_score import ConfidenceScore
 
 
 class UserRole(str, enum.Enum):
