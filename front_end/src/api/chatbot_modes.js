@@ -202,9 +202,9 @@ export const limitedChatbotAPI = {
     }
 };
 
-// Full Chatbot API functions (for authenticated users)
+const CHATBOT_STREAM_URL = import.meta.env.VITE_CHATBOT_STREAM_URL || 'http://localhost:8003';
+
 export const chatbotAPI = {
-    // Send chat message - uses authenticated API
     chat: async (message, sessionId = null) => {
         try {
             const response = await chatbotApi.post('/chat', {
@@ -216,6 +216,114 @@ export const chatbotAPI = {
             console.error('Chat API error:', error);
             throw error;
         }
+    },
+
+    streamChatMessage: async (message, sessionId, callbacks = {}) => {
+        const {
+            onMessage = () => {},
+            onError = () => {},
+            onComplete = () => {},
+            onMetadata = () => {}
+        } = callbacks;
+
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+
+        if (!token) {
+            throw new Error('Authentication token not found. Please login first.');
+        }
+
+        if (!userId) {
+            throw new Error('User ID not found. Please login first.');
+        }
+
+        const params = new URLSearchParams({
+            message: message,
+            session_id: sessionId || '',
+            user_id: userId,
+            token: token
+        });
+
+        let fullResponse = '';
+        let lastEventId = null;
+        let eventSource = null;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 3;
+
+        const connectStream = () => {
+            eventSource = new EventSource(
+                `${CHATBOT_STREAM_URL}/chat/stream?${params.toString()}`
+            );
+
+            eventSource.addEventListener('message', (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    lastEventId = event.lastEventId;
+
+                    if (data.type === 'token') {
+                        fullResponse += data.token;
+                        onMessage({
+                            token: data.token,
+                            partial: fullResponse,
+                            sessionId: data.session_id
+                        });
+                    } else if (data.type === 'metadata') {
+                        onMetadata({
+                            sessionId: data.session_id,
+                            patentUrls: data.patent_urls
+                        });
+                    } else if (data.type === 'done') {
+                        onComplete({
+                            response: fullResponse,
+                            sessionId: data.session_id
+                        });
+                        closeStream();
+                    } else if (data.type === 'error') {
+                        onError(new Error(data.error));
+                        closeStream();
+                    }
+                } catch (parseError) {
+                    console.error('Failed to parse SSE event:', parseError, event.data);
+                    onError(new Error('Failed to parse server response'));
+                }
+            });
+
+            eventSource.onerror = (error) => {
+                console.error('SSE connection error:', error);
+
+                if (eventSource.readyState !== EventSource.CLOSED && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                    reconnectAttempts++;
+                    console.log(`Attempting reconnect ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}...`);
+
+                    setTimeout(() => {
+                        if (lastEventId) {
+                            params.set('last_event_id', lastEventId);
+                        }
+                        connectStream();
+                    }, 2000 * reconnectAttempts);
+                } else {
+                    onError(new Error('Connection error. Unable to reconnect.'));
+                    closeStream();
+                }
+            };
+        };
+
+        const closeStream = () => {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+        };
+
+        connectStream();
+
+        return {
+            abort: () => {
+                console.log('Aborting SSE connection...');
+                closeStream();
+            },
+            close: closeStream
+        };
     },
 
     // Create new session - uses authenticated API
