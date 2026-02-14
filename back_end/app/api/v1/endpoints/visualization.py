@@ -29,7 +29,7 @@ async def get_network_map(
     mcp_service = MCPService(api_key=api_key)
 
     try:
-        return await mcp_service.network_analysis(request.dict())
+        return await mcp_service.network_analysis(request.model_dump())
     except Exception as e:
         # High-quality fallback for visualization demo if Neo4j is not connected
         return ProxyResult(

@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 from typing import Optional, List, Dict, Any
 import logging
@@ -205,9 +205,7 @@ Relevant patents found:
     URL_GENERATION_SOURCES: Any = ["google", "uspto", "kipris"]
     URL_GENERATION_DEFAULT_COUNTRY: str = "auto"
 
-    class Config:
-        env_file = ".env"
-        extra = "ignore"
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     def validate_configuration(self) -> bool:
         """Validate configuration settings and log warnings for missing critical settings"""
@@ -222,7 +220,6 @@ Relevant patents found:
             logger.warning(
                 "OPENAI_MODEL is not set. Using default gpt-4-turbo-preview."
             )
-            self.OPENAI_MODEL = "gpt-4-turbo-preview"
 
         # Check database URLs
         if not self.MARIADB_URL:

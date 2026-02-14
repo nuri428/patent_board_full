@@ -18,7 +18,7 @@ from app.models import User
 from app.models.patent_analysis import PatentSource, PatentAnalysis
 from shared.database import get_db
 
-router = APIRouter(prefix="/api/v1/patents", tags=["patents", "search"])
+router = APIRouter(prefix="/patents", tags=["patents", "search"])
 
 
 class PatentSearchRequest(BaseModel):

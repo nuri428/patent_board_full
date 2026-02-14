@@ -20,7 +20,7 @@ from app.models.patent_analysis import PatentSource, PatentAnalysis
 from app.schemas.patent import PatentSearch
 from shared.database import get_db
 
-router = APIRouter(prefix="/api/v1/patent-country", tags=["patents", "country-search"])
+router = APIRouter(prefix="/patent-country", tags=["patents", "country-search"])
 
 
 class PatentCountry(str, Enum):
