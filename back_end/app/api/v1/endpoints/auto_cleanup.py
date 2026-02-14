@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 
 from app.api.deps import get_current_active_user
 from app.models import User
-from app.scheduler.auto_cleanup_scheduler import (
+from app.auto_cleanup_scheduler import (
     AutoCleanupScheduler,
     CleanupCycleStats,
     get_scheduler,

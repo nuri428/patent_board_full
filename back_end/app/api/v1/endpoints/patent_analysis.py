@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request
 
-from app.crud.patent_analysis import PatentAnalysisCRUD, get_patent_analysis_crud
+from app.crud.crud_patent_analysis import PatentAnalysisCRUD, get_patent_analysis_crud
 from app.api import deps
 from app.models import User
 from app.schemas.patent_analysis import (

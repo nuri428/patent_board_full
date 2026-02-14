@@ -22,6 +22,9 @@ mariadb_session_factory = async_sessionmaker(
     expire_on_commit=False,
 )
 
+# Backward-compatible alias used across backend modules
+AsyncSessionLocal = mariadb_session_factory
+
 # Patent Database (for patent search)
 patentdb_engine = create_async_engine(
     settings.PATENTDB_URL,
