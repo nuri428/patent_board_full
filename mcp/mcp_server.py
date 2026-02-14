@@ -1,4 +1,8 @@
-from fastapi import FastAPI, HTTPException, Depends
+import logging
+import time
+from collections import defaultdict
+
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
@@ -23,6 +27,9 @@ from tools.patent_identifier import (
     PatentIdentifier,
     PatentUrl
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 # --- Input Schemas ---
@@ -98,6 +105,12 @@ class SemanticSearchInput(BaseModel):
     analysis_run_id: Optional[str] = Field(None, description="Filter by analysis run")
 
 
+class HybridPatentOverviewInput(BaseModel):
+    query: str = Field(..., description="Keyword query for hybrid patent overview")
+    limit: int = Field(10, le=30)
+    include_graph: bool = Field(True, description="Include Neo4j graph insights")
+
+
 class NetworkAnalysisInput(BaseModel):
     node_types: Optional[List[str]] = Field(
         default=["Corporation", "Technology", "Patent"],
@@ -152,13 +165,19 @@ class PatentAnalysisInput(BaseModel):
 
 # Patent Tools Response Schemas
 class PatentExtractionResponse(BaseModel):
-    found: List[Dict] = Field(default_factory=list, description="Found patent identifiers")
+    found: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Found patent identifiers",
+    )
     raw_text: str = Field(..., description="Original input text")
     has_patents: bool = Field(False, description="Whether any patents were found")
 
 
 class PatentUrlResponse(BaseModel):
-    urls: List[Dict] = Field(default_factory=list, description="Generated URLs")
+    urls: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Generated URLs",
+    )
     errors: List[str] = Field(default_factory=list, description="Errors encountered")
 
 
@@ -204,13 +223,48 @@ def wrap_response(
 
 mcp_app = FastAPI(title="Patent MCP Server", version="1.0.0")
 
+_metrics: Dict[str, Any] = {
+    "requests_total": 0,
+    "errors_total": 0,
+    "total_latency_ms": 0.0,
+    "by_path": defaultdict(lambda: {"count": 0, "errors": 0, "latency_ms": 0.0}),
+}
+
+
+@mcp_app.middleware("http")
+async def collect_request_metrics(request: Request, call_next):
+    start = time.perf_counter()
+    path = request.url.path
+    _metrics["requests_total"] += 1
+    by_path = _metrics["by_path"][path]
+    by_path["count"] += 1
+
+    response = None
+    try:
+        response = await call_next(request)
+        if response.status_code >= 400:
+            _metrics["errors_total"] += 1
+            by_path["errors"] += 1
+        return response
+    except Exception:
+        _metrics["errors_total"] += 1
+        by_path["errors"] += 1
+        raise
+    finally:
+        latency_ms = (time.perf_counter() - start) * 1000
+        _metrics["total_latency_ms"] += latency_ms
+        by_path["latency_ms"] += latency_ms
+        if response is not None and response.status_code >= 500:
+            logger.exception("Request failed with 5xx status: %s", path)
+
 # Enable CORS for Frontend
 mcp_app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3300",
-        "http://localhost:5173",
-    ],
+    allow_origins=getattr(
+        settings,
+        "MCP_CORS_ORIGINS",
+        ["http://localhost:3300", "http://localhost:5173"],
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -219,7 +273,41 @@ mcp_app.add_middleware(
 
 @mcp_app.get("/health")
 async def mcp_health():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "auth_modes": {
+            "master_key": getattr(settings, "MCP_ALLOW_MASTER_KEY", True),
+            "jwt": bool(getattr(settings, "MCP_JWT_SECRET_KEY", None)),
+            "db_api_key": True,
+            "allow_non_db_keys": getattr(settings, "MCP_AUTH_ALLOW_NON_DB_KEYS", False),
+        },
+    }
+
+
+@mcp_app.get("/metrics")
+async def mcp_metrics(key: Any = Depends(verify_api_key)):
+    requests_total = _metrics["requests_total"]
+    avg_latency_ms = (
+        _metrics["total_latency_ms"] / requests_total if requests_total else 0.0
+    )
+    by_path_stats = []
+    for path, stats in _metrics["by_path"].items():
+        avg_path_latency = stats["latency_ms"] / stats["count"] if stats["count"] else 0.0
+        by_path_stats.append(
+            {
+                "path": path,
+                "count": stats["count"],
+                "errors": stats["errors"],
+                "avg_latency_ms": round(avg_path_latency, 3),
+            }
+        )
+
+    return {
+        "requests_total": requests_total,
+        "errors_total": _metrics["errors_total"],
+        "avg_latency_ms": round(avg_latency_ms, 3),
+        "by_path": sorted(by_path_stats, key=lambda item: item["count"], reverse=True),
+    }
 
 
 @mcp_app.post("/tools/list")
@@ -281,6 +369,10 @@ async def list_tools(key: Any = Depends(verify_api_key)):
         {
             "name": "analyze_patent_text",
             "description": "Comprehensive patent text analysis - extract IDs and generate authoritative URLs.",
+        },
+        {
+            "name": "hybrid_patent_overview",
+            "description": "Combine MariaDB patent search and Neo4j graph insights for a single query overview.",
         },
     ]
 
@@ -491,7 +583,7 @@ async def search_patent_sections(
 
         query_embeddings = await embedding_service.encode_text(input.query)
 
-        search_body = {
+        search_body: Dict[str, Any] = {
             "size": input.limit,
             "query": {
                 "bool": {
@@ -553,14 +645,9 @@ async def semantic_search(
         embedding_service = EmbeddingService()
 
         query_embeddings = await embedding_service.encode_text(input.query)
-        
-        # Debug logging
-        print(f"[DEBUG] Query: {input.query}")
-        print(f"[DEBUG] Embedding length: {len(query_embeddings['dense_vector'])}")
-        print(f"[DEBUG] Embedding sample (first 5): {query_embeddings['dense_vector'][:5]}")
 
         # Use script_score with knn_score function for nmslib index
-        search_body = {
+        search_body: Dict[str, Any] = {
             "size": input.limit,
             "query": {
                 "script_score": {
@@ -591,14 +678,9 @@ async def semantic_search(
                 }
             }
 
-        print(f"[DEBUG] Search body: {json.dumps(search_body, indent=2, default=str)[:500]}")
-        
         response = await opensearch.search(
             index=settings.OPENSEARCH_PATENT_INDEX, body=search_body
         )
-        
-        print(f"[DEBUG] Response total hits: {response.get('hits', {}).get('total', {})}")
-        print(f"[DEBUG] Response hits count: {len(response.get('hits', {}).get('hits', []))}")
 
         hits = response["hits"]["hits"]
         results = []
@@ -610,6 +692,73 @@ async def semantic_search(
         return wrap_response(results, engine="OpenSearch-Semantic", total=len(results))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Semantic search failed: {str(e)}")
+
+
+@mcp_app.post("/tools/hybrid_patent_overview", response_model=StandardResponse)
+async def hybrid_patent_overview(
+    input: HybridPatentOverviewInput,
+    key: Any = Depends(verify_api_key),
+):
+    kr_results = []
+    foreign_results = []
+
+    async for session in get_patent_db():
+        kr_stmt = select(KRPatent).where(
+            or_(
+                KRPatent.title.like(f"%{input.query}%"),
+                KRPatent.abstract.like(f"%{input.query}%"),
+            )
+        )
+        kr_stmt = kr_stmt.limit(input.limit)
+        kr_rows = await session.execute(kr_stmt)
+        kr_patents = kr_rows.scalars().all()
+        kr_results = [
+            {
+                "id": patent.application_number,
+                "title": patent.title,
+                "status": patent.patent_status,
+                "source": "KR",
+            }
+            for patent in kr_patents
+        ]
+
+        foreign_stmt = select(ForeignPatent).where(
+            or_(
+                ForeignPatent.invention_name.like(f"%{input.query}%"),
+                ForeignPatent.abstract.like(f"%{input.query}%"),
+            )
+        )
+        foreign_stmt = foreign_stmt.limit(input.limit)
+        foreign_rows = await session.execute(foreign_stmt)
+        foreign_patents = foreign_rows.scalars().all()
+        foreign_results = [
+            {
+                "id": patent.document_number,
+                "title": patent.invention_name,
+                "country": patent.country_code,
+                "status": patent.patent_status,
+                "source": "FOREIGN",
+            }
+            for patent in foreign_patents
+        ]
+
+    graph_insights: Dict[str, Any] = {}
+    if input.include_graph:
+        tech_clusters = await GraphDatabase.get_tech_cluster(input.query)
+        problem_solution = await GraphDatabase.search_by_problem_solution(input.query)
+        graph_insights = {
+            "tech_clusters": tech_clusters,
+            "problem_solution_paths": problem_solution,
+        }
+
+    response_data = {
+        "query": input.query,
+        "kr_patents": kr_results,
+        "foreign_patents": foreign_results,
+        "graph_insights": graph_insights,
+    }
+    total = len(kr_results) + len(foreign_results)
+    return wrap_response(response_data, engine="Hybrid-MariaDB-Neo4j", total=total)
 
 
 @mcp_app.post("/tools/get_analysis_results", response_model=StandardResponse)
@@ -728,7 +877,7 @@ async def get_analysis_run_results(
     input: AnalysisRunResultsInput, key: Any = Depends(verify_api_key)
 ):
     try:
-        comprehensive_results = {
+        comprehensive_results: Dict[str, Any] = {
             "analysis_run_id": input.analysis_run_id,
             "metadata": {},
         }
@@ -922,6 +1071,13 @@ async def analyze_patent_text(
 
 # Create the MCP Interface
 def create_mcp_server():
-    from fastapi_mcp import FastApiMCP
+    import importlib
 
-    return FastApiMCP(mcp_app)
+    fastapi_mcp_module = importlib.import_module("fastapi_mcp")
+    mcp_class = getattr(fastapi_mcp_module, "FastApiMCP")
+    mcp = mcp_class(mcp_app)
+    mcp.mount(mcp_app, mount_path=getattr(settings, "MCP_MOUNT_PATH", "/mcp"))
+    return mcp
+
+
+mcp_interface = create_mcp_server()
