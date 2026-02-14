@@ -4,10 +4,15 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 import uuid
 import logging
+import json
 
 from app.api.deps import get_current_user
 from app.models import User
 from app.db.redis_client import get_redis
+from app.scheduler import get_scheduler
+from sqlalchemy.ext.asyncio import AsyncSession
+from shared.database import get_db
+from app.crud.crud_archived_session import get_archived_session_crud
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +52,22 @@ class LockResponse(BaseModel):
 
 
 class SuccessResponse(BaseModel):
+    message: str
+
+
+class ArchivedSessionResponse(BaseModel):
+    session_id: str
+    title: str
+    user_id: int
+    messages: List[Dict[str, Any]]
+    context: Optional[Dict[str, Any]]
+    created_at: datetime
+    archived_at: datetime
+
+
+class RestoreResponse(BaseModel):
+    session_id: str
+    restored: bool
     message: str
 
 
@@ -263,3 +284,164 @@ async def release_session_lock(
         lock_acquired=True,
         message="Lock released successfully" if success else "Lock already released",
     )
+
+
+@router.post("/{session_id}/archive", response_model=SuccessResponse)
+async def archive_session(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    redis_client=Depends(get_redis),
+):
+    """
+    On-demand archival of a specific session.
+
+    Manually triggers archival of a session, moving it from Redis to MariaDB.
+    Useful when a user explicitly ends a session.
+    """
+    # Get session to verify ownership
+    session = await redis_client.get_session(session_id)
+
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found",
+        )
+
+    # Verify user owns session
+    if session.get("user_id") != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this session",
+        )
+
+    # Get scheduler and archive session
+    archival_scheduler = get_scheduler()
+    success = await archival_scheduler.archive_session(session_id)
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to archive session",
+        )
+
+    return SuccessResponse(message="Session archived successfully")
+
+
+@router.post("/archive-all", response_model=Dict[str, Any])
+async def archive_all_sessions(
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Trigger archival of all inactive sessions.
+
+    Manually triggers the archival job to archive all inactive sessions.
+    Useful for testing or immediate cleanup.
+    """
+    # Only allow admin users to trigger full archival
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admin users can trigger full archival",
+        )
+
+    # Get scheduler and run archival job
+    archival_scheduler = get_scheduler()
+    stats = await archival_scheduler.archive_inactive_sessions()
+
+    return stats
+
+
+@router.get("/archived/{session_id}", response_model=ArchivedSessionResponse)
+async def get_archived_session(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get archived session details from MariaDB"""
+    archived_crud = get_archived_session_crud(db)
+    archived_session = await archived_crud.get_by_session_id(session_id)
+
+    if not archived_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Archived session not found",
+        )
+
+    # Verify user owns the archived session
+    if archived_session.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this archived session",
+        )
+
+    # Parse JSON fields
+    messages = json.loads(archived_session.messages) if archived_session.messages else []
+    context = json.loads(archived_session.context) if archived_session.context else {}
+
+    return ArchivedSessionResponse(
+        session_id=archived_session.session_id,
+        title=archived_session.title,
+        user_id=archived_session.user_id,
+        messages=messages,
+        context=context,
+        created_at=archived_session.created_at,
+        archived_at=archived_session.archived_at,
+    )
+
+
+@router.post("/{session_id}/restore", response_model=RestoreResponse)
+async def restore_session(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    redis_client=Depends(get_redis),
+):
+    """
+    Restore archived session from MariaDB to Redis.
+
+    Restores a previously archived session back to Redis for active use.
+    The archived copy remains in MariaDB for future reference.
+    """
+    archived_crud = get_archived_session_crud(db)
+    archived_session = await archived_crud.get_by_session_id(session_id)
+
+    if not archived_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Archived session not found",
+        )
+
+    # Verify user owns the archived session
+    if archived_session.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this archived session",
+        )
+
+    # Check if session already exists in Redis
+    existing_session = await redis_client.get_session(session_id)
+    if existing_session:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Session already exists in Redis. Cannot restore an active session.",
+        )
+
+    # Restore session to Redis
+    try:
+        restored_session_id = await archived_crud.restore_session_to_redis(session_id)
+        return RestoreResponse(
+            session_id=restored_session_id,
+            restored=True,
+            message="Session restored successfully",
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    except RuntimeError as e:
+        logger.error(f"Failed to restore session: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service unavailable. Failed to restore session to Redis.",
+        )
