@@ -1,0 +1,11 @@
+{
+  "include": [
+    "app",
+    "tests",
+    "../shared"
+  ],
+  "extraPaths": [
+    ".."
+  ],
+  "typeCheckingMode": "basic"
+}

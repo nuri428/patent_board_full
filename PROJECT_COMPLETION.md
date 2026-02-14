@@ -15,6 +15,13 @@
   - migrated schema/settings config declarations to Pydantic v2 config style
   - removed invalid optional dependency usage guidance from README
 
+## 🔜 Follow-up Queue (Recorded)
+
+- Unify frontend stack descriptions across all docs (React/Tailwind vs legacy Bootstrap wording)
+- Add production feature flag control for MCP fallback responses
+- Enforce CI quality gates (pytest + lint + typecheck)
+- Expand contract/integration tests for new session/cleanup/multi-modal APIs
+
 ## 🏗️ Architecture
 
 - **Backend**: FastAPI with async/await patterns

@@ -2,8 +2,12 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.orm import DeclarativeBase
 from neo4j import GraphDatabase
 from typing import AsyncGenerator
+import logging
 
 from back_end.app.core.config import settings
+
+
+logger = logging.getLogger(__name__)
 
 
 class Base(DeclarativeBase):
@@ -58,7 +62,7 @@ class Neo4jConnection:
                 settings.NEO4J_URI, auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
             )
         except Exception as e:
-            print(f"Failed to connect to Neo4j: {e}")
+            logger.exception("Failed to connect to Neo4j")
 
     def close(self):
         if self.driver:

@@ -8,7 +8,11 @@ import json
 import re
 from datetime import datetime
 import asyncio
+import logging
 from app.core.config import settings
+
+
+logger = logging.getLogger(__name__)
 
 class ContextEngineering:
     """Handles context engineering for patent-related queries"""
@@ -76,9 +80,12 @@ class ContextEngineering:
                             if url_result and "urls" in url_result:
                                 patent_urls.extend(url_result["urls"])
                         except Exception as e:
-                            print(f"Error generating URLs for {patent['id']}: {e}")
+                            logger.exception(
+                                "Error generating URLs for extracted patent %s",
+                                patent.get("id", "unknown"),
+                            )
             except Exception as e:
-                print(f"Error extracting patent IDs: {e}")
+                logger.exception("Error extracting patent IDs")
                 # Fallback to regex pattern
                 patent_ids = re.findall(self.patent_id_pattern, text)
         
@@ -298,11 +305,13 @@ class ContextEngineering:
                                 details["data"]["patent_urls"] = url_result["urls"]
                             
                     except Exception as e:
-                        print(f"Error generating URLs for {patent_id}: {e}")
-                        
+                        logger.exception(
+                            "Error generating URLs for patent %s", patent_id
+                        )
+
             except Exception as e:
                 # Log error but continue with other patents
-                print(f"Error fetching patent {patent_id}: {e}")
+                logger.exception("Error fetching patent %s", patent_id)
         
         return {
             "success": True,
@@ -423,7 +432,7 @@ class ContextEngineering:
                 current_year = datetime.now().year
                 age = current_year - year
                 return max(0, 1 - age / 20)  # Decay over 20 years
-            except:
+            except (ValueError, TypeError):
                 return 0.5
         
         return 0.5

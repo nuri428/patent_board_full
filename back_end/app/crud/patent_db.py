@@ -1,8 +1,11 @@
 from typing import List, Optional, Tuple
+import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func, or_
 from app.models.patent_db import PatentMaster, ForeignPatentMaster
 from app.schemas.patent import PatentSearch
+
+logger = logging.getLogger(__name__)
 
 
 class PatentDBCRUD:
@@ -155,7 +158,7 @@ class PatentDBCRUD:
                     return all_patents, len(all_patents)
             except Exception as e:
                 # OpenSearch 실패 시 키워드 검색으로 폴백 하거나 로그 남김
-                print(f"Semantic search failed: {e}")
+                logger.exception("Semantic search failed, fallback to RDB keyword search")
 
         # 기본 RDB 키워드 검색 (기존 로직)
         kr_patents, kr_total = await self.search_kr_patents(search_params)

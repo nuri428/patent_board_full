@@ -82,6 +82,16 @@
   - API 라우터 prefix 정규화 (`/api/v1` 중복 경로 가능성 제거)
   - Pydantic v2 마이그레이션 정리 (`Config` -> `ConfigDict`, `.dict()` -> `.model_dump()`)
   - README 의존성 안내 정합성 수정 (존재하지 않는 extra 안내 제거)
+- [x] **Priority B 반영 완료**
+  - 신규 기능 라우트 등록 검증 테스트 추가 (`back_end/tests/test_feature_route_registration.py`)
+  - 백엔드 테스트 52건 통과 확인 (신규 테스트 포함)
+  - 정적 타입 품질 개선 1차 수행 (Pydantic mutable default 제거, 일부 타입 힌트 보강)
+
+## ⏭️ 차후 작업 등록 (Priority C)
+- [ ] 문서 내 프론트엔드 기술 스택 서술 완전 일원화 (`README.md`, `PROJECT_COMPLETION.md`, `tasks.md`)
+- [ ] MCP fallback(test data) 동작을 운영 환경에서 feature flag로 제어
+- [ ] CI 파이프라인에 pytest/lint/typecheck 강제 게이트 설정
+- [ ] 신규 핵심 API(session-favorites, cleanup, multi-modal, patent-search) 계약 테스트 확장
 
 ## 📅 향후 작업 계획 (Future Tasks)
 

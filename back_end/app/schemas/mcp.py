@@ -99,4 +99,6 @@ class AnalysisWorkbenchRequest(BaseModel):
     analysis_type: Literal["semantic", "network", "tech", "charts"] = Field(
         ..., description="Type of analysis to run"
     )
-    parameters: Dict[str, Any] = Field(default={}, description="Analysis parameters")
+    parameters: Dict[str, Any] = Field(
+        default_factory=dict, description="Analysis parameters"
+    )

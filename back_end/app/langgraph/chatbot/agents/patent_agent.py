@@ -8,6 +8,10 @@ import json
 import re
 from datetime import datetime
 from enum import Enum
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class PatentCountry(str, Enum):
@@ -232,7 +236,7 @@ class PatentAgent:
                 
         except Exception as e:
             # If enhancement fails, return original response
-            print(f"Error enhancing chat response: {e}")
+            logger.exception("Error enhancing chat response")
         
         return enhanced_response
     

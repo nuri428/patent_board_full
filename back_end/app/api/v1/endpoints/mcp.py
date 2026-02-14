@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Any
+from typing import List, Any, cast
 from sqlalchemy.ext.asyncio import AsyncSession
+import logging
 from shared.database import get_db
 from app.api import deps
 from app.models import User
@@ -18,6 +19,8 @@ from app.schemas.mcp import (
 from app.crud.mcp import get_mcp_crud
 from app.services.mcp_service import MCPService
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 
@@ -30,7 +33,7 @@ async def list_keys(
     List all MCP API keys for current user.
     """
     crud = get_mcp_crud(db)
-    keys = await crud.get_by_user(user_id=current_user.id)
+    keys = await crud.get_by_user(user_id=cast(int, current_user.id))
     return keys
 
 
@@ -44,7 +47,7 @@ async def generate_key(
     Generate a new MCP API key.
     """
     crud = get_mcp_crud(db)
-    key = await crud.create(key_in=key_in, user_id=current_user.id)
+    key = await crud.create(key_in=key_in, user_id=cast(int, current_user.id))
     return key
 
 
@@ -58,7 +61,7 @@ async def revoke_key(
     Revoke an MCP API key.
     """
     crud = get_mcp_crud(db)
-    result = await crud.revoke(key_id=key_id, user_id=current_user.id)
+    result = await crud.revoke(key_id=key_id, user_id=cast(int, current_user.id))
     if not result:
         raise HTTPException(status_code=404, detail="Key not found")
     return True
@@ -74,21 +77,23 @@ async def proxy_tool_call(
     Proxy a tool call to the MCP server with authentication and data processing.
     """
     crud = get_mcp_crud(db)
-    keys = await crud.get_by_user(user_id=current_user.id)
+    keys = await crud.get_by_user(user_id=cast(int, current_user.id))
     if not keys:
         raise HTTPException(
             status_code=403, detail="No active MCP API Key found for user"
         )
 
     # Use the most recent active key
-    api_key = keys[0].api_key
+    api_key = cast(str, keys[0].api_key)
     mcp_service = MCPService(api_key=api_key)
 
     try:
-        return await mcp_service.call_tool(tool_call.tool_name, tool_call.arguments)
+        return await mcp_service.call_tool(
+            tool_call.tool_name, tool_call.arguments or {}
+        )
     except Exception as e:
         # Fallback to test data if MCP connection fails
-        print(f"MCP Connection Failed: {e}")
+        logger.exception("MCP connection failed in /proxy")
         test_data = {
             "data": [
                 {
@@ -130,11 +135,11 @@ async def proxy_semantic_search(
     OpenSearch 시만틱 검색 프록시
     """
     crud = get_mcp_crud(db)
-    keys = await crud.get_by_user(user_id=current_user.id)
+    keys = await crud.get_by_user(user_id=cast(int, current_user.id))
     if not keys:
         raise HTTPException(status_code=403, detail="No active MCP API Key found")
 
-    api_key = keys[0].api_key
+    api_key = cast(str, keys[0].api_key)
     mcp_service = MCPService(api_key=api_key)
 
     try:
@@ -143,7 +148,7 @@ async def proxy_semantic_search(
         )
     except Exception as e:
         # Fallback to test data if MCP connection fails
-        print(f"MCP Connection Failed: {e}")
+        logger.exception("MCP connection failed in /proxy/semantic-search")
         test_data = {
             "data": [
                 {
@@ -187,18 +192,18 @@ async def proxy_network_analysis(
     Neo4j 네트워크 분석 프록시
     """
     crud = get_mcp_crud(db)
-    keys = await crud.get_by_user(user_id=current_user.id)
+    keys = await crud.get_by_user(user_id=cast(int, current_user.id))
     if not keys:
         raise HTTPException(status_code=403, detail="No active MCP API Key found")
 
-    api_key = keys[0].api_key
+    api_key = cast(str, keys[0].api_key)
     mcp_service = MCPService(api_key=api_key)
 
     try:
         return await mcp_service.network_analysis(analysis_request.model_dump())
     except Exception as e:
         # Fallback to test data if MCP connection fails
-        print(f"MCP Connection Failed: {e}")
+        logger.exception("MCP connection failed in /proxy/network-analysis")
         return ProxyResult(
             status="success",
             data={
@@ -228,18 +233,18 @@ async def proxy_technology_mapping(
     기술 매핑 생성 프록시
     """
     crud = get_mcp_crud(db)
-    keys = await crud.get_by_user(user_id=current_user.id)
+    keys = await crud.get_by_user(user_id=cast(int, current_user.id))
     if not keys:
         raise HTTPException(status_code=403, detail="No active MCP API Key found")
 
-    api_key = keys[0].api_key
+    api_key = cast(str, keys[0].api_key)
     mcp_service = MCPService(api_key=api_key)
 
     try:
         return await mcp_service.technology_mapping(mapping_request.model_dump())
     except Exception as e:
         # Fallback to test data if MCP connection fails
-        print(f"MCP Connection Failed: {e}")
+        logger.exception("MCP connection failed in /proxy/technology-mapping")
         return ProxyResult(
             status="success",
             data=[

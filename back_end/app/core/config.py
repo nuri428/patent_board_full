@@ -1,7 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from typing import Optional, List, Dict, Any
 import logging
+import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class Settings(BaseSettings):
 
     # API
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = "your-secret-key-here-change-in-production"
+    SECRET_KEY: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
@@ -71,8 +72,8 @@ class Settings(BaseSettings):
                 import json
                 try:
                     return json.loads(v)
-                except:
-                    pass
+                except (TypeError, ValueError):
+                    logger.warning("Failed to parse BACKEND_CORS_ORIGINS JSON string")
             return [i.strip() for i in v.split(",")]
         return v
 
@@ -84,8 +85,8 @@ class Settings(BaseSettings):
                 import json
                 try:
                     return json.loads(v)
-                except:
-                    pass
+                except (TypeError, ValueError):
+                    logger.warning("Failed to parse URL_GENERATION_SOURCES JSON string")
             return [i.strip() for i in v.split(",")]
         return v
 
