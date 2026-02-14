@@ -14,12 +14,13 @@ from app.api.v1.endpoints import (
     mcp,
     patents,
     patent_analysis,
-    patent_search,
+    patents_search as patent_search,
     patent_country_search,
     visualization,
     health,
     sessions,
     session_groups,
+    session_favorites,
     auto_cleanup,
 )
 
@@ -53,5 +54,6 @@ api_router.include_router(
 )
 api_router.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
 api_router.include_router(session_groups.router, prefix="/session-groups", tags=["session-groups"])
+api_router.include_router(session_favorites.router, prefix="/session-favorites", tags=["session-favorites"])
 api_router.include_router(health.router, tags=["health"])
 api_router.include_router(auto_cleanup.router, prefix="/cleanup", tags=["cleanup"])
