@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     SESSION_ARCHIVAL_INTERVAL_MINUTES: int = 30
     SESSION_INACTIVITY_THRESHOLD_MINUTES: int = 30
 
+    # Session Auto Cleanup
+    SESSION_CLEANUP_INTERVAL_MINUTES: int = 60
+    SESSION_CLEANUP_ARCHIVED_RETENTION_DAYS: int = 30
+
     # Elasticsearch / OpenSearch
     ELASTICSEARCH_URL: str = "http://localhost:9200"
 
@@ -256,6 +260,19 @@ Relevant patents found:
         if self.MAX_CONTEXT_TOKENS < 1000 or self.MAX_CONTEXT_TOKENS > 100000:
             logger.warning(
                 f"MAX_CONTEXT_TOKENS {self.MAX_CONTEXT_TOKENS} seems unusually high"
+            )
+
+        # Validate session cleanup settings
+        if self.SESSION_CLEANUP_INTERVAL_MINUTES <= 0:
+            logger.warning(
+                "SESSION_CLEANUP_INTERVAL_MINUTES must be > 0. "
+                "Auto cleanup scheduler will use its runtime fallback (60 minutes)."
+            )
+
+        if self.SESSION_CLEANUP_ARCHIVED_RETENTION_DAYS <= 0:
+            logger.warning(
+                "SESSION_CLEANUP_ARCHIVED_RETENTION_DAYS must be > 0. "
+                "Auto cleanup scheduler will use its runtime fallback (30 days)."
             )
 
         # Validate CORS origins
