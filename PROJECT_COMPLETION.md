@@ -17,15 +17,15 @@
 
 ## 🔜 Follow-up Queue (Recorded)
 
-- Unify frontend stack descriptions across all docs (React/Tailwind vs legacy Bootstrap wording)
-- Add production feature flag control for MCP fallback responses
-- Enforce CI quality gates (pytest + lint + typecheck)
-- Expand contract/integration tests for new session/cleanup/multi-modal APIs
+- Completed on 2026-02-14:
+  - Added production-aware feature flag control for MCP fallback responses
+  - Added CI quality gates for pytest/lint/typecheck workflow steps
+  - Expanded contract coverage for new session/cleanup/multi-modal APIs
 
 ## 🏗️ Architecture
 
 - **Backend**: FastAPI with async/await patterns
-- **Frontend**: Bootstrap 5 with vanilla JavaScript
+- **Frontend**: React 19 + Vite + Tailwind CSS (primary) with legacy Bootstrap templates for web routes
 - **Database**: MariaDB (structured data) + Neo4j (graph relationships)
 - **AI Integration**: 
   - **MCP**: Model Context Protocol for data queries
@@ -357,7 +357,7 @@ Built with ❤️ for patent professionals and researchers using:
 - **Neo4j** - Graph database for relationships
 - **LangGraph** - Multi-agent AI workflows
 - **MCP** - Model Context Protocol
-- **Bootstrap 5** - Modern UI framework
+- **React 19 + Tailwind CSS** - Primary modern frontend stack
 - **Chart.js** - Data visualization library
 - **Docker** - Containerization platform
 

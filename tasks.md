@@ -32,7 +32,7 @@
    - 인증 및 유저 관리 기초 레이어 구축
 
 6. **Frontend Base Structure Setup** ✅
-   - Bootstrap 5 기반 프레임워크 및 레이아웃 구성
+   - React 19 + Vite + Tailwind 기반 프레임워크 및 레이아웃 구성 (레거시 Bootstrap 뷰 병행)
    - 대시보드 및 특허 검색 페이지 기본 UI 구현
    - JavaScript 모듈화 기초 작업 완료
 
@@ -77,7 +77,7 @@
   - 잘못된 CRUD import 경로 수정
 - [x] **검증 완료**
   - `back_end`: `PYTHONPATH=/mnt/sources/git/patent_board_full uv run --extra dev pytest`
-  - 결과: **50 passed / 0 failed**
+  - 결과: **52 passed / 0 failed**
 - [x] **즉시 수정 권장 항목 반영 완료 (Hotfix)**
   - API 라우터 prefix 정규화 (`/api/v1` 중복 경로 가능성 제거)
   - Pydantic v2 마이그레이션 정리 (`Config` -> `ConfigDict`, `.dict()` -> `.model_dump()`)
@@ -88,10 +88,10 @@
   - 정적 타입 품질 개선 1차 수행 (Pydantic mutable default 제거, 일부 타입 힌트 보강)
 
 ## ⏭️ 차후 작업 등록 (Priority C)
-- [ ] 문서 내 프론트엔드 기술 스택 서술 완전 일원화 (`README.md`, `PROJECT_COMPLETION.md`, `tasks.md`)
-- [ ] MCP fallback(test data) 동작을 운영 환경에서 feature flag로 제어
-- [ ] CI 파이프라인에 pytest/lint/typecheck 강제 게이트 설정
-- [ ] 신규 핵심 API(session-favorites, cleanup, multi-modal, patent-search) 계약 테스트 확장
+- [x] 문서 내 프론트엔드 기술 스택 서술 완전 일원화 (`README.md`, `PROJECT_COMPLETION.md`, `tasks.md`)
+- [x] MCP fallback(test data) 동작을 운영 환경에서 feature flag로 제어
+- [x] CI 파이프라인에 pytest/lint/typecheck 강제 게이트 설정
+- [x] 신규 핵심 API(session-favorites, cleanup, multi-modal, patent-search) 계약 테스트 확장
 
 ## 📅 향후 작업 계획 (Future Tasks)
 
@@ -161,7 +161,7 @@ graph LR
     B[Patent Board MCP 서버] -->|FastAPI Backend|
     C -->|MariaDB| & |Neo4j|
     D -->|LangGraph| -->|OpenAI API|
-    E -->|Web Frontend| --> F[Bootstrap 5 + JS]
+    E -->|Web Frontend| --> F[React 19 + Vite + Tailwind + Legacy Bootstrap]
 ```
 
 ### 선택 가능한 기술

@@ -5,7 +5,7 @@ A comprehensive patent analysis platform built with FastAPI, featuring AI-powere
 ## 🏗️ Architecture
 
 - **Backend**: FastAPI with async/await patterns
-- **Frontend**: React + Vite with Tailwind CSS
+- **Frontend**: React + Vite with Tailwind CSS (primary) and legacy Bootstrap templates for web routes
 - **Database**: MariaDB (structured data) + Neo4j (graph relationships) + OpenSearch (semantic search)
 - **AI Integration**: 
   - **MCP**: Model Context Protocol for data queries
