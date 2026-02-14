@@ -7,6 +7,22 @@ from typing import Dict, List, Any, Optional, Tuple
 import json
 import re
 from datetime import datetime
+from enum import Enum
+
+
+class PatentCountry(str, Enum):
+    """Patent country enumerations for country-specific search"""
+    KR = "KR"  # South Korea
+    US = "US"  # United States
+    CN = "CN"  # China
+    EP = "EP"  # European Union
+    JP = "JP"  # Japan
+    KIPO = "KIPO"  # Korean Intellectual Property Office
+    JPO = "JPO"  # Japan Patent Office
+    EPO = "EPO"  # European Patent Office
+    PCT = "PCT"  # Patent Cooperation Treaty
+    WO = "WO"  # World Intellectual Property Organization
+    OTHER = "OTHER"
 
 
 class PatentAgent:
@@ -273,8 +289,87 @@ class PatentAgent:
                     "total_urls": len(result["urls"]),
                     "unique_sources": list(set(u.get("source", "Unknown") for u in result["urls"]))
                 }
-        
+
         except Exception as e:
             result["errors"].append(f"Intelligence analysis failed: {str(e)}")
-        
+
+        return result
+
+    async def search_by_country(
+        self, country: PatentCountry, query: str, keywords: str = None, limit: int = 10
+    ) -> Dict[str, Any]:
+        """Search patents by specific country with optional keyword filtering"""
+        result = {
+            "patents": [],
+            "country": country.value,
+            "total_count": 0,
+            "errors": []
+        }
+
+        try:
+            if self.mcp_client:
+                # Map country code to MCP search method
+                if country == PatentCountry.KR:
+                    search_result = await self.mcp_client.search_kr_patents(query=query, limit=limit)
+                    if "data" in search_result:
+                        result["patents"] = search_result["data"]
+                elif country in [PatentCountry.US, PatentCountry.CN, PatentCountry.EP, PatentCountry.JP, PatentCountry.WO]:
+                    search_result = await self.mcp_client.search_foreign_patents(
+                        query=query, country=country.value, limit=limit
+                    )
+                    if "data" in search_result:
+                        result["patents"] = search_result["data"]
+                else:
+                    result["patents"] = []
+                    result["errors"].append(f"Country {country.value} not directly supported via MCP")
+
+                # Apply keyword filtering if provided
+                if keywords and result["patents"]:
+                    keywords_lower = keywords.lower().split()
+                    filtered_patents = []
+                    for patent in result["patents"]:
+                        patent_text = " ".join([
+                            patent.get('title', ''),
+                            patent.get('abstract', ''),
+                            str(patent.get('invention_name', ''))
+                        ]).lower()
+
+                        if all(keyword in patent_text for keyword in keywords_lower):
+                            filtered_patents.append(patent)
+
+                    result["patents"] = filtered_patents
+
+                result["total_count"] = len(result["patents"])
+
+            else:
+                # Fallback: return empty result with error
+                result["errors"].append("MCP client not available for country search")
+
+        except Exception as e:
+            result["errors"].append(f"Country search failed: {str(e)}")
+
+        return result
+
+    async def search_multiple_countries(
+        self, countries: List[PatentCountry], query: str, limit: int = 10
+    ) -> Dict[str, Any]:
+        """Search patents across multiple countries and return aggregated results"""
+        result = {
+            "patents_by_country": {},
+            "total_patents": 0,
+            "countries_searched": len(countries),
+            "errors": []
+        }
+
+        try:
+            for country in countries:
+                country_result = await self.search_by_country(country, query, limit=limit)
+                result["patents_by_country"][country.value] = country_result["patents"]
+                result["total_patents"] += country_result["total_count"]
+                if country_result["errors"]:
+                    result["errors"].extend([f"{country.value}: {err}" for err in country_result["errors"]])
+
+        except Exception as e:
+            result["errors"].append(f"Multi-country search failed: {str(e)}")
+
         return result
