@@ -22,6 +22,7 @@ from app.api.v1.endpoints import (
     session_groups,
     session_favorites,
     auto_cleanup,
+    multi_modal_chat,
 )
 
 api_router = APIRouter()
@@ -57,3 +58,4 @@ api_router.include_router(session_groups.router, prefix="/session-groups", tags=
 api_router.include_router(session_favorites.router, prefix="/session-favorites", tags=["session-favorites"])
 api_router.include_router(health.router, tags=["health"])
 api_router.include_router(auto_cleanup.router, prefix="/cleanup", tags=["cleanup"])
+api_router.include_router(multi_modal_chat.router)
