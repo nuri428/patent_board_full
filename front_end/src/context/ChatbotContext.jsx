@@ -15,6 +15,15 @@ const initialState = {
         isAuthenticated: false,
         userId: null,
         mode: 'limited'
+    },
+    // Streaming state
+    isStreaming: false,
+    currentStreamingMessageId: null,
+    streamingChunks: {},
+    streamingError: {
+        hasError: false,
+        message: null,
+        retryCallback: null
     }
 };
 
@@ -30,7 +39,11 @@ const ActionTypes = {
     SET_CONNECTED: 'SET_CONNECTED',
     SET_INITIALIZED: 'SET_INITIALIZED',
     CLEAR_CHAT: 'CLEAR_CHAT',
-    SET_AUTH_STATUS: 'SET_AUTH_STATUS'
+    SET_AUTH_STATUS: 'SET_AUTH_STATUS',
+    START_STREAMING: 'START_STREAMING',
+    UPDATE_STREAMING_CHUNK: 'UPDATE_STREAMING_CHUNK',
+    END_STREAMING: 'END_STREAMING',
+    STREAM_ERROR: 'STREAM_ERROR'
 };
 
 // Reducer
@@ -50,12 +63,21 @@ function chatbotReducer(state, action) {
         case ActionTypes.SET_MESSAGES:
             return {
                 ...state,
-                messages: action.payload
+                messages: action.payload.map(msg => ({
+                    ...msg,
+                    isStreaming: false
+                }))
             };
         case ActionTypes.ADD_MESSAGE:
             return {
                 ...state,
-                messages: [...state.messages, action.payload]
+                messages: [
+                    ...state.messages,
+                    {
+                        ...action.payload,
+                        isStreaming: action.payload.isStreaming || false
+                    }
+                ]
             };
         case ActionTypes.SET_LOADING:
             return {
@@ -94,6 +116,59 @@ function chatbotReducer(state, action) {
             return {
                 ...state,
                 authStatus: action.payload
+            };
+        case ActionTypes.START_STREAMING:
+            return {
+                ...state,
+                isStreaming: true,
+                currentStreamingMessageId: action.payload.messageId,
+                streamingError: {
+                    hasError: false,
+                    message: null,
+                    retryCallback: null
+                }
+            };
+        case ActionTypes.UPDATE_STREAMING_CHUNK:
+            return {
+                ...state,
+                streamingChunks: {
+                    ...state.streamingChunks,
+                    [action.payload.messageId]: action.payload.chunk
+                }
+            };
+        case ActionTypes.END_STREAMING:
+            const finalContent = state.streamingChunks[action.payload.messageId] || '';
+            return {
+                ...state,
+                isStreaming: false,
+                currentStreamingMessageId: null,
+                streamingChunks: {
+                    ...state.streamingChunks,
+                    [action.payload.messageId]: undefined
+                },
+                messages: [
+                    ...state.messages,
+                    {
+                        id: action.payload.messageId,
+                        content: finalContent,
+                        role: 'assistant',
+                        timestamp: new Date().toISOString(),
+                        patent_urls: action.payload.patentUrls || []
+                    }
+                ]
+            };
+        case ActionTypes.STREAM_ERROR:
+            return {
+                ...state,
+                isStreaming: false,
+                currentStreamingMessageId: null,
+                streamingError: {
+                    hasError: true,
+                    message: action.payload.message,
+                    retryCallback: action.payload.retryCallback
+                },
+                error: action.payload.message,
+                isLoading: false
             };
         default:
             return state;
@@ -348,5 +423,33 @@ export function useChatbot() {
     }
     return context;
 }
+
+// Streaming action creators
+export const startStreaming = (messageId) => ({
+    type: ActionTypes.START_STREAMING,
+    payload: { messageId }
+});
+
+export const updateStreamingChunk = (messageId, chunk) => ({
+    type: ActionTypes.UPDATE_STREAMING_CHUNK,
+    payload: { messageId, chunk }
+});
+
+export const endStreaming = (messageId, patentUrls) => ({
+    type: ActionTypes.END_STREAMING,
+    payload: { messageId, patentUrls }
+});
+
+export const setStreamingError = (message, retryCallback) => ({
+    type: ActionTypes.STREAM_ERROR,
+    payload: { message, retryCallback }
+});
+
+// Streaming selectors
+export const isStreaming = (messageId) => (state) => {
+    return state.isStreaming && state.currentStreamingMessageId === messageId;
+};
+
+export const selectStreamingError = (state) => state.streamingError;
 
 export default ChatbotContext;
