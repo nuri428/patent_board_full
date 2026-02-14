@@ -19,6 +19,7 @@ from app.api.v1.endpoints import (
     visualization,
     health,
     sessions,
+    session_groups,
 )
 
 api_router = APIRouter()
@@ -50,4 +51,5 @@ api_router.include_router(
     visualization.router, prefix="/visualization", tags=["visualization"]
 )
 api_router.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
+api_router.include_router(session_groups.router, prefix="/session-groups", tags=["session-groups"])
 api_router.include_router(health.router, tags=["health"])
