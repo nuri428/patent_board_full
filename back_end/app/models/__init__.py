@@ -17,6 +17,9 @@ import enum
 # Import archived session model
 from app.models.archived_session import ArchivedSession
 
+# Import patent analysis model
+from app.models.patent_analysis import PatentAnalysis, PatentSource, PatentSourceType
+
 
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
