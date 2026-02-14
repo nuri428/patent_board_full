@@ -7,7 +7,8 @@ function ConversationHistory({
     isLoading = false, 
     error = null,
     onRetry = null,
-    retryMessage = null
+    retryMessage = null,
+    showSkeleton = false
 }) {
     const messagesEndRef = useRef(null);
     const [autoScroll, setAutoScroll] = useState(true);
@@ -53,6 +54,24 @@ function ConversationHistory({
 
     const stats = getConversationStats();
 
+    const renderSkeleton = () => {
+        const skeletonCount = 3;
+        return (
+            <div className="skeleton-container">
+                {Array.from({ length: skeletonCount }).map((_, index) => (
+                    <div key={index} className="skeleton-row mb-3">
+                        <div className="skeleton-avatar shimmer me-3"></div>
+                        <div className="skeleton-content flex-grow-1">
+                            <div className="skeleton-line shimmer mb-2" style={{ width: '80%' }}></div>
+                            <div className="skeleton-line shimmer mb-2" style={{ width: '60%' }}></div>
+                            <div className="skeleton-line shimmer" style={{ width: '40%' }}></div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div className="conversation-history-container h-100 d-flex flex-column">
             {/* Header */}
@@ -90,12 +109,11 @@ function ConversationHistory({
                 </div>
             </div>
 
-            {/* Messages container */}
             <div 
                 className="messages-container flex-grow-1 overflow-auto"
                 onScroll={handleScroll}
             >
-                {error ? (
+                {showSkeleton ? renderSkeleton() : error ? (
                     <div className="error-container text-center py-5">
                         <i className="bi bi-exclamation-triangle-fill text-warning display-4"></i>
                         <h5 className="mt-3">Connection Error</h5>
@@ -181,8 +199,68 @@ function ConversationHistory({
                 </div>
             </div>
 
-            {/* Style for typing indicator */}
             <style jsx>{`
+                .skeleton-container {
+                    padding: 1rem 0;
+                }
+                
+                .skeleton-row {
+                    display: flex;
+                    align-items: flex-start;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    background: #f8f9fa;
+                }
+                
+                .skeleton-avatar {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: #e9ecef;
+                    flex-shrink: 0;
+                }
+                
+                .skeleton-content {
+                    flex: 1;
+                }
+                
+                .skeleton-line {
+                    height: 16px;
+                    border-radius: 4px;
+                    background: #dee2e6;
+                    margin-bottom: 8px;
+                }
+                
+                .shimmer {
+                    position: relative;
+                    overflow: hidden;
+                }
+                
+                .shimmer::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    transform: translateX(-100%);
+                    background-image: linear-gradient(
+                        90deg,
+                        rgba(255, 255, 255, 0) 0,
+                        rgba(255, 255, 255, 0.2) 20%,
+                        rgba(255, 255, 255, 0.5) 60%,
+                        rgba(255, 255, 255, 0)
+                    );
+                    animation: shimmer 2s infinite;
+                }
+                
+                @keyframes shimmer {
+                    100% {
+                        transform: translateX(100%);
+                    }
+                }
+                
+                
                 .typing-indicator {
                     display: flex;
                     align-items: center;
@@ -256,7 +334,8 @@ ConversationHistory.propTypes = {
     isLoading: PropTypes.bool,
     error: PropTypes.string,
     onRetry: PropTypes.func,
-    retryMessage: PropTypes.string
+    retryMessage: PropTypes.string,
+    showSkeleton: PropTypes.bool
 };
 
 export default ConversationHistory;
