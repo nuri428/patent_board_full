@@ -20,6 +20,9 @@ from app.models.archived_session import ArchivedSession
 # Import patent analysis model
 from app.models.patent_analysis import PatentAnalysis, PatentSource, PatentSourceType
 
+# Import session group model
+from app.models.session_group import SessionGroup, GroupMember, SessionGroupTag
+
 
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
