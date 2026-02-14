@@ -15,6 +15,7 @@ from app.api.v1.endpoints import (
     patents,
     patent_analysis,
     patent_search,
+    patent_country_search,
     visualization,
     health,
     sessions,
@@ -41,6 +42,9 @@ api_router.include_router(
 )
 api_router.include_router(
     patent_search.router, tags=["patent-search"]
+)
+api_router.include_router(
+    patent_country_search.router, tags=["patent-country-search"]
 )
 api_router.include_router(
     visualization.router, prefix="/visualization", tags=["visualization"]
