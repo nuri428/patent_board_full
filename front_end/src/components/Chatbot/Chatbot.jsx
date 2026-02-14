@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import SessionList from './SessionList';
 import ConversationHistory from './ConversationHistory';
 import ChatInput from './ChatInput';
+import TypingIndicator from './TypingIndicator';
 
 const MAX_RETRIES = 3;
 
@@ -496,26 +497,21 @@ function Chatbot({ userId, layout = 'split' }) {
                         showSkeleton={isLoading && messages.length === 0}
                     />
 
-                    <div className="input-area">
-                        {(isStreaming || isLoading) && (
-                            <div className="typing-indicator text-muted mb-3">
-                                <span>AI is typing</span>
-                                <div className="typing-dots ms-2 d-inline-block">
-                                    <span>.</span>
-                                    <span>.</span>
-                                    <span>.</span>
+                        <div className="input-area">
+                            {(isStreaming || isLoading) && (
+                                <div className="typing-indicator-container text-muted mb-3 flex items-center gap-3">
+                                    <TypingIndicator isStreaming={isStreaming} />
+                                    {isStreaming && (
+                                        <button
+                                            className="btn btn-sm btn-outline-danger"
+                                            onClick={handleAbortStream}
+                                            title="Stop generating"
+                                        >
+                                            <i className="bi bi-stop-circle"></i> Stop
+                                        </button>
+                                    )}
                                 </div>
-                                {isStreaming && (
-                                    <button
-                                        className="btn btn-sm btn-outline-danger ms-3"
-                                        onClick={handleAbortStream}
-                                        title="Stop generating"
-                                    >
-                                        <i className="bi bi-stop-circle"></i> Stop
-                                    </button>
-                                )}
-                            </div>
-                        )}
+                            )}
                         <ChatInput
                             onSendMessage={handleSendMessage}
                             disabled={!isConnected || !isInitialized || isLoading || isStreaming || reconnecting}
@@ -615,21 +611,16 @@ function Chatbot({ userId, layout = 'split' }) {
 
                         <div className="input-area">
                             {(isStreaming || isLoading) && (
-                                <div className="typing-indicator text-muted mb-3">
-                                    <span>AI is typing</span>
-                                    <div className="typing-dots ms-2 d-inline-block">
-                                        <span>.</span>
-                                        <span>.</span>
-                                        <span>.</span>
-                                    </div>
+                                <div className="typing-indicator-container text-muted mb-3 flex items-center gap-3">
+                                    <TypingIndicator isStreaming={isStreaming} />
                                     {isStreaming && (
                                         <button
-                                            className="btn btn-sm btn-outline-danger ms-3"
+                                            className="btn btn-sm btn-outline-danger"
                                             onClick={handleAbortStream}
                                             title="Stop generating"
                                         >
                                             <i className="bi bi-stop-circle"></i> Stop
-                                    </button>
+                                        </button>
                                     )}
                                 </div>
                             )}

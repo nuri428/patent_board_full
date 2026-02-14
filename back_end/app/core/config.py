@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
 
+    # Session Archival
+    SESSION_ARCHIVAL_INTERVAL_MINUTES: int = 30
+    SESSION_INACTIVITY_THRESHOLD_MINUTES: int = 30
+
     # Elasticsearch / OpenSearch
     ELASTICSEARCH_URL: str = "http://localhost:9200"
 

@@ -5,9 +5,11 @@ from datetime import datetime
 from typing import Dict, Any
 import httpx
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from app.api.v1.api import api_router
 from app.routes import web_router
 from app.core.config import settings
+from app.scheduler import scheduler
 import json
 import time
 from fastapi.staticfiles import StaticFiles
@@ -57,8 +59,44 @@ def setup_logging():
 setup_logging()
 logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager for startup and shutdown events.
+
+    Startup:
+    - Start the session archival scheduler
+
+    Shutdown:
+    - Stop the session archival scheduler gracefully
+    """
+    # Startup
+    logger.info("Starting up application...")
+    try:
+        scheduler.start()
+        logger.info("Session archival scheduler started successfully")
+
+        yield
+
+    except Exception as e:
+        logger.error(f"Error during startup: {e}", exc_info=True)
+        raise
+
+    # Shutdown
+    logger.info("Shutting down application...")
+    try:
+        scheduler.stop()
+        logger.info("Session archival scheduler stopped successfully")
+    except Exception as e:
+        logger.error(f"Error during shutdown: {e}", exc_info=True)
+
+
 app = FastAPI(
-    title="Patent Board", version="1.0.0", description="Patent Analysis Board Backend"
+    title="Patent Board",
+    version="1.0.0",
+    description="Patent Analysis Board Backend",
+    lifespan=lifespan,
 )
 
 

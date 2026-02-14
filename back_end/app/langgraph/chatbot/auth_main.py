@@ -3,15 +3,18 @@ LangGraph Chatbot API Service with Authentication
 Context-aware patent analysis chatbot with long-term memory and MCP integration.
 """
 
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, Request
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
 import uuid
 from datetime import datetime
 import asyncio
 import logging
+import jwt
+from jwt import PyJWTError
 
 # Import our modules
 from ..memory import MemoryManager, SQLMemoryBackend, RedisMemoryBackend
@@ -25,6 +28,50 @@ from app.core.config import settings
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# JWT Security
+security = HTTPBearer()
+
+
+async def validate_jwt_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> int:
+    """
+    Validate JWT token and return user_id.
+
+    Args:
+        credentials: HTTP Bearer token credentials
+
+    Returns:
+        int: User ID from validated token
+
+    Raises:
+        HTTPException: 401 if token is invalid, expired, or missing
+    """
+    if not credentials or not credentials.credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        payload = jwt.decode(
+            credentials.credentials,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
+        )
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
+        return int(user_id)
+    except PyJWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+
 
 # FastAPI app
 app = FastAPI(
@@ -153,13 +200,13 @@ async def health_check():
     }
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat_message(request: ChatRequest):
-    """Process a chat message with patent intelligence integration - requires basic authentication"""
-    
+async def chat_message(request: ChatRequest, current_user_id: int = Depends(validate_jwt_token)):
+    """Process a chat message with patent intelligence integration - requires JWT authentication"""
+
     try:
         # Generate session ID if not provided
         session_id = request.session_id or str(uuid.uuid4())
-        
+
         # Analyze user message for patent content using PatentAgent
         patent_analysis = None
         if patent_agent:
@@ -167,10 +214,10 @@ async def chat_message(request: ChatRequest):
                 patent_analysis = await patent_agent.analyze_patent_text(request.message.content)
             except Exception as e:
                 logger.warning(f"Patent analysis failed: {e}")
-        
-        # Process the message with enhanced context
+
+        # Process the message with enhanced context - use authenticated user_id
         result = await chatbot_agent.process_message(
-            user_id=request.user_id,
+            user_id=str(current_user_id),
             session_id=session_id,
             message_content=request.message.content,
             message_metadata=request.message.metadata or {},
@@ -232,17 +279,17 @@ async def chat_message(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/sessions", response_model=Dict[str, str])
-async def create_session(request: CreateSessionRequest):
-    """Create a new conversation session - requires basic authentication"""
-    
+async def create_session(request: CreateSessionRequest, current_user_id: int = Depends(validate_jwt_token)):
+    """Create a new conversation session - requires JWT authentication"""
+
     try:
         session_id = await chatbot_agent.create_new_session(
-            user_id=request.user_id,
+            user_id=str(current_user_id),
             title=request.title or "New Conversation"
         )
-        
+
         return {"session_id": session_id}
-        
+
     except Exception as e:
         logger.error(f"Error creating session: {e}")
         raise HTTPException(status_code=500, detail=str(e))

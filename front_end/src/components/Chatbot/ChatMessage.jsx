@@ -120,7 +120,7 @@ function ChatMessage({ message, isStreaming = false }) {
                                     </details>
                                 </div>
                             )}
-                        </div>
+                        </motion.div>
                     )}
 
                     {pending && (
