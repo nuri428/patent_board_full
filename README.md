@@ -14,6 +14,14 @@ A comprehensive patent analysis platform built with FastAPI, featuring AI-powere
 
 ## 🚀 Features
 
+### Latest Backend Updates (2026-02-14)
+- Session groups/tags management APIs
+- Session favorites with keyword search and pin/unpin
+- Auto cleanup scheduler + cleanup management APIs
+- Relevance analysis and confidence scoring for chatbot responses
+- Multi-modal chat endpoint (1-2 simultaneous queries)
+- MCP schema/endpoint contract alignment and backend compatibility hardening
+
 ### Patent Search & Analysis
 - Keyword and semantic search across patent databases
 - Advanced filtering by date, status, assignee
@@ -79,6 +87,11 @@ patent_board_full/
    ```bash
    pip install uv
    uv sync
+   ```
+
+   Optional retrieval extras (when embedding/retrieval stack is needed):
+   ```bash
+   uv sync --extra retrieval
    ```
 
 3. **Configure environment**:
@@ -165,6 +178,14 @@ Multi-agent system with specialized roles:
 - `POST /api/v1/reports/generate` - Generate new report
 - `GET /api/v1/reports/` - List reports
 - `GET /api/v1/reports/{id}` - Get report details
+
+### Session & Cleanup Enhancements
+- `GET/POST /api/v1/session-groups/*` - Session grouping/tagging workflows
+- `GET/POST/PUT/DELETE /api/v1/session-favorites/*` - Favorites and smart search
+- `POST /api/v1/cleanup/trigger` - Run cleanup cycle on demand
+- `GET /api/v1/cleanup/stats` - Last cleanup stats
+- `GET/PUT /api/v1/cleanup/config` - Cleanup config management
+- `POST /api/v1/multi-modal` - Multi-query chat response endpoint
 
 ## 🧪 Development
 

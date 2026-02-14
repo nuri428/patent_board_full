@@ -1,5 +1,15 @@
 # Patent Board - Project Status (IN PROGRESS) 🚧
 
+## 📌 Latest Spec Update (2026-02-14)
+
+- Backend verification complete for MCP/API contract fixes and chatbot enhancement integrations
+- Test status: `back_end` pytest **50 passed / 0 failed**
+- Added/validated feature specs:
+  - session favorites/smart search
+  - session cleanup scheduler + cleanup API management
+  - relevance/confidence analysis integration for chat
+  - multi-modal chat endpoint (1-2 concurrent queries)
+
 ## 🏗️ Architecture
 
 - **Backend**: FastAPI with async/await patterns
