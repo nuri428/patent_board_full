@@ -329,7 +329,8 @@ export function ChatbotProvider({ children }) {
         clearChat,
         refreshSessions,
         initializeChatbot,
-        api
+        api,
+        dispatch
     };
 
     return (

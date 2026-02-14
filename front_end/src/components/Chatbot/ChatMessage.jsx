@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
 import { User, Bot, Clock, Paperclip, ChevronRight, AlertTriangle, Loader2 } from 'lucide-react';
 import PatentLink from '../PatentLink';
 
-function ChatMessage({ message }) {
+function ChatMessage({ message, isStreaming = false }) {
     const { content, role, timestamp, pending = false, error = false, sources = [], metadata = {}, patent_urls = [] } = message;
 
     const formatTime = (timestampString) => {
@@ -22,6 +23,15 @@ function ChatMessage({ message }) {
             default: return '📚';
         }
     };
+
+    const StreamingCursor = () => (
+        <motion.span
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}
+            className="inline-block w-0.5 h-4.5 bg-indigo-600 rounded-sm ml-1 align-middle"
+            aria-label="AI is typing"
+        />
+    );
 
     return (
         <div className={`chat-message ${isUser ? 'user-message' : 'assistant-message'} ${pending ? 'pending' : ''} ${error ? 'error' : ''}`}>
@@ -46,9 +56,15 @@ function ChatMessage({ message }) {
                             <p className="text-sm">{content}</p>
                         </div>
                     ) : (
-                        <div className="chat-message-content prose prose-sm max-w-none prose-slate">
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: isStreaming ? 0.8 : 1, y: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="chat-message-content prose prose-sm max-w-none prose-slate"
+                        >
                             <p className="whitespace-pre-wrap leading-relaxed text-[0.9375rem]">
                                 {content}
+                                {isStreaming && !isUser && <StreamingCursor />}
                             </p>
 
                             {patent_urls && patent_urls.length > 0 && (
@@ -141,7 +157,8 @@ ChatMessage.propTypes = {
                 patent_id: PropTypes.string.isRequired
             })
         )
-    }).isRequired
+    }).isRequired,
+    isStreaming: PropTypes.bool
 };
 
 export default ChatMessage;
