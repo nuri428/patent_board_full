@@ -78,6 +78,10 @@
 - [x] **검증 완료**
   - `back_end`: `PYTHONPATH=/mnt/sources/git/patent_board_full uv run --extra dev pytest`
   - 결과: **50 passed / 0 failed**
+- [x] **즉시 수정 권장 항목 반영 완료 (Hotfix)**
+  - API 라우터 prefix 정규화 (`/api/v1` 중복 경로 가능성 제거)
+  - Pydantic v2 마이그레이션 정리 (`Config` -> `ConfigDict`, `.dict()` -> `.model_dump()`)
+  - README 의존성 안내 정합성 수정 (존재하지 않는 extra 안내 제거)
 
 ## 📅 향후 작업 계획 (Future Tasks)
 

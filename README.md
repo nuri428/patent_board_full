@@ -89,11 +89,6 @@ patent_board_full/
    uv sync
    ```
 
-   Optional retrieval extras (when embedding/retrieval stack is needed):
-   ```bash
-   uv sync --extra retrieval
-   ```
-
 3. **Configure environment**:
    ```bash
    cp .env.example .env

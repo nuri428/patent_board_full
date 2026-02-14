@@ -9,6 +9,11 @@
   - session cleanup scheduler + cleanup API management
   - relevance/confidence analysis integration for chat
   - multi-modal chat endpoint (1-2 concurrent queries)
+- Immediate remediation applied:
+  - normalized API router prefix usage to prevent `/api/v1` duplication
+  - migrated key request serialization paths to Pydantic v2 style (`model_dump`)
+  - migrated schema/settings config declarations to Pydantic v2 config style
+  - removed invalid optional dependency usage guidance from README
 
 ## 🏗️ Architecture
 
