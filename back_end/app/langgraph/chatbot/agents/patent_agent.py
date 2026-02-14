@@ -3,10 +3,8 @@ Patent Agent for specialized patent analysis and URL generation.
 Handles patent identification, URL generation, and patent-specific context enhancement.
 """
 
-from typing import Dict, List, Any, Optional, Tuple
-import json
+from typing import Dict, List, Any, Optional
 import re
-from datetime import datetime
 from enum import Enum
 import logging
 
@@ -234,7 +232,7 @@ class PatentAgent:
                 # Add helpful note
                 enhanced_response += "\n💡 These links will take you to official patent databases for detailed information."
                 
-        except Exception as e:
+        except Exception:
             # If enhancement fails, return original response
             logger.exception("Error enhancing chat response")
         

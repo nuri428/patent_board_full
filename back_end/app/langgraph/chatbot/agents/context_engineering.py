@@ -3,16 +3,15 @@ Context Engineering module for patent analysis chatbot.
 Enhances context understanding and integrates with MCP for patent data.
 """
 
-from typing import Dict, List, Any, Optional, Tuple
-import json
+from typing import Dict, List, Any, Optional
 import re
 from datetime import datetime
-import asyncio
 import logging
 from app.core.config import settings
 
 
 logger = logging.getLogger(__name__)
+
 
 class ContextEngineering:
     """Handles context engineering for patent-related queries"""
@@ -79,12 +78,12 @@ class ContextEngineering:
                             )
                             if url_result and "urls" in url_result:
                                 patent_urls.extend(url_result["urls"])
-                        except Exception as e:
+                        except Exception:
                             logger.exception(
                                 "Error generating URLs for extracted patent %s",
                                 patent.get("id", "unknown"),
                             )
-            except Exception as e:
+            except Exception:
                 logger.exception("Error extracting patent IDs")
                 # Fallback to regex pattern
                 patent_ids = re.findall(self.patent_id_pattern, text)
@@ -216,13 +215,6 @@ class ContextEngineering:
             # Detect query type and optimize search strategy
             intent = await self.detect_patent_intent(query)
             
-            # Prepare search parameters based on query type
-            search_params = {
-                "query": query,
-                "limit": limit,
-                "type": self._map_query_type_to_search(intent["query_type"])
-            }
-            
             # If specific patent IDs mentioned, use get_patent_details instead
             if intent["patent_ids"]:
                 return await self._get_patent_details_batch(intent["patent_ids"])
@@ -304,12 +296,12 @@ class ContextEngineering:
                             if "data" in details and isinstance(details["data"], dict):
                                 details["data"]["patent_urls"] = url_result["urls"]
                             
-                    except Exception as e:
+                    except Exception:
                         logger.exception(
                             "Error generating URLs for patent %s", patent_id
                         )
 
-            except Exception as e:
+            except Exception:
                 # Log error but continue with other patents
                 logger.exception("Error fetching patent %s", patent_id)
         
@@ -471,7 +463,7 @@ class ContextEngineering:
         
         # Add patent URLs if available
         if patent_urls:
-            summary_parts.append(f"\n📄 Patent Database Links:")
+            summary_parts.append("\n📄 Patent Database Links:")
             # Group URLs by patent
             patent_url_map = {}
             for url in patent_urls:

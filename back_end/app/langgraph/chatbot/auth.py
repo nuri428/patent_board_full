@@ -4,7 +4,7 @@ Authentication utilities for LangGraph Chatbot API
 
 from fastapi import HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from typing import Optional
+from typing import cast
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,6 +17,7 @@ DEMO_TOKENS = {
     "demo_token": {"user_id": "demo_user", "permissions": ["read", "write", "full_access"]},
     "limited_token": {"user_id": "limited_user", "permissions": ["read", "basic_chat"]},
 }
+
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """
@@ -51,12 +52,14 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 def require_permission(permission: str):
     """
     Dependency to check if user has specific permission
     """
     async def permission_checker(user: dict[str, object] = Depends(get_current_user)):
-        if permission not in user.get("permissions", []):
+        permissions = cast(list[str], user.get("permissions", []))
+        if permission not in permissions:
             logger.warning(f"Permission denied: {permission} for user {user.get('user_id')}")
             raise HTTPException(
                 status_code=403,
@@ -64,6 +67,7 @@ def require_permission(permission: str):
             )
         return user
     return permission_checker
+
 
 async def optional_auth(request: Request):
     """
@@ -76,6 +80,7 @@ async def optional_auth(request: Request):
         return await get_current_user(credentials)
     except Exception:
         return None
+
 
 async def is_authenticated(request: Request):
     """

@@ -48,6 +48,8 @@ class Settings(BaseSettings):
     # MCP Server
     MCP_SERVER_URL: str = "http://localhost:8082"
     MCP_TIMEOUT: int = 30
+    MCP_ENABLE_TEST_FALLBACK: bool = False
+    MCP_FALLBACK_ALLOW_NON_PROD: bool = True
 
     # LangGraph Configuration
     MAX_CONVERSATION_LENGTH: int = 1000

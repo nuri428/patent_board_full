@@ -61,7 +61,7 @@ class Neo4jConnection:
             self.driver = GraphDatabase.driver(
                 settings.NEO4J_URI, auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
             )
-        except Exception as e:
+        except Exception:
             logger.exception("Failed to connect to Neo4j")
 
     def close(self):

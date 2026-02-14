@@ -24,6 +24,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _is_fallback_enabled() -> bool:
+    if settings.MCP_ENABLE_TEST_FALLBACK:
+        return True
+    env = (settings.ENVIRONMENT or "").lower()
+    return settings.MCP_FALLBACK_ALLOW_NON_PROD and env != "production"
+
+
 @router.get("/keys", response_model=List[MCPKeyRead])
 async def list_keys(
     db: AsyncSession = Depends(get_db),
@@ -92,7 +99,12 @@ async def proxy_tool_call(
             tool_call.tool_name, tool_call.arguments or {}
         )
     except Exception as e:
-        # Fallback to test data if MCP connection fails
+        if not _is_fallback_enabled():
+            raise HTTPException(
+                status_code=503,
+                detail="MCP service unavailable and fallback is disabled",
+            ) from e
+        # Fallback to test data if MCP connection fails and fallback is enabled
         logger.exception("MCP connection failed in /proxy")
         test_data = {
             "data": [
@@ -147,7 +159,12 @@ async def proxy_semantic_search(
             search_request.query, search_request.limit
         )
     except Exception as e:
-        # Fallback to test data if MCP connection fails
+        if not _is_fallback_enabled():
+            raise HTTPException(
+                status_code=503,
+                detail="MCP service unavailable and fallback is disabled",
+            ) from e
+        # Fallback to test data if MCP connection fails and fallback is enabled
         logger.exception("MCP connection failed in /proxy/semantic-search")
         test_data = {
             "data": [
@@ -202,7 +219,12 @@ async def proxy_network_analysis(
     try:
         return await mcp_service.network_analysis(analysis_request.model_dump())
     except Exception as e:
-        # Fallback to test data if MCP connection fails
+        if not _is_fallback_enabled():
+            raise HTTPException(
+                status_code=503,
+                detail="MCP service unavailable and fallback is disabled",
+            ) from e
+        # Fallback to test data if MCP connection fails and fallback is enabled
         logger.exception("MCP connection failed in /proxy/network-analysis")
         return ProxyResult(
             status="success",
@@ -243,7 +265,12 @@ async def proxy_technology_mapping(
     try:
         return await mcp_service.technology_mapping(mapping_request.model_dump())
     except Exception as e:
-        # Fallback to test data if MCP connection fails
+        if not _is_fallback_enabled():
+            raise HTTPException(
+                status_code=503,
+                detail="MCP service unavailable and fallback is disabled",
+            ) from e
+        # Fallback to test data if MCP connection fails and fallback is enabled
         logger.exception("MCP connection failed in /proxy/technology-mapping")
         return ProxyResult(
             status="success",
