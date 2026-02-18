@@ -15,13 +15,12 @@ import asyncio
 import logging
 import json
 
-# Import our modules
 from .memory import MemoryManager
 from .backends.sql_memory import SQLMemoryBackend
 from .backends.redis_memory import RedisMemoryBackend
 from .agents import ChatbotAgent, ContextEngineering
 from .agents.patent_agent import PatentAgent
-from ..mcp_client import get_mcp_client, MCPClient
+from common.mcp_client import get_mcp_client, MCPClient
 from .models.database import PropertyType
 from app.core.config import settings
 from .auth_main import validate_jwt_token
@@ -491,7 +490,7 @@ async def set_user_properties(user_id: str, properties: Dict[str, Any]):
     """Set multiple user properties"""
     
     try:
-        from ..memory import UserProperty
+        from .memory import UserProperty
         
         for key, value in properties.items():
             # Create user property for each key-value pair

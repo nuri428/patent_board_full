@@ -134,7 +134,7 @@ class PatentDBCRUD:
         """한국 + 해외 특허 통합 검색 (OpenSearch k-NN semantic search 지원)"""
         # 만약 query 필드가 있다면 OpenSearch k-NN 시맨틱 검색 수행
         if search_params.query:
-            from app.langgraph.mcp_client import get_mcp_client
+            from common.mcp_client import get_mcp_client
 
             mcp = await get_mcp_client()
             try:

@@ -46,7 +46,7 @@ async def generate_report_background(
     Updates report status as it progresses and sends WebSocket notification on completion.
     """
     # Import here to avoid circular dependencies
-    from app.langgraph import report_generator
+    from app.agents import report_generator
     from shared.database import AsyncSessionLocal
     from app.api.v1.endpoints.notifications import notify_report_completion
 

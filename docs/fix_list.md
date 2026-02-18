@@ -4,9 +4,9 @@
 
 ## 1. AI 핵심 기능 통합 (P0 – 가장 시급)
 - **AI 채팅 서비스 실데이터 연결**: 
-    - `back_end/app/api/v1/endpoints/chat.py`의 placeholder를 `back_end/app/langgraph/chatbot/main.py`의 실시간 로직으로 대체.
+    - `back_end/app/api/v1/endpoints/chat.py`의 placeholder를 `back_end/chatbot/main.py`의 실시간 로직으로 대체.
 - **자동 리포트 생성 기능 활성화**:
-    - `back_end/app/api/v1/endpoints/reports.py`의 `/generate`를 `back_end/app/langgraph/__init__.py`의 `PatentReportGenerator`와 연결.
+    - `back_end/app/api/v1/endpoints/reports.py`의 `/generate`를 `back_end/app/agents/report_generator.py`의 `PatentReportGenerator`와 연결.
     - 리포트 생성 상태를 `Report` 모델에 저장하고 비동기 처리 적용.
 
 ## 2. 시스템 설정 및 인프라 정합성 (P1)

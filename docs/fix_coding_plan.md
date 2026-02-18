@@ -7,7 +7,7 @@
 ### 1.1 AI 채팅 엔드포인트 실구현
 - **대상 파일**: [chat.py](file:///home/nuri/dev/git/patent_board_full/back_end/app/api/v1/endpoints/chat.py)
 - **작업 내용**:
-    - `langgraph/chatbot/main.py`의 `chatbot_agent` 및 `context_engineering` 모듈을 임포트하여 `/ask` 엔드포인트와 연결.
+    - `chatbot/main.py`의 `chatbot_agent` 및 `context_engineering` 모듈을 임포트하여 `/ask` 엔드포인트와 연결.
     - `crud/chat.py`를 사용하여 실제 세션 및 메시지를 MariaDB에 저장.
 
 ### 1.2 자동 리포트 생성 및 비동기 처리

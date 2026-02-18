@@ -6,7 +6,7 @@ import json
 import uuid
 
 from app.core.config import settings
-from .mcp_client import mcp_client
+from common.mcp_client import mcp_client
 
 
 class PatentAnalysisState(TypedDict):

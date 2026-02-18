@@ -138,7 +138,7 @@ export const getChatbotAPI = () => {
 ### 2. 백엔드 개발 (100% 완료)
 
 #### 2.1 인증 미들웨어 구현
-**위치**: `/back_end/app/langgraph/chatbot/auth.py`
+**위치**: `/back_end/chatbot/auth.py`
 **수행 작업**:
 - Bearer 토큰 기반 인증 미들웨어 구현
 - 데모 토큰 관리 시스템 (`DEMO_TOKENS`)
@@ -165,7 +165,7 @@ def require_permission(permission: str):
 ```
 
 #### 2.2 보안 강화 API 서버
-**위치**: `/back_end/app/langgraph/chatbot/auth_main.py`
+**위치**: `/back_end/chatbot/auth_main.py`
 **수행 작업**:
 - 인증이 필요한 API 엔드포인트 보안 강화
 - 사용자 소유권 검증 로직 추가 (세션, 속성 접근 시)

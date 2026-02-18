@@ -17,7 +17,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 # LangGraph Chatbot Service URL
-LANGGRAPH_CHATBOT_URL = "http://localhost:8001"
+LANGGRAPH_CHATBOT_URL = "http://localhost:8003"
 
 
 @router.post("/ask", response_model=ChatResponse)

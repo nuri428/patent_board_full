@@ -17,12 +17,12 @@ import jwt
 from jwt import PyJWTError
 
 # Import our modules
-from ..memory import MemoryManager, SQLMemoryBackend, RedisMemoryBackend
-from ..agents import ChatbotAgent, ContextEngineering
-from ..agents.patent_agent import PatentAgent
-from ..mcp_client import get_mcp_client, MCPClient
-from ..models.database import PropertyType
-from ..auth import get_current_user, require_permission, is_authenticated
+from .memory import MemoryManager, SQLMemoryBackend, RedisMemoryBackend
+from .agents import ChatbotAgent, ContextEngineering
+from .agents.patent_agent import PatentAgent
+from common.mcp_client import get_mcp_client, MCPClient
+from .models.database import PropertyType
+from .auth import get_current_user, require_permission, is_authenticated
 from app.core.config import settings
 
 # Set up logging
@@ -362,7 +362,7 @@ async def set_user_properties(user_id: str, properties: Dict[str, Any], current_
         raise HTTPException(status_code=403, detail="Access denied to this user's properties")
     
     try:
-        from ..memory import UserProperty
+        from .memory import UserProperty
         for key, value in properties.items():
             # Create user property for each key-value pair
             user_property = UserProperty(
