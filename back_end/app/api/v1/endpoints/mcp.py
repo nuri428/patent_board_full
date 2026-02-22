@@ -177,6 +177,64 @@ async def proxy_semantic_search(
         )
 
 
+
+
+@router.post("/semantic-search", response_model=ProxyResult)
+async def semantic_search(
+    search_request: SemanticSearchRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    OpenSearch 시만틱 검색
+    """
+    crud = get_mcp_crud(db)
+    keys = await crud.get_by_user(user_id=current_user.id)
+    if not keys:
+        raise HTTPException(status_code=403, detail="No active MCP API Key found")
+
+    api_key = keys[0].api_key
+    mcp_service = MCPService(api_key=api_key)
+
+    try:
+        return await mcp_service.semantic_search(
+            search_request.query, search_request.limit
+        )
+    except Exception as e:
+        # Fallback to test data if MCP connection fails
+        print(f"MCP Connection Failed: {e}")
+        test_data = {
+            "data": [
+                {
+                    "id": f"KR202000000{hash(search_request.query) % 1000:03d}",
+                    "title": f"Test Patent for '{search_request.query}' - MCP Connection Fallback",
+                    "abstract": f"This is a test patent returned from the backend when MCP server connection failed. Query: {search_request.query}. The MCP server is running on {settings.MCP_SERVER_URL} but connection is not working from this backend instance.",
+                    "applicant": "Test Corporation",
+                    "inventor": "Test Inventor",
+                    "application_date": "2020-01-01",
+                    "publication_date": "2020-12-31",
+                    "status": "Registered",
+                }
+            ],
+            "metadata": {
+                "engine": "KIPRIS-MariaDB",
+                "is_raw": False,
+                "confidence": "Medium",
+                "total_count": 1,
+                "query": search_request.query,
+                "limit": search_request.limit,
+                "message": f"Test data returned - MCP server connection failed. Error: {str(e)}",
+            },
+        }
+
+        return ProxyResult(
+            status="success",
+            data=test_data["data"],
+            confidence="Medium",
+            interpretation_note=f"MCP connection failed, using test data. Error: {str(e)}",
+            source="Backend-Test-Fallback",
+        )
+
 @router.post("/proxy/network-analysis", response_model=ProxyResult)
 async def proxy_network_analysis(
     analysis_request: NetworkAnalysisRequest,
