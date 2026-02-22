@@ -34,13 +34,13 @@ const AnalysisWorkbench = () => {
     };
 
     if (type === 'semantic') {
-      endpoint = 'mcp/proxy/semantic-search';
+      endpoint = 'mcp/semantic-search';
       data = params;
     } else if (type === 'network') {
-      endpoint = 'mcp/proxy/network-analysis';
+      endpoint = 'mcp/network-analysis';
       data = params;
     } else if (type === 'tech') {
-      endpoint = 'mcp/proxy/technology-mapping';
+      endpoint = 'mcp/technology-mapping';
       data = params;
     }
 

@@ -174,13 +174,8 @@ describe('AnalysisWorkbench', () => {
     fireEvent.click(screen.getByText('Search Patents'));
     
     await waitFor(() => {
-      expect(mockApi.post).toHaveBeenCalledWith('/mcp/proxy', {
-        tool_name: 'semantic_analysis_tool_name',
-        arguments: {
-          query: 'test',
-          limit: 10,
-          similarity_threshold: 0.7
-        }
+      expect(mockApi.post).toHaveBeenCalledWith('mcp/semantic-search', {
+        query: 'test',
       });
     });
   });
@@ -195,9 +190,8 @@ describe('AnalysisWorkbench', () => {
     fireEvent.click(screen.getByText('Analyze'));
     
     await waitFor(() => {
-      expect(mockApi.post).toHaveBeenCalledWith('/mcp/proxy', {
-        tool_name: 'network_analysis_tool_name',
-        arguments: expect.any(Object)
+      expect(mockApi.post).toHaveBeenCalledWith('mcp/network-analysis', {
+        nodes: [],
       });
     });
   });
@@ -212,11 +206,8 @@ describe('AnalysisWorkbench', () => {
     fireEvent.click(screen.getByText('Map'));
     
     await waitFor(() => {
-      expect(mockApi.post).toHaveBeenCalledWith('/mcp/proxy', {
-        tool_name: 'tech_analysis_tool_name',
-        arguments: {
-          patent_id: 'test'
-        }
+      expect(mockApi.post).toHaveBeenCalledWith('mcp/technology-mapping', {
+        patent_id: 'test',
       });
     });
   });
