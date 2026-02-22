@@ -351,3 +351,41 @@ async def proxy_technology_mapping(
             interpretation_note=f"MCP connection failed, using test data. Error: {str(e)}",
             source="Backend-Test-Fallback",
         )
+
+
+@router.post("/technology-mapping", response_model=ProxyResult)
+async def technology_mapping(
+    mapping_request: TechMappingRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    기술 매핑 생성
+    """
+    crud = get_mcp_crud(db)
+    keys = await crud.get_by_user(user_id=current_user.id)
+    if not keys:
+        raise HTTPException(status_code=403, detail="No active MCP API Key found")
+
+    api_key = keys[0].api_key
+    mcp_service = MCPService(api_key=api_key)
+
+    try:
+        return await mcp_service.technology_mapping(mapping_request.dict())
+    except Exception as e:
+        # Fallback to test data if MCP connection fails
+        print(f"MCP Connection Failed: {e}")
+        return ProxyResult(
+            status="success",
+            data=[
+                {
+                    "patent_id": mapping_request.patent_id,
+                    "technology_id": mapping_request.technology_id,
+                    "confidence": 0.5,
+                    "method": "fallback-test",
+                }
+            ],
+            confidence="Low",
+            interpretation_note=f"MCP connection failed, using test data. Error: {str(e)}",
+            source="Backend-Test-Fallback",
+        )
