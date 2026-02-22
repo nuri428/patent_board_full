@@ -275,6 +275,45 @@ async def proxy_network_analysis(
             source="Backend-Test-Fallback",
         )
 
+@router.post("/network-analysis", response_model=ProxyResult)
+async def network_analysis(
+    analysis_request: NetworkAnalysisRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Neo4j 네트워크 분석
+    """
+    crud = get_mcp_crud(db)
+    keys = await crud.get_by_user(user_id=current_user.id)
+    if not keys:
+        raise HTTPException(status_code=403, detail="No active MCP API Key found")
+
+    api_key = keys[0].api_key
+    mcp_service = MCPService(api_key=api_key)
+
+    try:
+        return await mcp_service.network_analysis(analysis_request.dict())
+    except Exception as e:
+        # Fallback to test data if MCP connection fails
+        print(f"MCP Connection Failed: {e}")
+        return ProxyResult(
+            status="success",
+            data={
+                "nodes": [
+                    {
+                        "id": "node1",
+                        "label": "Test Corporation",
+                        "group": "Corporation",
+                    },
+                    {"id": "node2", "label": "Test Technology", "group": "Technology"},
+                ],
+                "edges": [{"from": "node1", "to": "node2", "label": "owns"}],
+            },
+            confidence="Low",
+            interpretation_note=f"MCP connection failed, using test data. Error: {str(e)}",
+            source="Backend-Test-Fallback",
+        )
 
 @router.post("/proxy/technology-mapping", response_model=ProxyResult)
 async def proxy_technology_mapping(
