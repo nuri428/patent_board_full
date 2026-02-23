@@ -1,11 +1,19 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Literal, Any, List, Dict
 from datetime import datetime
 
 
 class MCPKeyBase(BaseModel):
     name: str
+    description: Optional[str] = None
     key_type: Literal["simple", "graph", "all"] = "simple"
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def normalize_description(cls, value: Any) -> Optional[str]:
+        if value is None or isinstance(value, str):
+            return value
+        return None
 
 
 class MCPKeyCreate(MCPKeyBase):
@@ -19,8 +27,7 @@ class MCPKeyRead(MCPKeyBase):
     created_at: datetime
     last_used_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class MCPKeyResult(MCPKeyRead):
@@ -29,27 +36,32 @@ class MCPKeyResult(MCPKeyRead):
 
 class ProxyToolCall(BaseModel):
     tool_name: str
-    arguments: dict
+    arguments: Optional[Dict[str, Any]] = None
 
 
 class ProxyResult(BaseModel):
     status: str
     data: Any
-    confidence: Optional[Literal["High", "Medium", "Low"]] = None
+    confidence: Literal["High", "Medium", "Low", "General"] = "General"
     interpretation_note: Optional[str] = None
-    source: str = "KIPRIS"
+    source: Optional[str] = None
 
 
 class SemanticSearchRequest(BaseModel):
-    query: str = Field(..., description="Query for semantic search")
-    limit: int = Field(default=10, le=50)
+    query: str = Field(..., min_length=1, description="Query for semantic search")
+    limit: int = Field(default=10, ge=1, le=100)
     similarity_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
     analysis_run_id: Optional[str] = Field(None, description="Filter by analysis run")
 
 
 class NetworkAnalysisRequest(BaseModel):
+    company_name: str = Field(..., min_length=1, description="Company name to analyze")
+    analysis_options: List[Literal["centrality", "community", "path", "clustering"]] = Field(
+        default_factory=lambda: ["centrality"],
+        description="Requested analysis options",
+    )
     node_types: Optional[List[str]] = Field(
-        default=["Corporation", "Technology", "Patent"],
+        default_factory=lambda: ["Corporation", "Technology", "Patent"],
         description="Node types to analyze"
     )
     include_centrality: bool = Field(True, description="Include centrality metrics")
@@ -59,13 +71,23 @@ class NetworkAnalysisRequest(BaseModel):
 
 class TechMappingRequest(BaseModel):
     patent_id: str = Field(..., description="Patent application number")
-    technology_id: str = Field(..., description="Technology ID")
-    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score")
-    method: str = Field(..., description="Classification method")
-    analysis_run_id: str = Field(..., description="Analysis run ID")
+    technology_name: Optional[str] = Field(None, min_length=1, description="Technology name")
+    confidence_threshold: float = Field(
+        0.7,
+        ge=0.0,
+        le=1.0,
+        description="Confidence threshold",
+    )
+    technology_id: Optional[str] = Field(None, description="Technology ID")
+    confidence: Optional[float] = Field(None, ge=0.0, le=1.0, description="Confidence score")
+    method: Optional[str] = Field(None, description="Classification method")
+    analysis_run_id: Optional[str] = Field(None, description="Analysis run ID")
     is_partial: bool = Field(False, description="Partial classification")
 
 
 class AnalysisWorkbenchRequest(BaseModel):
-    analysis_type: str = Field(..., description="Type of analysis to run")
-    parameters: Dict[str, Any] = Field(default={}, description="Analysis parameters")
+    analysis_type: Literal["semantic", "network", "tech", "charts"] = Field(
+        ...,
+        description="Type of analysis to run",
+    )
+    parameters: Dict[str, Any] = Field(default_factory=dict, description="Analysis parameters")

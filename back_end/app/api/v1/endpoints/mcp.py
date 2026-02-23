@@ -85,7 +85,7 @@ async def proxy_tool_call(
     mcp_service = MCPService(api_key=api_key)
 
     try:
-        return await mcp_service.call_tool(tool_call.tool_name, tool_call.arguments)
+        return await mcp_service.call_tool(tool_call.tool_name, tool_call.arguments or {})
     except Exception as e:
         # Fallback to test data if MCP connection fails
         print(f"MCP Connection Failed: {e}")
@@ -253,7 +253,7 @@ async def proxy_network_analysis(
     mcp_service = MCPService(api_key=api_key)
 
     try:
-        return await mcp_service.network_analysis(analysis_request.dict())
+        return await mcp_service.network_analysis(analysis_request.model_dump())
     except Exception as e:
         # Fallback to test data if MCP connection fails
         print(f"MCP Connection Failed: {e}")
@@ -293,7 +293,7 @@ async def network_analysis(
     mcp_service = MCPService(api_key=api_key)
 
     try:
-        return await mcp_service.network_analysis(analysis_request.dict())
+        return await mcp_service.network_analysis(analysis_request.model_dump())
     except Exception as e:
         # Fallback to test data if MCP connection fails
         print(f"MCP Connection Failed: {e}")
@@ -333,7 +333,7 @@ async def proxy_technology_mapping(
     mcp_service = MCPService(api_key=api_key)
 
     try:
-        return await mcp_service.technology_mapping(mapping_request.dict())
+        return await mcp_service.technology_mapping(mapping_request.model_dump())
     except Exception as e:
         # Fallback to test data if MCP connection fails
         print(f"MCP Connection Failed: {e}")
@@ -371,7 +371,7 @@ async def technology_mapping(
     mcp_service = MCPService(api_key=api_key)
 
     try:
-        return await mcp_service.technology_mapping(mapping_request.dict())
+        return await mcp_service.technology_mapping(mapping_request.model_dump())
     except Exception as e:
         # Fallback to test data if MCP connection fails
         print(f"MCP Connection Failed: {e}")
