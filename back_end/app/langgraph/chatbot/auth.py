@@ -4,7 +4,6 @@ Authentication utilities for LangGraph Chatbot API
 
 from fastapi import HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)
@@ -55,8 +54,9 @@ def require_permission(permission: str):
     """
     Dependency to check if user has specific permission
     """
-    async def permission_checker(user: dict = Depends(get_current_user)):
-        if permission not in user.get("permissions", []):
+    async def permission_checker(user: dict[str, object] = Depends(get_current_user)):
+        permissions = user.get("permissions")
+        if not isinstance(permissions, list) or permission not in permissions:
             logger.warning(f"Permission denied: {permission} for user {user.get('user_id')}")
             raise HTTPException(
                 status_code=403,
@@ -65,23 +65,33 @@ def require_permission(permission: str):
         return user
     return permission_checker
 
-def optional_auth(request: Request):
+async def optional_auth(request: Request):
     """
     Optional authentication - returns user if authenticated, None otherwise
     """
     try:
         credentials = await security(request)
+        if credentials is None:
+            return None
         return await get_current_user(credentials)
-    except:
+    except HTTPException:
+        return None
+    except Exception as exc:
+        logger.warning("Optional auth check failed: %s", exc)
         return None
 
-def is_authenticated(request: Request):
+async def is_authenticated(request: Request):
     """
     Check if request has valid authentication
     """
     try:
         credentials = await security(request)
+        if credentials is None:
+            return False
         await get_current_user(credentials)
         return True
-    except:
+    except HTTPException:
+        return False
+    except Exception as exc:
+        logger.warning("Auth status check failed: %s", exc)
         return False

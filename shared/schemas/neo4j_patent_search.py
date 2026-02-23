@@ -1,5 +1,5 @@
 from neo4j import GraphDatabase
-from typing import List, Dict, Optional, Tuple
+from typing import Any, List, Dict, Optional, Tuple
 import logging
 from django.conf import settings
 
@@ -7,6 +7,8 @@ logger = logging.getLogger(__name__)
 
 
 class Neo4jPatentSearch:
+    ALLOWED_RELATIONSHIP_TYPES = {"APPLIED_BY", "OWNED_BY"}
+
     def __init__(self, uri: Optional[str] = None, username: Optional[str] = None, password: Optional[str] = None):
         self.uri = uri or getattr(settings, 'NEO4J_URI', 'bolt://localhost:7687')
         self.username = username or getattr(settings, 'NEO4J_USERNAME', 'neo4j')
@@ -30,13 +32,11 @@ class Neo4jPatentSearch:
                               offset: int = 0) -> List[Dict]:
         """특허 제목, 초록으로 텍스트 검색"""
         with self.driver.session() as session:
-            country_filter = f"AND p.country_code = '{country_code}'" if country_code else ""
-            
-            cypher = f"""
+            cypher = """
             MATCH (p:Patent)
-            WHERE toLower(p.title) CONTAINS toLower($query) 
-               OR toLower(p.abstract) CONTAINS toLower($query)
-               {country_filter}
+            WHERE (toLower(p.title) CONTAINS toLower($query)
+               OR toLower(p.abstract) CONTAINS toLower($query))
+               AND ($country_code IS NULL OR p.country_code = $country_code)
             RETURN p.application_number as patent_id,
                    p.document_number as doc_num,
                    p.title as title,
@@ -49,7 +49,13 @@ class Neo4jPatentSearch:
             SKIP $offset LIMIT $limit
             """
             
-            result = session.run(cypher, query=query, limit=limit, offset=offset)
+            result = session.run(
+                cypher,
+                query=query,
+                country_code=country_code,
+                limit=limit,
+                offset=offset,
+            )
             return [record.data() for record in result]
     
     def search_patents_by_corporation(self, 
@@ -57,9 +63,16 @@ class Neo4jPatentSearch:
                                     relationship_type: str = 'APPLIED_BY',
                                     limit: int = 20) -> List[Dict]:
         """회사 이름으로 특허 검색"""
+        normalized_relationship_type = relationship_type.upper()
+        if normalized_relationship_type not in self.ALLOWED_RELATIONSHIP_TYPES:
+            raise ValueError(
+                f"Invalid relationship_type '{relationship_type}'. "
+                f"Allowed values: {sorted(self.ALLOWED_RELATIONSHIP_TYPES)}"
+            )
+
         with self.driver.session() as session:
             cypher = f"""
-            MATCH (p:Patent)-[r:{relationship_type}]->(c:Corporation)
+            MATCH (p:Patent)-[r:{normalized_relationship_type}]->(c:Corporation)
             WHERE toLower(c.name) CONTAINS toLower($corp_name)
                OR toLower(c.name_normalized) CONTAINS toLower($corp_name)
             RETURN p.application_number as patent_id,
@@ -106,12 +119,10 @@ class Neo4jPatentSearch:
                            limit: int = 20) -> List[Dict]:
         """IPC 코드로 특허 검색"""
         with self.driver.session() as session:
-            is_main_filter = "AND r.is_main = true" if is_main else ""
-            
-            cypher = f"""
+            cypher = """
             MATCH (p:Patent)-[r:CLASSIFIED_AS]->(i:IPC)
             WHERE i.code STARTS WITH $ipc_code
-               {is_main_filter}
+               AND ($is_main = false OR r.is_main = true)
             RETURN p.application_number as patent_id,
                    p.document_number as doc_num,
                    p.title as title,
@@ -123,7 +134,7 @@ class Neo4jPatentSearch:
             LIMIT $limit
             """
             
-            result = session.run(cypher, ipc_code=ipc_code, limit=limit)
+            result = session.run(cypher, ipc_code=ipc_code, is_main=is_main, limit=limit)
             return [record.data() for record in result]
     
     def search_patents_by_cpc(self, 
@@ -154,14 +165,11 @@ class Neo4jPatentSearch:
                                 limit: int = 20) -> List[Dict]:
         """키워드로 특허 검색 (KR 특허 주로)"""
         with self.driver.session() as session:
-            country_filter = f"AND p.country_code = '{country_code}'" if country_code else ""
-            keyword_list = ', '.join([f"'{kw}'" for kw in keywords])
-            
-            cypher = f"""
+            cypher = """
             MATCH (p:Patent)-[r:CONTAINS_KEYWORD]->(k:Keyword)
-            WHERE k.keyword IN [{keyword_list}]
+            WHERE k.keyword IN $keywords
                AND r.frequency >= $min_frequency
-               {country_filter}
+               AND ($country_code IS NULL OR p.country_code = $country_code)
             WITH p, collect(k.keyword) as matched_keywords, sum(r.frequency) as total_freq
             RETURN p.application_number as patent_id,
                    p.document_number as doc_num,
@@ -174,7 +182,13 @@ class Neo4jPatentSearch:
             LIMIT $limit
             """
             
-            result = session.run(cypher, min_frequency=min_frequency, limit=limit)
+            result = session.run(
+                cypher,
+                keywords=keywords,
+                min_frequency=min_frequency,
+                country_code=country_code,
+                limit=limit,
+            )
             return [record.data() for record in result]
     
     def search_patents_by_technology(self, 
@@ -226,13 +240,13 @@ class Neo4jPatentSearch:
             return [record.data() for record in result]
     
     def search_by_problem_solution(self, 
-                                 problem_text: str = None,
-                                 solution_text: str = None,
+                                 problem_text: Optional[str] = None,
+                                 solution_text: Optional[str] = None,
                                  limit: int = 20) -> List[Dict]:
         """문제-해결책 기반 특허 검색 (US 특허)"""
         with self.driver.session() as session:
             conditions = []
-            params = {}
+            params: Dict[str, Any] = {}
             
             if problem_text:
                 conditions.append("toLower(pr.description) CONTAINS toLower($problem_text)")
@@ -349,7 +363,7 @@ class Neo4jPatentSearch:
         """통합 고급 검색"""
         with self.driver.session() as session:
             conditions = []
-            params = {'limit': limit, 'offset': offset}
+            params: Dict[str, Any] = {'limit': limit, 'offset': offset}
             
             if query:
                 conditions.append("(toLower(p.title) CONTAINS toLower($query) OR toLower(p.abstract) CONTAINS toLower($query))")
@@ -399,13 +413,17 @@ class Neo4jPatentSearch:
             result = session.run(cypher, **params)
             return [record.data() for record in result]
     
-    def get_patent_network(self, patent_id: str, depth: int = 2) -> Dict:
+    def get_patent_network(self, patent_id: str, depth: int = 2) -> Optional[Dict]:
         """특허 관계망 시각화 데이터 조회"""
+        if depth < 1:
+            raise ValueError("depth must be >= 1")
+        bounded_depth = min(depth, 5)
+
         with self.driver.session() as session:
-            cypher = """
+            cypher = f"""
             MATCH (p:Patent)
             WHERE p.application_number = $patent_id OR p.document_number = $patent_id
-            MATCH (p)-[r*1..{depth}]-(related)
+            MATCH (p)-[r*1..{bounded_depth}]-(related)
             RETURN p as center_patent,
                    collect(DISTINCT related) as related_patents,
                    collect(DISTINCT r) as relationships
@@ -466,6 +484,6 @@ class MCPPatentSearch:
         """고급 검색"""
         return self.neo4j_search.advanced_search(**search_params)
     
-    def get_patent_network(self, patent_id: str, depth: int = 2) -> Dict:
+    def get_patent_network(self, patent_id: str, depth: int = 2) -> Optional[Dict]:
         """특허 관계망 데이터 조회"""
         return self.neo4j_search.get_patent_network(patent_id, depth)

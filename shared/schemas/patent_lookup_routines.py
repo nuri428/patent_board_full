@@ -2,7 +2,6 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
-import time
 import logging
 from django.conf import settings
 from .patent_db import Patent
@@ -93,8 +92,6 @@ class KoreanPatentLookup:
                 
                 results = self._parse_kipris_response(response.text)
                 all_results.extend(results)
-                
-                time.sleep(0.5)  # Rate limiting
                 
             except Exception as e:
                 logger.error(f"Error searching KIPRIS {endpoint}: {str(e)}")
@@ -233,7 +230,7 @@ class KoreanPatentLookup:
                 day = date_str[6:8]
                 return f"{year}-{month}-{day}"
             return date_str.strip()
-        except:
+        except (TypeError, ValueError):
             return date_str.strip()
     
     def _determine_status(self, registration_date: Optional[str]) -> str:
@@ -504,7 +501,7 @@ class USPatentLookup:
         try:
             # PEDS date format might be YYYY-MM-DD
             return date_str.split('T')[0] if 'T' in date_str else date_str
-        except:
+        except (AttributeError, TypeError, ValueError):
             return date_str
     
     def _determine_us_patent_type(self, patent_number: str) -> str:

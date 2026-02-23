@@ -265,12 +265,23 @@ class ContextEngineering:
     
     async def _get_patent_details_batch(self, patent_ids: List[str]) -> Dict[str, Any]:
         """Get details for multiple patent IDs with URLs"""
+        mcp_client = self.mcp_client
+        if not mcp_client:
+            return {
+                "success": False,
+                "query_type": "specific_patents",
+                "results": [],
+                "total_results": 0,
+                "patent_urls": [],
+                "error": "MCP client is not configured",
+            }
+
         results = []
         all_urls = []
         
         for patent_id in patent_ids:
             try:
-                details = await self.mcp_client.get_patent_details(patent_id)
+                details = await mcp_client.get_patent_details(patent_id)
                 if details and "error" not in details:
                     results.append(details)
                     
@@ -285,7 +296,7 @@ class ContextEngineering:
                         elif patent_id.startswith("WO"):
                             country = "WIPO"
                         
-                        url_result = await self.mcp_client.generate_patent_urls(
+                        url_result = await mcp_client.generate_patent_urls(
                             patent_ids=[patent_id],
                             country=country,
                             sources=self.url_generation_sources
@@ -423,7 +434,7 @@ class ContextEngineering:
                 current_year = datetime.now().year
                 age = current_year - year
                 return max(0, 1 - age / 20)  # Decay over 20 years
-            except:
+            except (TypeError, ValueError):
                 return 0.5
         
         return 0.5
