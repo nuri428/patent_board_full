@@ -173,6 +173,16 @@ Multi-agent system with specialized roles:
 uv run pytest
 ```
 
+## ✅ Recent Updates (2026-02-23)
+
+- Hardened MCP/API authentication paths and removed permissive API-key bypass behavior.
+- Removed hardcoded credential defaults from operational scripts and switched to environment-required secrets.
+- Reworked Neo4j query construction to avoid unsafe string interpolation in search flows.
+- Tightened exception handling in chatbot/context utilities and removed blocking sleep in lookup routines.
+- Aligned MCP request/response schemas with backend test contracts and fixed endpoint serialization compatibility.
+- Resolved Pydantic v2 deprecations in backend settings and MCP endpoint payload serialization.
+- Validation status: `back_end/tests` passing (`50 passed`).
+
 ### Code Quality
 ```bash
 uv run black app/          # Format code

@@ -210,6 +210,12 @@ graph LR
 - ✅ Vite API 프록시 타깃을 환경 변수 기반으로 분리 (`VITE_API_PROXY_TARGET`)
 - ✅ Docker 개발 환경에서 프록시 타깃 주입 추가 (`http://backend:5000`)
 - ✅ E2E 실패 케이스 코드 레벨 검증 및 환경 의존 테스트 skip/완화 처리
+- ✅ MCP 인증 보안 강화: API 키 DB 검증 복구 및 비활성 키 차단 처리
+- ✅ 하드코딩 자격증명 제거: `check_db.py`, `verify_endpoints.py`, `create_initial_users.py` 환경변수 강제화
+- ✅ Neo4j 특허 검색 안전성 개선: 동적 문자열 보간 제거 및 파라미터화 확대
+- ✅ MCP 스키마 계약 정렬: `back_end/tests/test_mcp_schemas.py` 기준 필드/검증 규칙 동기화
+- ✅ Pydantic deprecation 정리: `SettingsConfigDict` 적용, `dict()` -> `model_dump()` 전환
+- ✅ 백엔드 테스트 통과 확인: `back_end/tests` 전체 `50 passed`
 - ⚠️ Firefox E2E는 호스트 라이브러리(`libgtk-3-0`) 부재로 부분 실행 제한
 - ⚠️ 백엔드 상세 헬스는 인프라 상태에 따라 `503 degraded` 가능 (테스트 기대값 반영)
 

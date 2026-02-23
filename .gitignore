@@ -10,3 +10,9 @@ wheels/
 .venv
 .env
 .sisyphus/
+
+# Node / frontend artifacts
+node_modules/
+front_end/node_modules/
+front_end/playwright-report/
+front_end/test-results/
