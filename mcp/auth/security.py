@@ -1,8 +1,9 @@
+from datetime import datetime, timezone
+
 from fastapi import Security, HTTPException, status, Depends
 from fastapi.security import APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from datetime import datetime
+from sqlalchemy import select, update
 
 from database import get_auth_db
 from auth.models import APIKey
@@ -18,38 +19,42 @@ async def verify_api_key(
     Verifies the API key from the request header against the database.
     Returns the APIKey object if valid, otherwise raises HTTPException.
     """
-    # TEMPORARY: For testing purposes, accept any API key
-    # In production, this should be restored to proper database validation
-    if api_key_str is not None and len(api_key_str.strip()) > 0:
-        # Create a mock APIKey object for testing
-        class MockAPIKey:
-            def __init__(self):
-                self.id = 1
-                self.user_id = 1
-                self.name = "test-key"
-                self.api_key = api_key_str
-                self.key_type = "simple"
-                self.is_active = True
-                self.created_at = datetime.now()
-                self.last_used_at = None
-        
-        return MockAPIKey()
-    
-    # Use api_key column instead of key
-    query = select(APIKey).where(APIKey.api_key == api_key_str)
+    if not api_key_str or not api_key_str.strip():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing API Key",
+        )
+
+    query = select(APIKey).where(
+        APIKey.api_key == api_key_str,
+        APIKey.is_active.is_(True),
+    )
     result = await session.execute(query)
     api_key = result.scalar_one_or_none()
 
     if not api_key:
+        inactive_key_query = select(APIKey.id).where(
+            APIKey.api_key == api_key_str,
+            APIKey.is_active.is_not(True),
+        )
+        inactive_result = await session.execute(inactive_key_query)
+        if inactive_result.scalar_one_or_none() is not None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="API Key is inactive",
+            )
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API Key",
         )
 
-    if not api_key.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="API Key is inactive",
-        )
+    touch_query = (
+        update(APIKey)
+        .where(APIKey.id == api_key.id)
+        .values({APIKey.last_used_at: datetime.now(timezone.utc)})
+    )
+    _ = await session.execute(touch_query)
+    await session.commit()
 
     return api_key

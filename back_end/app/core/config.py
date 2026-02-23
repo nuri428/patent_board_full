@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional, List, Dict
 import logging
 
@@ -6,13 +6,15 @@ logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
     # Database
-    MARIADB_URL: str = "mysql+aiomysql://patent_user:password@localhost/patent_db"
-    PATENTDB_URL: str = "mysql+aiomysql://patent_user:password@localhost/patent_db"
-    PA_SYSTEM_DB_URL: str = "mysql+aiomysql://chatbot_user:password@localhost/pa_system"
+    MARIADB_URL: str = "mysql+aiomysql://patent_user:change-me@localhost/patent_db"
+    PATENTDB_URL: str = "mysql+aiomysql://patent_user:change-me@localhost/patent_db"
+    PA_SYSTEM_DB_URL: str = "mysql+aiomysql://chatbot_user:change-me@localhost/pa_system"
     NEO4J_URI: str = "bolt://localhost:7687"
     NEO4J_USER: str = "neo4j"
-    NEO4J_PASSWORD: str = "password"
+    NEO4J_PASSWORD: str = "change-me"
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
@@ -22,7 +24,7 @@ class Settings(BaseSettings):
 
     # API
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = "your-secret-key-here-change-in-production"
+    SECRET_KEY: str = "change-me-in-env-min-32-chars"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
@@ -170,10 +172,6 @@ Relevant patents found:
     URL_GENERATION_SOURCES: List[str] = ["google", "uspto", "kipris"]
     URL_GENERATION_DEFAULT_COUNTRY: str = "auto"
 
-    class Config:
-        env_file = ".env"
-        extra = "ignore"
-
     def validate_configuration(self) -> bool:
         """Validate configuration settings and log warnings for missing critical settings"""
         validation_passed = True
@@ -187,17 +185,36 @@ Relevant patents found:
             logger.warning(
                 "OPENAI_MODEL is not set. Using default gpt-4-turbo-preview."
             )
-            self.OPENAI_MODEL = "gpt-4-turbo-preview"
 
         # Check database URLs
         if not self.MARIADB_URL:
             logger.error("MARIADB_URL is not set. Database connection will fail.")
             validation_passed = False
 
+        if "change-me" in self.MARIADB_URL:
+            logger.error("MARIADB_URL uses placeholder credentials. Set a real value in environment variables.")
+            validation_passed = False
+
         if not self.PA_SYSTEM_DB_URL:
             logger.error(
                 "PA_SYSTEM_DB_URL is not set. Chatbot system database connection will fail."
             )
+            validation_passed = False
+
+        if "change-me" in self.PA_SYSTEM_DB_URL:
+            logger.error("PA_SYSTEM_DB_URL uses placeholder credentials. Set a real value in environment variables.")
+            validation_passed = False
+
+        if "change-me" in self.PATENTDB_URL:
+            logger.error("PATENTDB_URL uses placeholder credentials. Set a real value in environment variables.")
+            validation_passed = False
+
+        if self.SECRET_KEY == "change-me-in-env-min-32-chars":
+            logger.error("SECRET_KEY is still set to placeholder. Set a strong secret in environment variables.")
+            validation_passed = False
+
+        if self.NEO4J_PASSWORD == "change-me":
+            logger.error("NEO4J_PASSWORD is still set to placeholder. Set a real value in environment variables.")
             validation_passed = False
 
         if not self.REDIS_URL:

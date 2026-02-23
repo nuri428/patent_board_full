@@ -1,6 +1,7 @@
 import sys
 import os
 import asyncio
+import importlib
 from sqlalchemy import select
 import bcrypt
 
@@ -24,8 +25,11 @@ from dotenv import load_dotenv
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv(env_path)
 
-from shared.database import mariadb_engine, mariadb_session_factory
 from app.models import User
+
+shared_database = importlib.import_module("shared.database")
+mariadb_engine = shared_database.mariadb_engine
+mariadb_session_factory = shared_database.mariadb_session_factory
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -33,17 +37,25 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 async def create_users():
     print("Creating initial users...")
 
+    default_user_password = os.getenv("INITIAL_USER_PASSWORD")
+    default_admin_password = os.getenv("INITIAL_ADMIN_PASSWORD")
+
+    if not default_user_password or not default_admin_password:
+        raise RuntimeError(
+            "Set INITIAL_USER_PASSWORD and INITIAL_ADMIN_PASSWORD before running this script"
+        )
+
     users_to_create = [
         {
             "username": "nuri",
-            "password": "manhae",
+            "password": default_user_password,
             "email": "greennuri@gmail.com",
             # "full_name": "Nuri",
             "is_admin": False,
         },
         {
             "username": "admin",
-            "password": "manhae",
+            "password": default_admin_password,
             "email": "greennuri+admin@gmail.com",  # Modified to avoid unique constraint violation
             # "full_name": "Admin",
             "is_admin": True,
@@ -61,13 +73,17 @@ async def create_users():
                 print(f"User '{user_data['username']}' already exists. Skipping.")
                 continue
 
+            password_value = user_data.get("password")
+            if not isinstance(password_value, str):
+                raise RuntimeError(
+                    f"Password for {user_data['username']} must be a string"
+                )
+
             print(f"Hashing password for {user_data['username']}...")
             try:
                 # Bypass passlib and use bcrypt directly due to version incompatibility
                 salt = bcrypt.gensalt()
-                hashed_bytes = bcrypt.hashpw(
-                    user_data["password"].encode("utf-8"), salt
-                )
+                hashed_bytes = bcrypt.hashpw(password_value.encode("utf-8"), salt)
                 hashed_password = hashed_bytes.decode("utf-8")
             except Exception as e:
                 print(f"Error hashing password: {e}")

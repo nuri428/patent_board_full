@@ -1,6 +1,7 @@
 import asyncio
 import httpx
 import logging
+import os
 import sys
 
 # Configure logging
@@ -10,11 +11,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 BASE_URL = "http://localhost:8001/api/v1"
-EMAIL = "greennuri@gmail.com"
-PASSWORD = "manhae"
+EMAIL = os.getenv("VERIFY_EMAIL")
+PASSWORD = os.getenv("VERIFY_PASSWORD")
 
 
 async def verify_endpoints():
+    if not EMAIL or not PASSWORD:
+        raise RuntimeError(
+            "Set VERIFY_EMAIL and VERIFY_PASSWORD before running endpoint verification"
+        )
+
     async with httpx.AsyncClient(base_url=BASE_URL, timeout=10.0) as client:
         # 1. Login (JSON)
         logger.info("Attempting login...")

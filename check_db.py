@@ -12,11 +12,11 @@ load_dotenv()
 MARIADB_HOST = os.getenv("MARIADB_HOST", "192.168.0.10")
 MARIADB_PORT = os.getenv("MARIADB_PORT", "3306")
 MARIADB_USER = os.getenv("MARIADB_USER", "pa_admin")
-MARIADB_PASSWORD = os.getenv("MARIADB_PASSWORD", "Manhae428!")
+MARIADB_PASSWORD = os.getenv("MARIADB_PASSWORD")
 
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://192.168.0.10:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "manhae428!")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 
 
 async def check_mariadb(db_name, label):
@@ -54,6 +54,12 @@ def check_neo4j(db_name, label):
 
 async def main():
     print("--- Verifying Database Connections ---")
+
+    if not MARIADB_PASSWORD:
+        raise RuntimeError("MARIADB_PASSWORD must be set in environment variables")
+
+    if not NEO4J_PASSWORD:
+        raise RuntimeError("NEO4J_PASSWORD must be set in environment variables")
 
     # 1. Backend -> pa_system
     await check_mariadb("pa_system", "BackEnd MariaDB")
