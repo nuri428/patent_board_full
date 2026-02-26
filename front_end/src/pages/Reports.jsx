@@ -12,8 +12,7 @@ import {
     Download,
     Trash2
 } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || '';
+import api from '../api/axios';
 
 const Reports = () => {
     const { user } = useAuth();
@@ -40,21 +39,8 @@ const Reports = () => {
         try {
             setLoading(true);
             setError(null);
-
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/api/v1/reports/`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch reports');
-            }
-
-            const data = await response.json();
-            setReports(data);
+            const response = await api.get('/reports/');
+            setReports(response.data);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -86,31 +72,19 @@ const Reports = () => {
             setGenerating(true);
             setError(null);
 
-            const token = localStorage.getItem('token');
             const patentIds = newReport.patent_ids
                 .split(',')
                 .map(id => parseInt(id.trim()))
                 .filter(id => !isNaN(id));
 
-            const response = await fetch(`${API_URL}/api/v1/reports/generate`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    topic: newReport.topic,
-                    report_type: newReport.report_type,
-                    patent_ids: patentIds,
-                    priority: 'normal'
-                })
+            const response = await api.post('/reports/generate', {
+                topic: newReport.topic,
+                report_type: newReport.report_type,
+                patent_ids: patentIds,
+                priority: 'normal'
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to generate report');
-            }
-
-            const data = await response.json();
+            const data = response.data;
 
             // Close modal and refresh reports
             setShowGenerateModal(false);
@@ -142,17 +116,8 @@ const Reports = () => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/api/v1/reports/${reportId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                setReports(prev => prev.filter(r => r.id !== reportId));
-            }
+            await api.delete(`/reports/${reportId}`);
+            setReports(prev => prev.filter(r => r.id !== reportId));
         } catch (err) {
             console.error('Failed to delete report:', err);
         }

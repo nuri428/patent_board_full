@@ -21,7 +21,7 @@ from back_end.app.langgraph.chatbot.memory import (
 from back_end.app.langgraph.chatbot.backends import SQLMemoryBackend
 from back_end.app.langgraph.chatbot.agents import ChatbotAgent, ContextEngineering
 from back_end.app.langgraph.chatbot.models.database import PropertyType
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 async def test_memory_manager():
@@ -54,8 +54,8 @@ async def test_memory_manager():
         key="test_preference",
         value="AI & Machine Learning",
         type="preference",
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
     # Set user property

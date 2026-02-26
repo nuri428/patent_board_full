@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, DateTime, JSON, Integer
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 import uuid
 
 
@@ -11,7 +11,7 @@ class AnalysisRun(Base):
     __tablename__ = "analysis_runs"
     
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     analysis_type = Column(String(50))
     status = Column(String(20), default="running")
     parameters = Column(JSON)

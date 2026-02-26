@@ -3,7 +3,7 @@ from sqlalchemy import select, func, desc
 from typing import Optional, List, Dict, Any
 from app.models import Report, Patent, User, SearchQuery, ReportAnalytics
 from app.schemas import SystemMetrics, UserAnalytics, PatentAnalytics
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 class AnalyticsCRUD:
@@ -20,7 +20,7 @@ class AnalyticsCRUD:
         )
 
         # Get daily searches (last 24 hours)
-        yesterday = datetime.utcnow() - timedelta(days=1)
+        yesterday = datetime.now(timezone.utc) - timedelta(days=1)
         daily_searches_result = await self.db.execute(
             select(func.count(SearchQuery.id)).where(
                 SearchQuery.created_at >= yesterday
@@ -50,7 +50,7 @@ class AnalyticsCRUD:
             else None,
             database_connections=1,  # This would come from connection pool monitoring
             uptime_hours=24.0,  # This would come from application monitoring
-            last_updated=datetime.utcnow(),
+            last_updated=datetime.now(timezone.utc),
         )
 
     async def get_user_analytics(self, user_id: int) -> UserAnalytics:
@@ -83,7 +83,7 @@ class AnalyticsCRUD:
         total_searches = searches_result.scalar() or 0
         total_reports = reports_result.scalar() or 0
         avg_time = avg_time_result.scalar()
-        last_activity = last_search_result.scalar() or datetime.utcnow()
+        last_activity = last_search_result.scalar() or datetime.now(timezone.utc)
 
         return UserAnalytics(
             user_id=user_id,
@@ -115,7 +115,7 @@ class AnalyticsCRUD:
 
     async def get_search_analytics(self, days: int = 30) -> List[Dict[str, Any]]:
         """Get search analytics over time period"""
-        start_date = datetime.utcnow() - timedelta(days=days)
+        start_date = datetime.now(timezone.utc) - timedelta(days=days)
 
         result = await self.db.execute(
             select(
@@ -141,7 +141,7 @@ class AnalyticsCRUD:
 
     async def get_report_analytics(self, days: int = 30) -> List[Dict[str, Any]]:
         """Get report generation analytics"""
-        start_date = datetime.utcnow() - timedelta(days=days)
+        start_date = datetime.now(timezone.utc) - timedelta(days=days)
 
         result = await self.db.execute(
             select(

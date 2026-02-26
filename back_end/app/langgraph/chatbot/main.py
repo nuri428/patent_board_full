@@ -3,13 +3,14 @@ LangGraph Chatbot API Service
 Context-aware patent analysis chatbot with long-term memory and MCP integration.
 """
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 import asyncio
 import logging
 
@@ -27,13 +28,51 @@ from app.core.config import settings
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Global variables
+memory_manager: Optional[MemoryManager] = None
+chatbot_agent: Optional[ChatbotAgent] = None
+context_engineering: Optional[ContextEngineering] = None
+patent_agent: Optional[PatentAgent] = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan: startup and shutdown"""
+    global memory_manager, chatbot_agent, context_engineering, patent_agent
+
+    logger.info("Initializing LangGraph Chatbot API...")
+    try:
+        sql_backend = SQLMemoryBackend(database_url=settings.PA_SYSTEM_DB_URL)
+        redis_backend = RedisMemoryBackend(redis_url=settings.REDIS_URL)
+        memory_manager = MemoryManager(
+            primary_backend=sql_backend,
+            cache_backend=redis_backend
+        )
+        mcp_client = await get_mcp_client()
+        context_engineering = ContextEngineering(mcp_client=mcp_client)
+        chatbot_agent = ChatbotAgent(
+            memory_manager=memory_manager,
+            context_engineering=context_engineering
+        )
+        patent_agent = PatentAgent(mcp_client=mcp_client)
+        logger.info("LangGraph Chatbot API initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize services: {e}")
+        raise
+
+    yield
+
+    logger.info("Shutting down LangGraph Chatbot API...")
+
+
 # FastAPI app
 app = FastAPI(
     title="LangGraph Chatbot API",
     description="Context-aware patent analysis chatbot with long-term memory",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # CORS middleware
@@ -82,68 +121,13 @@ class UserPropertyRequest(BaseModel):
     value: Any = Field(..., description="Property value")
     type: str = Field(..., description="Property type (preference, setting, context, profile)")
 
-# Global variables
-memory_manager: Optional[MemoryManager] = None
-chatbot_agent: Optional[ChatbotAgent] = None
-context_engineering: Optional[ContextEngineering] = None
-patent_agent: Optional[PatentAgent] = None
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize services on startup"""
-    global memory_manager, chatbot_agent, context_engineering, patent_agent
-    
-    logger.info("Initializing LangGraph Chatbot API...")
-    
-    try:
-        # Initialize database backends
-        sql_backend = SQLMemoryBackend(
-            database_url=settings.PA_SYSTEM_DB_URL
-        )
-        
-        redis_backend = RedisMemoryBackend(
-            redis_url=settings.REDIS_URL
-        )
-        
-        # Create memory manager
-        memory_manager = MemoryManager(
-            primary_backend=sql_backend,
-            cache_backend=redis_backend
-        )
-        
-        # Initialize MCP client
-        mcp_client = await get_mcp_client()
-        
-        # Initialize context engineering with MCP client
-        context_engineering = ContextEngineering(mcp_client=mcp_client)
-        
-        # Initialize chatbot agent
-        chatbot_agent = ChatbotAgent(
-            memory_manager=memory_manager,
-            context_engineering=context_engineering
-        )
-        
-        # Initialize patent agent with MCP client
-        patent_agent = PatentAgent(mcp_client=mcp_client)
-        
-        logger.info("LangGraph Chatbot API initialized successfully")
-        
-    except Exception as e:
-        logger.error(f"Failed to initialize services: {e}")
-        raise
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Cleanup on shutdown"""
-    logger.info("Shutting down LangGraph Chatbot API...")
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "service": "langgraph-chatbot"
     }
 
@@ -306,8 +290,8 @@ async def set_user_properties(user_id: str, properties: Dict[str, Any]):
                 key=key,
                 value=value,
                 type="preference",  # Default type
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc)
             )
             
             await memory_manager.set_user_property(user_property)
@@ -372,12 +356,12 @@ async def get_sample_context():
                 {
                     "role": "user",
                     "content": "I'm interested in AI patents related to machine learning",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 },
                 {
                     "role": "assistant", 
                     "content": "I can help you find AI patents related to machine learning. Let me search for relevant patents.",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             ],
             "sample_user_properties": {

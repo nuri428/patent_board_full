@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 
 
@@ -61,13 +61,13 @@ class PatentSearchResponse(BaseModel):
 
 class ChatMessage(BaseModel):
     message: str
-    timestamp: datetime = datetime.utcnow()
+    timestamp: datetime = datetime.now(timezone.utc)
 
 
 class ChatResponse(BaseModel):
     response: str
     sources: Optional[List[str]] = []
-    timestamp: datetime = datetime.utcnow()
+    timestamp: datetime = datetime.now(timezone.utc)
 
 
 class ReportRequest(BaseModel):

@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, selectinload
 from sqlalchemy import select, delete, and_, or_
 from typing import List, Optional, Any
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 from ..memory import (
     MemoryInterface,
@@ -138,7 +138,7 @@ class SQLMemoryBackend(MemoryInterface):
 
                 model.value = property.value
                 model.type = property.type
-                model.updated_at = datetime.utcnow()
+                model.updated_at = datetime.now(timezone.utc)
             else:
                 # Create new property
                 model = UserPropertyModel(
@@ -146,8 +146,8 @@ class SQLMemoryBackend(MemoryInterface):
                     key=property.key,
                     value=property.value,
                     type=property.type,
-                    created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow(),
+                    created_at=datetime.now(timezone.utc),
+                    updated_at=datetime.now(timezone.utc),
                 )
                 session.add(model)
 
@@ -241,7 +241,7 @@ class SQLMemoryBackend(MemoryInterface):
             model.title = session.title
             model.context = session.context
             model.status = session.status
-            model.updated_at = datetime.utcnow()
+            model.updated_at = datetime.now(timezone.utc)
 
             # Update messages (clear and recreate)
             await db_session.execute(
@@ -314,6 +314,6 @@ class SQLMemoryBackend(MemoryInterface):
             session_model = result.scalar_one_or_none()
 
             if session_model:
-                session_model.updated_at = datetime.utcnow()
+                session_model.updated_at = datetime.now(timezone.utc)
 
             await db_session.commit()

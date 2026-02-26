@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Date, DateTime, Integer, Text, BigInteger, JSON
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.dialects.mysql import LONGTEXT
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Base(DeclarativeBase):
@@ -21,8 +21,8 @@ class KRPatent(Base):
     registration_date = Column(Date, nullable=True)
     patent_status = Column(String(20), nullable=False)
     raw_data = Column(LONGTEXT, nullable=True)
-    created_at = Column(DateTime(6), nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime(6), nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(6), nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(6), nullable=False, default=lambda: datetime.now(timezone.utc))
 
 
 class ForeignPatent(Base):
@@ -40,8 +40,8 @@ class ForeignPatent(Base):
     abstract = Column(LONGTEXT, nullable=True)
     patent_status = Column(String(20), nullable=False)
     raw_data = Column(LONGTEXT, nullable=True)
-    created_at = Column(DateTime(6), nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime(6), nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(6), nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(6), nullable=False, default=lambda: datetime.now(timezone.utc))
 
 
 # Link Tables - for future use in search queries
@@ -76,7 +76,7 @@ class AnalysisRun(Base):
     analysis_type = Column(String(100), nullable=False)
     parameters = Column(JSON, nullable=True)
     status = Column(String(20), default="running")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     completed_at = Column(DateTime, nullable=True)
     results_count = Column(Integer, default=0)
     

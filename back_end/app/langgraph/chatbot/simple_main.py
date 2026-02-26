@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 import asyncio
 import logging
 
@@ -78,7 +78,7 @@ async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "service": "langgraph-chatbot"
     }
 
@@ -97,7 +97,7 @@ async def chat_message(request: ChatRequest):
         messages[session_id].append({
             "role": "user",
             "content": request.message.content,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
         
         # Simple echo response for testing
@@ -107,7 +107,7 @@ async def chat_message(request: ChatRequest):
         messages[session_id].append({
             "role": "assistant",
             "content": response_content,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
         
         # Create session if it doesn't exist
@@ -116,13 +116,13 @@ async def chat_message(request: ChatRequest):
                 "id": session_id,
                 "user_id": request.user_id,
                 "title": request.title or "New Conversation",
-                "created_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
                 "context": {}
             }
         
         # Update session
-        sessions[session_id]["updated_at"] = datetime.utcnow().isoformat()
+        sessions[session_id]["updated_at"] = datetime.now(timezone.utc).isoformat()
         sessions[session_id]["message_count"] = len(messages[session_id])
         
         return ChatResponse(
@@ -150,8 +150,8 @@ async def create_session(request: CreateSessionRequest):
             "id": session_id,
             "user_id": request.user_id,
             "title": request.title or "New Conversation",
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
             "context": {}
         }
         

@@ -133,16 +133,6 @@ mcp_client = MCPClient()
 
 async def get_mcp_client() -> MCPClient:
     """Get global MCP client instance"""
-    global mcp_client
-
-    # Perform health check if not done before (basic check)
-    try:
-        # We don't want to block everything if it fails on startup
-        # but we can try to check if it's alive
-        pass
-    except Exception:
-        pass
-
     return mcp_client
 
 

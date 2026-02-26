@@ -19,8 +19,13 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
 
-    # Elasticsearch / OpenSearch
-    ELASTICSEARCH_URL: str = "http://localhost:9200"
+    # OpenSearch (외부 서비스 접속)
+    OPENSEARCH_URL: str = "http://localhost:9200"
+    OPENSEARCH_HOST: str = "localhost"
+    OPENSEARCH_PORT: int = 9200
+    OPENSEARCH_USER: Optional[str] = None
+    OPENSEARCH_PASSWORD: Optional[str] = None
+    OPENSEARCH_USE_SSL: bool = False
 
     # API
     API_V1_STR: str = "/api/v1"

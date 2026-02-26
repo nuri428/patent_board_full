@@ -6,7 +6,7 @@ import json
 import pickle
 import redis.asyncio as redis
 from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import asyncio
 from ..memory import (
     MemoryInterface,
@@ -232,7 +232,7 @@ class RedisMemoryBackend(MemoryInterface):
         session = await self.get_conversation_session(session_id)
         if session:
             session.messages.append(message)
-            session.updated_at = datetime.utcnow()
+            session.updated_at = datetime.now(timezone.utc)
 
             # Update session in Redis
             await self.update_conversation_session(session)

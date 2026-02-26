@@ -17,7 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 import enum
 
@@ -47,9 +47,9 @@ class UserPropertyModel(Base):
     key = Column(String(255), nullable=False, index=True)
     value = Column(JSON, nullable=False)
     type = Column(Enum(PropertyType), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False
     )
 
     # Composite index for user_id and key
@@ -79,7 +79,7 @@ class ConversationMessageModel(Base):
     )
     message = Column(Text, nullable=False)
     role = Column(String(50), nullable=False)  # 'user', 'assistant'
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
     extra_metadata = Column(JSON, nullable=True)
 
     # Relationship with session
@@ -105,9 +105,9 @@ class ConversationSessionModel(Base):
     id = Column(String(255), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(255), nullable=False, index=True)
     title = Column(String(500), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False
     )
     context = Column(JSON, nullable=True)
     status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE, nullable=False)
@@ -143,9 +143,9 @@ class UserSessionSummary(Base):
     last_message = Column(Text, nullable=True)
     last_message_time = Column(DateTime, nullable=True)
     total_messages = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False
     )
 
     def to_dict(self):

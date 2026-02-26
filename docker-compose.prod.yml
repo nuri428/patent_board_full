@@ -1,6 +1,10 @@
 version: '3.8'
 
 services:
+  # ============================================
+  # Patent Board Backend (FastAPI)
+  # 운영 외부 포트: 58001
+  # ============================================
   backend:
     build:
       context: .
@@ -8,22 +12,31 @@ services:
     container_name: patent-board-backend-prod
     restart: always
     ports:
-      - "${PROD_BACKEND_PORT:-8000}:${BACKEND_PORT:-8001}"
+      - "${PROD_BACKEND_PORT:-58001}:8001"
     env_file:
       - .env
     environment:
       - MARIADB_URL=${MARIADB_URL}
+      - PATENTDB_URL=${PATENTDB_URL}
       - NEO4J_URI=${NEO4J_URI}
       - NEO4J_USER=${NEO4J_USER}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - SECRET_KEY=${SECRET_KEY}
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+      - MCP_SERVER_URL=http://patent-board-mcp-prod:8080
       - ENVIRONMENT=production
       - DEBUG=false
       - LOG_LEVEL=INFO
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - patent-board-network-prod
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health", "||", "exit", "1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     deploy:
       resources:
         limits:
@@ -33,6 +46,10 @@ services:
           cpus: '0.5'
           memory: 512M
 
+  # ============================================
+  # Frontend Service (Node/React)
+  # 운영 외부 포트: 58080
+  # ============================================
   frontend:
     build:
       context: .
@@ -40,14 +57,108 @@ services:
     container_name: patent-board-frontend-prod
     restart: always
     ports:
-      - "${PROD_FRONTEND_PORT:-80}:${FRONTEND_PORT:-3000}"
+      - "${PROD_FRONTEND_PORT:-58080}:3000"
     environment:
-      - VITE_API_URL=http://localhost:${PROD_BACKEND_PORT:-8000}/api/v1
+      - VITE_API_URL=http://patents.greennuri.info/api/v1
+      - VITE_API_PROXY_TARGET=http://backend:8001
     networks:
       - patent-board-network-prod
     depends_on:
       - backend
 
+  # ============================================
+  # MCP Server Service
+  # 운영 외부 포트: 58082
+  # ============================================
+  mcp:
+    build:
+      context: .
+      dockerfile: docker/mcp/Dockerfile
+    container_name: patent-board-mcp-prod
+    restart: always
+    ports:
+      - "${PROD_MCP_PORT:-58082}:8080"
+    env_file:
+      - .env
+    environment:
+      - MARIADB_URL=${MARIADB_URL}
+      - PATENTDB_URL=${PATENTDB_URL}
+      - NEO4J_URI=${NEO4J_URI}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEBUG=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - patent-board-network-prod
+    depends_on:
+      - backend
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health", "||", "exit", "1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # ============================================
+  # LangGraph Chatbot Service
+  # 운영 외부 포트: 58003
+  # ============================================
+  langgraph:
+    build:
+      context: .
+      dockerfile: docker/langgraph/Dockerfile
+    container_name: patent-board-langgraph-prod
+    restart: always
+    ports:
+      - "${PROD_LANGGRAPH_PORT:-58003}:8001"
+    env_file:
+      - .env
+    environment:
+      - PA_SYSTEM_DB_URL=${PA_SYSTEM_DB_URL}
+      - REDIS_URL=redis://patent-board-redis-prod:6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4-turbo-preview}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-patent-board-langgraph}
+      - MCP_SERVER_URL=http://patent-board-mcp-prod:8080
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - patent-board-network-prod
+    depends_on:
+      - backend
+      - mcp
+      - redis
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health", "||", "exit", "1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # ============================================
+  # Redis (캐시 전용, 자체 컨테이너)
+  # 운영: 외부 포트 미노출 (내부 네트워크만)
+  # ============================================
   redis:
     image: redis:7-alpine
     container_name: patent-board-redis-prod

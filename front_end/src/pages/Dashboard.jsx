@@ -20,14 +20,17 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const reportsRes = await api.get('/reports/?skip=0&limit=5');
+                const [reportsRes, overviewRes] = await Promise.all([
+                    api.get('/reports/?skip=0&limit=5'),
+                    api.get('/analytics/overview').catch(() => null),
+                ]);
                 const reports = reportsRes.data;
                 setRecentReports(reports);
 
                 setStats({
-                    totalReports: reports.length,
-                    totalPatents: 12503,
-                    credits: 500
+                    totalReports: overviewRes?.data?.total_reports ?? reports.length,
+                    totalPatents: overviewRes?.data?.total_patents ?? 0,
+                    credits: 0
                 });
 
                 if (user?.is_admin) {
@@ -35,8 +38,8 @@ const Dashboard = () => {
                         const adminStats = await api.get('/admin/statistics');
                         setStats(prev => ({
                             ...prev,
-                            totalPatents: adminStats.data.total_patents,
-                            totalReports: adminStats.data.total_reports
+                            totalPatents: adminStats.data.total_patents ?? prev.totalPatents,
+                            totalReports: adminStats.data.total_reports ?? prev.totalReports
                         }));
                     } catch (err) {
                         console.warn("Failed to fetch admin stats", err);
@@ -108,7 +111,7 @@ const Dashboard = () => {
                 </div>
                 <div className="flex items-center gap-3">
                     <Link
-                        to="/reports/new"
+                        to="/reports"
                         className="premium-button-primary flex items-center gap-2"
                     >
                         <Plus className="w-5 h-5" /> New Analysis

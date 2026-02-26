@@ -3,7 +3,7 @@ Memory management system for the chatbot.
 """
 
 from typing import Dict, List, Optional, Any, Union
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import pickle
 import uuid
@@ -175,5 +175,5 @@ class MemoryManager:
             session = await self.cache.get_conversation_session(session_id)
             if session:
                 session.messages.append(message)
-                session.updated_at = datetime.utcnow()
+                session.updated_at = datetime.now(timezone.utc)
                 await self.cache.update_conversation_session(session)

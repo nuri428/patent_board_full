@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 import asyncio
 import logging
 
@@ -148,7 +148,7 @@ async def health_check():
     """Health check endpoint - public"""
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "service": "langgraph-chatbot"
     }
 
@@ -322,8 +322,8 @@ async def set_user_properties(user_id: str, properties: Dict[str, Any], current_
                 key=key,
                 value=value,
                 type="preference",  # Default type
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc)
             )
             
             await memory_manager.set_user_property(user_property)

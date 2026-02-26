@@ -3,7 +3,7 @@ from sqlalchemy import select, func, desc
 from typing import Optional, List
 from app.models import Notification
 from app.schemas import NotificationCreate
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class NotificationCRUD:
@@ -59,7 +59,7 @@ class NotificationCRUD:
             return False
 
         notification.is_read = True
-        notification.read_at = datetime.utcnow()
+        notification.read_at = datetime.now(timezone.utc)
 
         await self.db.commit()
         return True
@@ -71,7 +71,7 @@ class NotificationCRUD:
         stmt = (
             update(Notification)
             .where(Notification.user_id == user_id, Notification.is_read == False)
-            .values(is_read=True, read_at=datetime.utcnow())
+            .values(is_read=True, read_at=datetime.now(timezone.utc))
         )
 
         result = await self.db.execute(stmt)

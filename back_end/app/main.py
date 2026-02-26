@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 import logging
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 import httpx
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,7 +22,7 @@ frontend_dist_path = os.path.abspath(
 class JsonFormatter(logging.Formatter):
     def format(self, record):
         log_record = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "level": record.levelname,
             "message": record.getMessage(),
             "module": record.module,
@@ -201,13 +201,13 @@ async def check_redis() -> Dict[str, Any]:
 @app.get("/health")
 async def health_check():
     """Basic health check endpoint"""
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+    return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
 @app.get("/health/detailed")
 async def health_check_detailed():
     """Detailed health check with service dependencies"""
-    start_time = datetime.utcnow()
+    start_time = datetime.now(timezone.utc)
 
     # Run all checks concurrently
     results = await asyncio.gather(
@@ -239,7 +239,7 @@ async def health_check_detailed():
         checks[service]["status"] == "healthy" for service in critical_services
     )
 
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc)
     response_time_ms = (end_time - start_time).total_seconds() * 1000
 
     status_code = 200 if all_healthy else 503

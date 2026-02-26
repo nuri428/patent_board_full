@@ -21,7 +21,7 @@ const RecentReports = ({ reports }) => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">No reports yet</h3>
                 <p className="text-gray-500 mb-6 max-w-sm">Create your first patent analysis report to see it here.</p>
                 <Link
-                    to="/reports/new"
+                    to="/reports"
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                     Create Report

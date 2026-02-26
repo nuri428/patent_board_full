@@ -3,7 +3,7 @@ LangGraph chatbot agent implementation.
 """
 
 from typing import Dict, List, Any, Optional, TypedDict, Annotated
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 import json
 from langgraph.graph import StateGraph, START, END
@@ -147,7 +147,7 @@ class ChatbotAgent:
         # Update context with current message
         state["context"]["current_message"] = {
             "content": content,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "extra_metadata": message.get("extra_metadata", {}),
         }
 
@@ -205,7 +205,7 @@ class ChatbotAgent:
                     {
                         "role": "system",
                         "content": patent_summary,
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                         "extra_metadata": {
                             "type": "patent_search",
                             "result_count": len(patent_context["results"]),
@@ -247,7 +247,7 @@ class ChatbotAgent:
             response_message = {
                 "role": "assistant",
                 "content": response.content,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "extra_metadata": {
                     "model": "gpt-4-turbo-preview",
                     "tokens_used": getattr(response, "usage", {}).get(
@@ -264,7 +264,7 @@ class ChatbotAgent:
             error_response = {
                 "role": "assistant",
                 "content": f"I apologize, but I encountered an error while processing your request: {str(e)}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "extra_metadata": {"error": str(e)},
             }
             state["messages"].append(error_response)
@@ -289,8 +289,8 @@ class ChatbotAgent:
                     id=session_id,
                     user_id=user_id,
                     title=state["context"].get("session_title", "New Conversation"),
-                    created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow(),
+                    created_at=datetime.now(timezone.utc),
+                    updated_at=datetime.now(timezone.utc),
                     messages=[],
                     context=state["context"],
                 )
@@ -384,7 +384,7 @@ class ChatbotAgent:
             {
                 "role": "user",
                 "content": message_content,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "extra_metadata": message_metadata or {},
             }
         )
@@ -419,8 +419,8 @@ class ChatbotAgent:
             id=session_id,
             user_id=user_id,
             title=title or "New Conversation",
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
             messages=[],
             context={},
         )

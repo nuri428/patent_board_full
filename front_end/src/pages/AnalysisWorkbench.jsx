@@ -15,6 +15,7 @@ import SemanticSearchTab from '../components/AnalysisWorkbench/SemanticSearchTab
 import NetworkAnalysisTab from '../components/AnalysisWorkbench/NetworkAnalysisTab';
 import TechMappingTab from '../components/AnalysisWorkbench/TechMappingTab';
 import AnalysisResults from '../components/AnalysisWorkbench/AnalysisResults';
+import { VisualAnalyticsTab, VisualAnalyticsResults } from '../components/AnalysisWorkbench/VisualAnalyticsTab';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AnalysisWorkbench = () => {
@@ -136,12 +137,7 @@ const AnalysisWorkbench = () => {
                     <TechMappingTab onMapping={handleAnalysis} loading={loading} />
                   )}
                   {activeTab === 'charts' && (
-                    <div className="text-center py-10 space-y-4">
-                      <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto text-amber-600">
-                        <BarChart3 className="w-8 h-8" />
-                      </div>
-                      <p className="text-slate-500 text-sm font-medium">Visualization layer is currently initializing.</p>
-                    </div>
+                    <VisualAnalyticsTab results={results} />
                   )}
                 </motion.div>
               </AnimatePresence>
@@ -171,7 +167,14 @@ const AnalysisWorkbench = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6"
               >
-                <AnalysisResults results={results} />
+                {activeTab === 'charts'
+                  ? <VisualAnalyticsResults results={results} />
+                  : <AnalysisResults results={results} />
+                }
+              </motion.div>
+            ) : activeTab === 'charts' ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <VisualAnalyticsResults results={null} />
               </motion.div>
             ) : error ? (
               <motion.div

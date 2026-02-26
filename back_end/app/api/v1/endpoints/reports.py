@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime
+from datetime import datetime, timezone
 import sys
 import os
 import logging
@@ -58,7 +58,7 @@ async def generate_report_background(
             # Update status to "processing"
             await crud.update(
                 report_id,
-                ReportUpdate(status="processing", updated_at=datetime.utcnow()),
+                ReportUpdate(status="processing", updated_at=datetime.now(timezone.utc)),
             )
 
             logger.info(
@@ -80,8 +80,8 @@ async def generate_report_background(
                 ReportUpdate(
                     status="completed",
                     content=result.get("content", ""),
-                    generated_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow(),
+                    generated_at=datetime.now(timezone.utc),
+                    updated_at=datetime.now(timezone.utc),
                 ),
             )
 
@@ -115,7 +115,7 @@ async def generate_report_background(
                     ReportUpdate(
                         status="failed",
                         description=f"Generation failed: {str(e)}",
-                        updated_at=datetime.utcnow(),
+                        updated_at=datetime.now(timezone.utc),
                     ),
                 )
 
