@@ -1,0 +1,54 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "7bfb6c560a15",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 5,
+  "files_touched": [
+    ".env",
+    "TODO.md",
+    "back_end/app/api/v1/endpoints/auth.py",
+    "back_end/app/api/v1/endpoints/reports.py",
+    "back_end/app/core/config.py",
+    "back_end/app/crud/analytics.py",
+    "back_end/app/crud/notification.py",
+    "back_end/app/langgraph/chatbot/agents/chatbot_agent.py",
+    "back_end/app/langgraph/chatbot/auth_main.py",
+    "back_end/app/langgraph/chatbot/backends/redis_memory.py",
+    "back_end/app/langgraph/chatbot/backends/sql_memory.py",
+    "back_end/app/langgraph/chatbot/main.py",
+    "back_end/app/langgraph/chatbot/memory.py",
+    "back_end/app/langgraph/chatbot/models/database.py",
+    "back_end/app/langgraph/chatbot/simple_main.py",
+    "back_end/app/langgraph/mcp_client.py",
+    "back_end/app/main.py",
+    "back_end/app/services/opensearch_service.py",
+    "docker-compose.prod.yml",
+    "docker-compose.yml",
+    "front_end/src/components/AnalysisWorkbench/VisualAnalyticsTab.jsx",
+    "front_end/src/components/Dashboard/RecentReports.jsx",
+    "front_end/src/pages/AnalysisWorkbench.jsx",
+    "front_end/src/pages/Dashboard.jsx",
+    "front_end/src/pages/Reports.jsx",
+    "mcp/db/analysis_models.py",
+    "mcp/db/models.py",
+    "shared/schemas/__init__.py",
+    "test_langgraph_chatbot.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/7b/fb6c560a15/0/metadata.json",
+      "transcript": "/7b/fb6c560a15/0/full.jsonl",
+      "context": "/7b/fb6c560a15/0/context.md",
+      "content_hash": "/7b/fb6c560a15/0/content_hash.txt",
+      "prompt": "/7b/fb6c560a15/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 782,
+    "cache_creation_tokens": 206049,
+    "cache_read_tokens": 12908664,
+    "output_tokens": 67448,
+    "api_call_count": 146
+  }
+}
