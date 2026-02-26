@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "07bb690e41ea",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "front_end/e2e/tests/patent-board.spec.js",
+    "front_end/playwright.config.js"
+  ],
+  "sessions": [
+    {
+      "metadata": "/07/bb690e41ea/0/metadata.json",
+      "transcript": "/07/bb690e41ea/0/full.jsonl",
+      "context": "/07/bb690e41ea/0/context.md",
+      "content_hash": "/07/bb690e41ea/0/content_hash.txt",
+      "prompt": "/07/bb690e41ea/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 80,
+    "cache_creation_tokens": 65895,
+    "cache_read_tokens": 381460,
+    "output_tokens": 20081,
+    "api_call_count": 10
+  }
+}
