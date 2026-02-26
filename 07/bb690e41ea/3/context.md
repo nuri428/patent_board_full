@@ -1,0 +1,28 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+claude.md를 읽어서 이전 세션에서 중단한 내용을 로딩해줘
+
+### Prompt 2
+
+외부 DB 접속 검증을 수행해줘
+
+### Prompt 3
+
+잔여 작업은 E2E로 접속 테스트인가 아직 docker compose가 정상으로 뜨는지 확인 안됐는데 ?
+
+### Prompt 4
+
+수정 내역을  기록해놔
+
+### Prompt 5
+
+이 서버는 GUI가 없는 서버인데 web 페이지 접속으로 테스트가 가능한가?
+
+### Prompt 6
+
+서버내부에서 헤드리스 브라우저도 테스트 해봐
+
