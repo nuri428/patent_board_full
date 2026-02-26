@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "07bb690e41ea",
+  "session_id": "7ba67c4d-46f0-4c66-946e-b85857a91da7",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-26T19:34:40.199365155Z",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "front_end/e2e/tests/patent-board.spec.js",
+    "front_end/playwright.config.js"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "467651352771",
+  "transcript_identifier_at_start": "14745745-b961-45d0-a660-9fa4babc48dc",
+  "checkpoint_transcript_start": 46,
+  "transcript_lines_at_start": 46,
+  "token_usage": {
+    "input_tokens": 5,
+    "cache_creation_tokens": 3683,
+    "cache_read_tokens": 61942,
+    "output_tokens": 45,
+    "api_call_count": 3
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-26T19:34:40.172433849Z",
+    "agent_lines": 0,
+    "human_added": 2,
+    "human_modified": 13,
+    "human_removed": 0,
+    "total_committed": 2,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-mnt-sources-git-patent-board-full/7ba67c4d-46f0-4c66-946e-b85857a91da7.jsonl"
+}
