@@ -83,3 +83,6 @@ async def get_patentdb() -> AsyncGenerator[AsyncSession, None]:
 
 
 get_db = get_mariadb_db
+
+# Alias for backward compatibility
+AsyncSessionLocal = mariadb_session_factory

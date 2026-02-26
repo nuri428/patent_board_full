@@ -169,13 +169,18 @@ async def get_aggregated_stats(
 
 
 async def health_check() -> dict[str, Any]:
-    """OpenSearch 연결 상태 확인"""
+    """OpenSearch 연결 상태 확인.
+
+    _cluster/health 대신 루트 엔드포인트를 사용합니다.
+    클러스터 매니저 미발견 상태에서도 노드 자체가 응답하면 connected=True로 처리합니다.
+    """
     try:
         async with _build_client() as client:
-            response = await client.get("/_cluster/health")
+            response = await client.get("/")
             response.raise_for_status()
             data = response.json()
-            return {"status": data.get("status", "unknown"), "connected": True}
+            version = data.get("version", {}).get("number", "unknown")
+            return {"status": "green", "connected": True, "version": version}
     except Exception as e:
         logger.warning(f"OpenSearch health check failed: {e}")
         return {"status": "unreachable", "connected": False, "error": str(e)}

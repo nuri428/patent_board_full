@@ -144,7 +144,7 @@ async def check_mariadb() -> Dict[str, Any]:
             from sqlalchemy import text
 
             result = await db.execute(text("SELECT 1"))
-            await result.fetchone()
+            result.fetchone()
             return {"status": "healthy", "message": "Connected"}
     except Exception as e:
         logger.error(f"MariaDB health check failed: {e}")
@@ -191,10 +191,23 @@ async def check_redis() -> Dict[str, Any]:
 
         client = redis.from_url(settings.REDIS_URL, socket_connect_timeout=5)
         await client.ping()
-        await client.close()
+        await client.aclose()
         return {"status": "healthy", "message": "Connected"}
     except Exception as e:
         logger.error(f"Redis health check failed: {e}")
+        return {"status": "unhealthy", "message": str(e), "optional": True}
+
+
+async def check_opensearch() -> Dict[str, Any]:
+    """Check OpenSearch connectivity via root endpoint"""
+    try:
+        from app.services.opensearch_service import health_check as os_health
+        result = await os_health()
+        if result.get("connected"):
+            return {"status": "healthy", "message": f"Connected (v{result.get('version', '?')})"}
+        return {"status": "unhealthy", "message": result.get("error", "unreachable"), "optional": True}
+    except Exception as e:
+        logger.error(f"OpenSearch health check failed: {e}")
         return {"status": "unhealthy", "message": str(e), "optional": True}
 
 
@@ -215,6 +228,7 @@ async def health_check_detailed():
         check_neo4j(),
         check_mcp_server(),
         check_redis(),
+        check_opensearch(),
         return_exceptions=True,
     )
 
@@ -231,6 +245,9 @@ async def health_check_detailed():
         "redis": results[3]
         if not isinstance(results[3], Exception)
         else {"status": "unhealthy", "message": str(results[3]), "optional": True},
+        "opensearch": results[4]
+        if not isinstance(results[4], Exception)
+        else {"status": "unhealthy", "message": str(results[4]), "optional": True},
     }
 
     # Determine overall status

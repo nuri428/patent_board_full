@@ -45,6 +45,9 @@ services:
       # MCP Server Configuration (내부 네트워크)
       - MCP_SERVER_URL=http://patent-board-mcp:8080
 
+      # Redis Configuration (내부 네트워크)
+      - REDIS_URL=redis://patent-board-redis:6379
+
       # Application Configuration
       - PROJECT_NAME=Patent Board
       - DEBUG=${DEBUG:-true}
@@ -67,7 +70,7 @@ services:
       - "host.docker.internal:host-gateway"
 
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8001/health", "||", "exit", "1" ]
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -137,7 +140,7 @@ services:
     depends_on:
       - backend
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/health", "||", "exit", "1" ]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -197,7 +200,7 @@ services:
       - mcp
       - redis
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8001/health", "||", "exit", "1" ]
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
