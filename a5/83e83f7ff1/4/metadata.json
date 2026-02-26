@@ -1,0 +1,37 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "a583e83f7ff1",
+  "session_id": "57c3d902-bf27-4333-bda9-c7677910c209",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-26T19:25:03.616296156Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docker/langgraph/Dockerfile",
+    "docker/mcp/Dockerfile",
+    "shared/database/__init__.py",
+    ".env",
+    "back_end/app/main.py",
+    "back_end/app/services/opensearch_service.py",
+    "docker-compose.yml"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "fdd9b5fbe35b",
+  "token_usage": {
+    "input_tokens": 1676,
+    "cache_creation_tokens": 27825,
+    "cache_read_tokens": 123138,
+    "output_tokens": 9,
+    "api_call_count": 5
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-26T19:25:03.387739732Z",
+    "agent_lines": 0,
+    "human_added": 222,
+    "human_modified": 19,
+    "human_removed": 0,
+    "total_committed": 222,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-mnt-sources-git-patent-board-full/57c3d902-bf27-4333-bda9-c7677910c209.jsonl"
+}
