@@ -34,5 +34,8 @@ export default defineConfig({
     command: 'npm run dev -- --port 3301 --strictPort',
     url: 'http://localhost:3301',
     reuseExistingServer: !process.env.CI,
+    env: {
+      VITE_API_PROXY_TARGET: process.env.BACKEND_URL || 'http://localhost:48001',
+    },
   },
 });

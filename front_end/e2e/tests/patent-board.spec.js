@@ -18,9 +18,8 @@ let authBackendReady = false;
 
 test.beforeAll(async ({ request }) => {
   try {
-    const backendResponse = await request.get('http://localhost:8005/health');
-    const frontendProxyResponse = await request.get('http://localhost:3301/api/v1/health');
-    authBackendReady = backendResponse.ok() && frontendProxyResponse.ok();
+    const backendResponse = await request.get('http://localhost:48001/health');
+    authBackendReady = backendResponse.ok();
   } catch {
     authBackendReady = false;
   }
@@ -72,14 +71,14 @@ test.describe('Report Generation Flow', () => {
 
   test('should open generate report modal', async ({ page }) => {
     await page.goto('/reports');
-    
+
     // Click generate report button
     const generateBtn = page.locator('button').filter({ hasText: /generate|new|create/i }).first();
     await expect(generateBtn).toBeVisible();
     await generateBtn.click();
-    
-    // Check modal is open
-    await expect(page.locator('[role="dialog"], .modal, [class*="modal"]')).toBeVisible();
+
+    // Check modal is open (Reports.jsx uses fixed overlay without role="dialog")
+    await expect(page.getByText('Generate New Report')).toBeVisible();
   });
 
   test('should submit report generation form', async ({ page }) => {
@@ -90,7 +89,7 @@ test.describe('Report Generation Flow', () => {
     await generateBtn.click();
     
     // Fill form
-    await page.fill('input[name="topic"], input[placeholder*="topic" i]', 'AI in Healthcare');
+    await page.fill('input[placeholder*="Machine Learning in Healthcare"]', 'AI in Healthcare');
     
     // Select report type if dropdown exists
     const typeSelect = page.locator('select[name="report_type"]').first();
@@ -188,12 +187,12 @@ test.describe('End-to-End User Flow', () => {
     await generateBtn.click();
     
     // Fill and submit form
-    await page.fill('input[name="topic"], input[placeholder*="topic" i]', 'Machine Learning Patents');
+    await page.fill('input[placeholder*="Machine Learning in Healthcare"]', 'Machine Learning Patents');
     const submitBtn = page.locator('button[type="submit"]').filter({ hasText: /generate|submit|create/i }).first();
     await submitBtn.click();
     
-    // Step 4: Verify report appears in list
-    await expect(page.locator('text=Machine Learning Patents, text=Pending, text=Processing').first()).toBeVisible({ timeout: 10000 });
+    // Step 4: Verify report appears in list (topic text is shown in the report card)
+    await expect(page.getByText('Machine Learning Patents').first()).toBeVisible({ timeout: 10000 });
     
     // Step 5: Wait for status updates (polling every 3 seconds)
     await page.waitForTimeout(5000);
@@ -205,7 +204,7 @@ test.describe('End-to-End User Flow', () => {
 
 test.describe('Health Check Integration', () => {
   test('API health endpoint should return healthy', async ({ request }) => {
-    const response = await request.get('http://localhost:8005/health');
+    const response = await request.get('http://localhost:48001/health');
     expect(response.ok()).toBeTruthy();
     
     const body = await response.json();
@@ -213,7 +212,7 @@ test.describe('Health Check Integration', () => {
   });
 
   test('detailed health check should include services', async ({ request }) => {
-    const response = await request.get('http://localhost:8005/health/detailed');
+    const response = await request.get('http://localhost:48001/health/detailed');
     expect([200, 503]).toContain(response.status());
     
     const body = await response.json();
