@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "90aeee4fb825",
+  "session_id": "697675fb-fd6c-4731-9289-8bc01a58e7f7",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T18:57:37.113312081Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "front_end/vite.config.js"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "76e9ba98c555",
+  "transcript_identifier_at_start": "851b9168-ca0d-4176-b883-d21e34ed24bf",
+  "token_usage": {
+    "input_tokens": 29,
+    "cache_creation_tokens": 82549,
+    "cache_read_tokens": 975833,
+    "output_tokens": 8667,
+    "api_call_count": 18
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T18:57:37.016897131Z",
+    "agent_lines": 11,
+    "human_added": 3200,
+    "human_modified": 4,
+    "human_removed": 0,
+    "total_committed": 3215,
+    "agent_percentage": 0.34214618973561434
+  },
+  "transcript_path": ".claude/projects/-mnt-sources-git-patent-board-full/697675fb-fd6c-4731-9289-8bc01a58e7f7.jsonl"
+}
