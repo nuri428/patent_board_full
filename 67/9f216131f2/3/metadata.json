@@ -1,0 +1,38 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "679f216131f2",
+  "session_id": "0b2c819a-7555-4025-be3b-2ada65e52f52",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T18:59:24.793873876Z",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "back_end/app/api/v1/api.py",
+    "back_end/app/api/v1/endpoints/notifications.py",
+    "back_end/app/api/v1/endpoints/tgip.py",
+    "back_end/app/main.py",
+    "back_end/app/schemas/tgip.py"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "872746c006fd",
+  "transcript_identifier_at_start": "632d0be7-7e13-4b1a-8a72-125125637a8f",
+  "checkpoint_transcript_start": 33,
+  "transcript_lines_at_start": 33,
+  "token_usage": {
+    "input_tokens": 8,
+    "cache_creation_tokens": 6622,
+    "cache_read_tokens": 89459,
+    "output_tokens": 28,
+    "api_call_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T18:59:24.752111449Z",
+    "agent_lines": 231,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 231,
+    "agent_percentage": 100
+  },
+  "transcript_path": ".claude/projects/-mnt-sources-git-patent-board-full/0b2c819a-7555-4025-be3b-2ada65e52f52.jsonl"
+}
