@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "679f216131f2",
+  "session_id": "ses_3750116aaffeKF8yNK3QlMFUAT",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T18:59:40.443702692Z",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "back_end/app/api/v1/api.py",
+    "back_end/app/api/v1/endpoints/notifications.py",
+    "back_end/app/api/v1/endpoints/tgip.py",
+    "back_end/app/main.py",
+    "back_end/app/schemas/tgip.py"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "36219f72f083",
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T18:59:40.413604825Z",
+    "agent_lines": 231,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 231,
+    "agent_percentage": 100
+  }
+}
