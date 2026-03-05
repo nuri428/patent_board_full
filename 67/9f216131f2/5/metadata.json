@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "679f216131f2",
+  "session_id": "1bee228b-9ba7-4e1a-a14c-2bac92f835a9",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T18:59:28.592697897Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "back_end/app/main.py"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "c50a0a431e63",
+  "transcript_identifier_at_start": "f893db9d-859f-4c74-a381-9ea938ecc2c0",
+  "token_usage": {
+    "input_tokens": 181,
+    "cache_creation_tokens": 358908,
+    "cache_read_tokens": 14299258,
+    "output_tokens": 73857,
+    "api_call_count": 154
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T18:59:28.086276413Z",
+    "agent_lines": 2,
+    "human_added": 229,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 231,
+    "agent_percentage": 0.8658008658008658
+  },
+  "transcript_path": ".claude/projects/-mnt-sources-git-patent-board-full/1bee228b-9ba7-4e1a-a14c-2bac92f835a9.jsonl"
+}
