@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "dd3d36cb965b",
+  "session_id": "0097e234-444d-4fe6-ab9b-6bd67c4a6f5e",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T19:05:09.290843823Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/01-plan/features/patent-board-platform.plan.md",
+    "docs/02-design/features/patent-board-platform.design.md"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "c30a032e18da",
+  "transcript_identifier_at_start": "23cd9bda-218d-4e9e-8c10-a63850cc58d3",
+  "token_usage": {
+    "input_tokens": 80,
+    "cache_creation_tokens": 65895,
+    "cache_read_tokens": 381460,
+    "output_tokens": 20081,
+    "api_call_count": 10
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T19:05:09.114936855Z",
+    "agent_lines": 970,
+    "human_added": 15552,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 16522,
+    "agent_percentage": 5.870959932211597
+  },
+  "transcript_path": ".claude/projects/-mnt-sources-git-patent-board-full/0097e234-444d-4fe6-ab9b-6bd67c4a6f5e.jsonl"
+}
