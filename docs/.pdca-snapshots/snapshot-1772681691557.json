@@ -1,0 +1,824 @@
+{
+  "timestamp": "2026-03-05T03:34:51.557Z",
+  "reason": "compaction",
+  "status": {
+    "version": "2.0",
+    "lastUpdated": "2026-03-05T02:00:00.000Z",
+    "activeFeatures": [
+      "webpage",
+      "infra-db-e2e",
+      "opensearch_service.py",
+      "back_end",
+      "database",
+      "front_end",
+      "tests",
+      "context",
+      "endpoints",
+      "store",
+      "api",
+      "tgip",
+      "RTSView",
+      "TPIView",
+      "FSSView",
+      "WSDView",
+      "Workspace",
+      "Layout",
+      "frontend - Gap 분석",
+      "schemas",
+      "v1"
+    ],
+    "primaryFeature": null,
+    "features": {
+      "webpage": {
+        "phase": "plan",
+        "phaseNumber": 1,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [
+          "10개 페이지 라우트 (LandingPage, Login, Chat, Dashboard, PatentSearch, GraphAnalysis, AnalysisWorkbench, Reports, Settings, Admin)",
+          "인증/미인증 라우팅 분기",
+          "공통 레이아웃 (Sidebar + Header + ProtectedLayout)",
+          "전역 컨텍스트 (Auth, Notifications, Chatbot)",
+          "알림 시스템 (Toast + NotificationCenter)"
+        ],
+        "documents": {
+          "plan": "docs/01-plan/features/webpage.plan.md"
+        },
+        "timestamps": {
+          "started": "2026-03-04T00:00:00.000Z",
+          "lastUpdated": "2026-03-04T00:00:00.000Z"
+        }
+      },
+      "infra-db-e2e": {
+        "phase": "completed",
+        "phaseNumber": 5,
+        "matchRate": 100,
+        "iterationCount": 0,
+        "requirements": [
+          "외부 DB 5종 접속 검증",
+          "Docker Compose 5개 서비스 정상화",
+          "Playwright E2E 12/12 통과"
+        ],
+        "documents": {
+          "analysis": "docs/03-analysis/infra-db-e2e.analysis.md",
+          "report": "docs/04-report/infra-db-e2e.report.md"
+        },
+        "timestamps": {
+          "started": "2026-02-27T00:00:00.000Z",
+          "lastUpdated": "2026-02-27T09:00:00.000Z",
+          "completed": "2026-02-27T09:00:00.000Z"
+        },
+        "commits": [
+          "2b73e07",
+          "5842f7f"
+        ]
+      },
+      "opensearch_service.py": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:00:01.543Z",
+          "lastUpdated": "2026-02-26T19:00:01.543Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/back_end/app/services/opensearch_service.py"
+      },
+      "back_end": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:00:10.566Z",
+          "lastUpdated": "2026-03-04T15:10:29.208Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/back_end/app/main.py"
+      },
+      "database": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:21:16.594Z",
+          "lastUpdated": "2026-02-26T19:21:16.594Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/shared/database/__init__.py"
+      },
+      "front_end": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:28:57.895Z",
+          "lastUpdated": "2026-03-04T18:44:30.073Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/App.jsx"
+      },
+      "tests": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:29:00.445Z",
+          "lastUpdated": "2026-02-26T19:33:06.601Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/e2e/tests/patent-board.spec.js"
+      },
+      "context": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-03T04:40:10.478Z",
+          "lastUpdated": "2026-03-03T04:40:10.478Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/context/NotificationsContext.jsx"
+      },
+      "endpoints": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-03T04:40:34.574Z",
+          "lastUpdated": "2026-03-04T18:40:58.049Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/back_end/app/api/v1/endpoints/tgip.py"
+      },
+      "store": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T15:53:57.428Z",
+          "lastUpdated": "2026-03-04T18:40:12.215Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/store/tgipStore.js"
+      },
+      "api": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T15:54:01.561Z",
+          "lastUpdated": "2026-03-04T15:54:01.561Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/api/tgip.js"
+      },
+      "tgip": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T15:54:05.918Z",
+          "lastUpdated": "2026-03-04T18:44:21.828Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/pages/tgip/RunDetail.jsx"
+      },
+      "RTSView": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T15:54:20.288Z",
+          "lastUpdated": "2026-03-04T16:08:35.732Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/components/tgip/views/RTSView/RTSView.jsx"
+      },
+      "TPIView": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T15:54:49.292Z",
+          "lastUpdated": "2026-03-04T18:45:13.508Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/components/tgip/views/TPIView/PropagationGraph.jsx"
+      },
+      "FSSView": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T15:54:52.962Z",
+          "lastUpdated": "2026-03-04T18:43:44.457Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/components/tgip/views/FSSView/FSSView.jsx"
+      },
+      "WSDView": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T15:54:56.369Z",
+          "lastUpdated": "2026-03-04T18:41:49.858Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/components/tgip/views/WSDView/WSDView.jsx"
+      },
+      "Workspace": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T15:55:12.712Z",
+          "lastUpdated": "2026-03-04T18:44:45.180Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/components/tgip/Workspace/SidebarViewSelector.jsx"
+      },
+      "Layout": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T15:56:10.007Z",
+          "lastUpdated": "2026-03-04T16:09:00.702Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/src/components/tgip/Layout/TGIPAppLayout.jsx"
+      },
+      "frontend - Gap 분석": {
+        "phase": "act",
+        "phaseNumber": 5,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T16:04:16.810Z",
+          "lastUpdated": "2026-03-04T16:04:16.810Z"
+        },
+        "previousPhase": "check",
+        "autoAdvanced": true
+      },
+      "schemas": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T18:40:25.449Z",
+          "lastUpdated": "2026-03-04T18:40:25.449Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/back_end/app/schemas/tgip.py"
+      },
+      "v1": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-04T18:41:02.332Z",
+          "lastUpdated": "2026-03-04T18:41:05.976Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/back_end/app/api/v1/api.py"
+      }
+    },
+    "pipeline": {
+      "currentPhase": 1,
+      "level": "Dynamic",
+      "phaseHistory": []
+    },
+    "session": {
+      "startedAt": "2026-02-26T18:53:38.153Z",
+      "onboardingCompleted": false,
+      "lastActivity": "2026-03-04T18:45:13.508Z"
+    },
+    "history": [
+      {
+        "timestamp": "2026-02-26T19:00:01.543Z",
+        "feature": "opensearch_service.py",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:00:10.566Z",
+        "feature": "back_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:00:18.977Z",
+        "feature": "back_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:21:16.594Z",
+        "feature": "database",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:22:01.740Z",
+        "feature": "back_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:28:57.895Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:29:00.445Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:29:38.299Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:32:09.637Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:32:12.585Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:32:15.376Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:33:06.601Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-03T04:40:10.478Z",
+        "feature": "context",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-03T04:40:18.472Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-03T04:40:34.574Z",
+        "feature": "endpoints",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:10:29.208Z",
+        "feature": "back_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:11:50.856Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:53:57.428Z",
+        "feature": "store",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:01.561Z",
+        "feature": "api",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:05.918Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:09.432Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:20.288Z",
+        "feature": "RTSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:29.420Z",
+        "feature": "RTSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:37.877Z",
+        "feature": "RTSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:44.747Z",
+        "feature": "RTSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:49.292Z",
+        "feature": "TPIView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:52.962Z",
+        "feature": "FSSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:54:56.369Z",
+        "feature": "WSDView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:55:12.712Z",
+        "feature": "Workspace",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:55:25.037Z",
+        "feature": "Workspace",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:55:35.691Z",
+        "feature": "Workspace",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:55:52.721Z",
+        "feature": "Workspace",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:55:59.129Z",
+        "feature": "Workspace",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:56:10.007Z",
+        "feature": "Layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:56:20.432Z",
+        "feature": "Layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:56:23.321Z",
+        "feature": "Layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:56:33.341Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:57:04.036Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:57:36.041Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:57:44.975Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:58:06.023Z",
+        "feature": "RTSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:58:17.192Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:58:27.049Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T15:58:34.563Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:04:16.810Z",
+        "feature": "frontend - Gap 분석",
+        "phase": "act",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:08:00.015Z",
+        "feature": "store",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:08:06.729Z",
+        "feature": "store",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:08:13.069Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:08:17.803Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:08:26.657Z",
+        "feature": "RTSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:08:31.111Z",
+        "feature": "RTSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:08:35.732Z",
+        "feature": "RTSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:08:39.496Z",
+        "feature": "Layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:08:57.416Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:09:00.702Z",
+        "feature": "Layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:09:12.592Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:09:21.263Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T16:09:27.678Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:40:12.215Z",
+        "feature": "store",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:40:25.449Z",
+        "feature": "schemas",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:40:58.049Z",
+        "feature": "endpoints",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:41:02.332Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:41:05.976Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:41:22.760Z",
+        "feature": "WSDView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:41:33.175Z",
+        "feature": "WSDView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:41:41.338Z",
+        "feature": "WSDView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:41:49.858Z",
+        "feature": "WSDView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:42:03.786Z",
+        "feature": "TPIView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:42:17.106Z",
+        "feature": "TPIView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:42:28.173Z",
+        "feature": "TPIView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:42:36.469Z",
+        "feature": "TPIView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:43:11.460Z",
+        "feature": "FSSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:43:21.236Z",
+        "feature": "FSSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:43:32.212Z",
+        "feature": "FSSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:43:44.457Z",
+        "feature": "FSSView",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:44:21.828Z",
+        "feature": "tgip",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:44:26.111Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:44:30.073Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:44:41.249Z",
+        "feature": "Workspace",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:44:45.180Z",
+        "feature": "Workspace",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-04T18:45:13.508Z",
+        "feature": "TPIView",
+        "phase": "do",
+        "action": "updated"
+      }
+    ]
+  }
+}

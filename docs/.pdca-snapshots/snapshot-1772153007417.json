@@ -1,0 +1,167 @@
+{
+  "timestamp": "2026-02-27T00:43:27.416Z",
+  "reason": "compaction",
+  "status": {
+    "version": "2.0",
+    "lastUpdated": "2026-02-26T19:33:06.601Z",
+    "activeFeatures": [
+      "opensearch_service.py",
+      "back_end",
+      "database",
+      "front_end",
+      "tests"
+    ],
+    "primaryFeature": "opensearch_service.py",
+    "features": {
+      "opensearch_service.py": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:00:01.543Z",
+          "lastUpdated": "2026-02-26T19:00:01.543Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/back_end/app/services/opensearch_service.py"
+      },
+      "back_end": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:00:10.566Z",
+          "lastUpdated": "2026-02-26T19:22:01.740Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/back_end/app/main.py"
+      },
+      "database": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:21:16.594Z",
+          "lastUpdated": "2026-02-26T19:21:16.594Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/shared/database/__init__.py"
+      },
+      "front_end": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:28:57.895Z",
+          "lastUpdated": "2026-02-26T19:28:57.895Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/playwright.config.js"
+      },
+      "tests": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-26T19:29:00.445Z",
+          "lastUpdated": "2026-02-26T19:33:06.601Z"
+        },
+        "lastFile": "/mnt/sources/git/patent_board_full/front_end/e2e/tests/patent-board.spec.js"
+      }
+    },
+    "pipeline": {
+      "currentPhase": 1,
+      "level": "Dynamic",
+      "phaseHistory": []
+    },
+    "session": {
+      "startedAt": "2026-02-26T18:53:38.153Z",
+      "onboardingCompleted": false,
+      "lastActivity": "2026-02-26T19:33:06.601Z"
+    },
+    "history": [
+      {
+        "timestamp": "2026-02-26T19:00:01.543Z",
+        "feature": "opensearch_service.py",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:00:10.566Z",
+        "feature": "back_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:00:18.977Z",
+        "feature": "back_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:21:16.594Z",
+        "feature": "database",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:22:01.740Z",
+        "feature": "back_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:28:57.895Z",
+        "feature": "front_end",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:29:00.445Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:29:38.299Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:32:09.637Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:32:12.585Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:32:15.376Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-26T19:33:06.601Z",
+        "feature": "tests",
+        "phase": "do",
+        "action": "updated"
+      }
+    ]
+  }
+}
