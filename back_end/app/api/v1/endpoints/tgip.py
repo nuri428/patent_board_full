@@ -1,0 +1,181 @@
+import uuid
+from datetime import datetime, timezone
+from fastapi import APIRouter, Query
+
+from app.schemas.tgip import TGIPAnalysisRequest
+
+router = APIRouter()
+
+
+def _build_mock_response(technology_id: str, run_id: str) -> dict:
+    return {
+        "run_id": run_id,
+        "technology_id": technology_id,
+        "results": {
+            "RTS": {
+                "score": 0.72,
+                "stage": "Bottleneck",
+                "components": {
+                    "patent_volume": 0.85,
+                    "growth": 0.60,
+                    "classification_conf": 0.78,
+                    "citation_percentile": 0.65,
+                },
+                "solutionOptions": [
+                    {"approach": "황화물계 전해질", "patents": 1243, "coverage": 0.82, "evidence": "H01M 10/0562"},
+                    {"approach": "산화물계 전해질", "patents": 876, "coverage": 0.71, "evidence": "H01M 10/052"},
+                ],
+            },
+            "TPI": {
+                "semanticPropagationScore": 0.78,
+                "propagationGraph": {
+                    "nodes": [
+                        {"id": "core", "label": technology_id.replace("-", " ").title(), "size": 40},
+                        {"id": "ev", "label": "Electric Vehicle", "size": 30},
+                        {"id": "consumer", "label": "Consumer Electronics", "size": 22},
+                        {"id": "grid", "label": "Grid Storage", "size": 18},
+                    ],
+                    "edges": [
+                        {"id": "e1", "source": "core", "target": "ev", "weight": 0.85},
+                        {"id": "e2", "source": "core", "target": "consumer", "weight": 0.71},
+                        {"id": "e3", "source": "core", "target": "grid", "weight": 0.58},
+                    ],
+                },
+                "industryFlow": [
+                    {"industry": "Automotive EV", "score": 0.85, "patents": 412},
+                    {"industry": "Consumer Electronics", "score": 0.71, "patents": 287},
+                    {"industry": "Grid Storage", "score": 0.58, "patents": 163},
+                    {"industry": "Aerospace", "score": 0.34, "patents": 89},
+                ],
+                "burstTimeline": [
+                    {"year": 2017, "count": 187, "burstScore": 0.2},
+                    {"year": 2018, "count": 234, "burstScore": 0.3},
+                    {"year": 2019, "count": 312, "burstScore": 0.4},
+                    {"year": 2020, "count": 445, "burstScore": 0.55},
+                    {"year": 2021, "count": 623, "burstScore": 0.72},
+                    {"year": 2022, "count": 891, "burstScore": 0.90},
+                    {"year": 2023, "count": 1043, "burstScore": 0.95},
+                ],
+            },
+            "FSS": {
+                "familyMetrics": {"FES": 0.82, "GCR": 0.74, "MIV": 0.68, "averageFamilySize": 4.3},
+                "countryCoverage": [
+                    {"iso": "KR", "count": 1243, "intensity": 1.0},
+                    {"iso": "US", "count": 876, "intensity": 0.71},
+                    {"iso": "CN", "count": 734, "intensity": 0.59},
+                    {"iso": "JP", "count": 512, "intensity": 0.41},
+                    {"iso": "DE", "count": 289, "intensity": 0.23},
+                ],
+                "assigneeLeaderboard": [
+                    {"name": "Samsung SDI", "familyCount": 234, "gcr": 0.91},
+                    {"name": "LG Energy Solution", "familyCount": 198, "gcr": 0.87},
+                    {"name": "CATL", "familyCount": 176, "gcr": 0.82},
+                    {"name": "Panasonic", "familyCount": 145, "gcr": 0.79},
+                    {"name": "SK Innovation", "familyCount": 112, "gcr": 0.73},
+                ],
+            },
+            "WSD": {
+                "problemClusters": [
+                    {"id": "dendrite", "label": "Dendrite Growth", "density": 0.87, "patents": 312},
+                    {"id": "interface", "label": "Interface Resistance", "density": 0.74, "patents": 267},
+                    {"id": "thermal", "label": "Thermal Stability", "density": 0.61, "patents": 198},
+                    {"id": "scalability", "label": "Manufacturing Scale", "density": 0.45, "patents": 134},
+                ],
+                "solutionClusters": [
+                    {"id": "coating", "label": "Interface Coating", "density": 0.72, "patents": 198},
+                    {"id": "composite", "label": "Composite Electrolyte", "density": 0.65, "patents": 176},
+                    {"id": "pressure", "label": "Stack Pressure Control", "density": 0.48, "patents": 112},
+                ],
+                "heatmapMatrix": [
+                    [0.9, 0.3, 0.1],
+                    [0.7, 0.8, 0.2],
+                    [0.2, 0.4, 0.6],
+                    [0.1, 0.1, 0.9],
+                ],
+                "gapCandidates": [
+                    {"id": "gap-1", "problem": "Thermal Stability at High Temperature", "solution": "Cross-industry Ceramic Tech", "gapScore": 0.83, "confidence": 0.71},
+                    {"id": "gap-2", "problem": "Manufacturing Scale", "solution": "Roll-to-Roll Process", "gapScore": 0.76, "confidence": 0.65},
+                    {"id": "gap-3", "problem": "Dendrite Growth", "solution": "Liquid Metal Interface", "gapScore": 0.68, "confidence": 0.59},
+                ],
+                "crossIndustryAnalogs": [
+                    {"sourceIndustry": "Aerospace", "targetProblem": "Thermal Electrolyte", "analogy": "Ceramic Insulator Tech", "similarity": 0.76},
+                    {"sourceIndustry": "Fuel Cell", "targetProblem": "Interface Resistance", "analogy": "MEA Fabrication", "similarity": 0.68},
+                ],
+            },
+        },
+        "evidence": {
+            "representativePatents": [
+                {
+                    "id": "KR1020230045231",
+                    "title": "고체 전해질 기반 리튬 이온 배터리 및 제조 방법",
+                    "abstractSnippet": "전해질 층의 두께를 최소화하여 이온 전도도를 개선하고, 계면 저항을 감소시키는 고체 전해질 구조",
+                    "ipc": ["H01M 10/0562", "H01M 10/052"],
+                    "confidence": 0.91,
+                },
+                {
+                    "id": "KR1020220098712",
+                    "title": "황화물계 고체 전해질 합성 방법",
+                    "abstractSnippet": "황화물계 고체 전해질의 고이온 전도성을 달성하기 위한 합성 방법",
+                    "ipc": ["H01M 10/0562", "C01B 17/20"],
+                    "confidence": 0.87,
+                },
+            ],
+            "ipcSignatures": ["H01M 10/05", "H01M 4/13", "C01B 17/00"],
+            "abstractSnippets": [],
+            "confidenceScores": {"overall": 0.89, "coverage": 0.73},
+        },
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+# In-memory store (Phase 2 임시 — Phase 3에서 DB로 교체)
+_run_store: dict[str, dict] = {}
+
+_all_technologies = [
+    {"id": "solid-state-battery", "name": "Solid State Battery", "patentCount": 4821, "description": "전고체 배터리 기술"},
+    {"id": "perovskite-solar", "name": "Perovskite Solar Cell", "patentCount": 3412, "description": "페로브스카이트 태양전지"},
+    {"id": "carbon-nanotube", "name": "Carbon Nanotube", "patentCount": 6789, "description": "탄소나노튜브 소재"},
+    {"id": "quantum-computing", "name": "Quantum Computing", "patentCount": 2891, "description": "양자 컴퓨팅"},
+    {"id": "gene-editing-crispr", "name": "CRISPR Gene Editing", "patentCount": 5124, "description": "CRISPR 유전자 편집"},
+]
+
+
+@router.post("/analysis")
+async def run_analysis(request: TGIPAnalysisRequest):
+    run_id = f"tgip-run-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
+    data = _build_mock_response(request.technology_id, run_id)
+    _run_store[run_id] = data
+    return data
+
+
+@router.get("/runs/{run_id}")
+async def get_run_detail(run_id: str):
+    if run_id in _run_store:
+        return {**_run_store[run_id], "metadata": {"executionTime": "2.4s", "patentsAnalyzed": 4821}}
+    data = _build_mock_response("unknown-technology", run_id)
+    return {**data, "metadata": {"executionTime": "2.4s", "patentsAnalyzed": 4821}}
+
+
+@router.get("/technologies")
+async def search_technologies(q: str = Query(default="", min_length=0)):
+    if q:
+        q_lower = q.lower()
+        results = [t for t in _all_technologies if q_lower in t["name"].lower() or q_lower in t["description"].lower()]
+    else:
+        results = _all_technologies
+    return {"results": results, "total": len(results)}
+
+
+@router.get("/library")
+async def get_library():
+    runs = [
+        {
+            "run_id": run_id,
+            "technology_id": data["technology_id"],
+            "technology_name": data["technology_id"].replace("-", " ").title(),
+            "created_at": data["created_at"],
+            "views_computed": ["RTS", "TPI", "FSS", "WSD"],
+        }
+        for run_id, data in _run_store.items()
+    ]
+    return {"runs": runs, "total": len(runs)}

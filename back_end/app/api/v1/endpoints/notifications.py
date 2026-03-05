@@ -143,8 +143,12 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
     try:
         while True:
             data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_text("pong")
 
     except WebSocketDisconnect:
+        manager.disconnect(websocket, user_id)
+    except Exception:
         manager.disconnect(websocket, user_id)
 
 
