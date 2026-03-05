@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "dd3d36cb965b",
+  "session_id": "08993363-7e32-42fc-9de4-83eb360b096b",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T19:05:13.908659134Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/.bkit-memory.json",
+    "docs/01-plan/features/frontend.plan.md",
+    "docs/02-design/features/frontend.design.md",
+    "docs/03-analysis/frontend.analysis.md",
+    "docs/04-report/features/frontend.report.md"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "bffe2aaffc72",
+  "transcript_identifier_at_start": "667edec0-c6e7-49de-bdd7-1fa2f78f63ad",
+  "token_usage": {
+    "input_tokens": 858,
+    "cache_creation_tokens": 259446,
+    "cache_read_tokens": 10456572,
+    "output_tokens": 58854,
+    "api_call_count": 103
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T19:05:13.490810652Z",
+    "agent_lines": 1578,
+    "human_added": 14944,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 16522,
+    "agent_percentage": 9.550901827865877
+  },
+  "transcript_path": ".claude/projects/-mnt-sources-git-patent-board-full/08993363-7e32-42fc-9de4-83eb360b096b.jsonl"
+}
