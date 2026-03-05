@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "229a4a80fdb4",
+  "session_id": "57c3d902-bf27-4333-bda9-c7677910c209",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T19:00:44.889207442Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docker-compose.yml",
+    "docker/frontend/Dockerfile",
+    "docker/frontend/Dockerfile.dev",
+    "docker/frontend/nginx.conf",
+    "docker/nginx/nginx.conf",
+    "docker-compose.prod.yml"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "fdd9b5fbe35b",
+  "token_usage": {
+    "input_tokens": 1676,
+    "cache_creation_tokens": 27825,
+    "cache_read_tokens": 123138,
+    "output_tokens": 9,
+    "api_call_count": 5
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T19:00:44.619175896Z",
+    "agent_lines": 154,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 154,
+    "agent_percentage": 100
+  },
+  "transcript_path": ".claude/projects/-mnt-sources-git-patent-board-full/57c3d902-bf27-4333-bda9-c7677910c209.jsonl"
+}
