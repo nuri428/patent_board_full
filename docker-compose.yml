@@ -91,7 +91,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: docker/frontend/Dockerfile
+      dockerfile: docker/frontend/Dockerfile.dev
     container_name: patent-board-frontend
     restart: unless-stopped
     ports:

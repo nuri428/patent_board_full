@@ -57,10 +57,7 @@ services:
     container_name: patent-board-frontend-prod
     restart: always
     ports:
-      - "${PROD_FRONTEND_PORT:-58080}:3000"
-    environment:
-      - VITE_API_URL=http://patents.greennuri.info/api/v1
-      - VITE_API_PROXY_TARGET=http://backend:8001
+      - "${PROD_FRONTEND_PORT:-58080}:80"
     networks:
       - patent-board-network-prod
     depends_on:

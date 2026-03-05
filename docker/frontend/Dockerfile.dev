@@ -1,0 +1,14 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install dependencies (cache layer)
+COPY front_end/package.json front_end/package-lock.json* ./
+RUN npm install --legacy-peer-deps
+
+# Source는 volume mount로 제공 (hot reload)
+COPY front_end/ .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
